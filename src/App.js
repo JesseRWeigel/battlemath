@@ -4,8 +4,55 @@ import './App.css'
 
 class App extends Component {
   state = {
-    text: ''
+    answer: '',
+    numOfEnemies: 3,
+    val1: 0,
+    val2: 0,
+    won: false
   }
+
+  componentDidMount() {
+    this.newProblem()
+  }
+
+  randomNum = max => Math.floor(Math.random() * Math.floor(max))
+
+  checkAnswer = () => {
+    let correct =
+      parseInt(this.state.answer, 10) === this.state.val1 + this.state.val2
+    if (correct) {
+      this.removeEnemy()
+    } else {
+      this.addEnemy()
+    }
+    this.newProblem()
+  }
+
+  removeEnemy = () => {
+    this.setState(
+      prev => ({ numOfEnemies: prev.numOfEnemies - 1 }),
+      () => {
+        if (this.state.numOfEnemies === 0) {
+          this.youWon()
+        }
+      }
+    )
+  }
+
+  addEnemy = () => {
+    if (this.state.numOfEnemies < 6) {
+      this.setState({ numOfEnemies: this.state.numOfEnemies + 1 })
+    }
+  }
+
+  newProblem = () => {
+    this.setState({ val1: this.randomNum(10), val2: this.randomNum(10) })
+  }
+
+  youWon = () => {
+    this.setState({ won: true })
+  }
+
   render() {
     return (
       <View style={styles.root}>
@@ -15,27 +62,33 @@ class App extends Component {
             <View style={styles.hero} />
           </View>
           <View style={styles.container}>
-            <View style={styles.enemy} />
-            <View style={styles.enemy} />
-            <View style={styles.enemy} />
+            {[...Array(this.state.numOfEnemies)].map(i => (
+              <View key={i} style={styles.enemy} />
+            ))}
           </View>
         </View>
-        <View style={styles.mathContainer}>
-          <View style={styles.mathRow}>
-            <Text style={styles.mathText}>2 + 2 =</Text>
-            <TextInput
-              style={styles.input}
-              onChangeText={text => this.setState({ text })}
-              value={this.state.text}
+        {this.state.won ? (
+          <Text>Victory!</Text>
+        ) : (
+          <View style={styles.mathContainer}>
+            <View style={styles.mathRow}>
+              <Text style={styles.mathText}>
+                {this.state.val1} + {this.state.val2} =
+              </Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={answer => this.setState({ answer })}
+                value={this.state.answer}
+              />
+            </View>
+            <Button
+              onPress={() => this.checkAnswer()}
+              title="Submit"
+              color="#841584"
+              accessibilityLabel="Learn more about this purple button"
             />
           </View>
-          <Button
-            onPress={() => console.log(this.state.text)}
-            title="Submit"
-            color="#841584"
-            accessibilityLabel="Learn more about this purple button"
-          />
-        </View>
+        )}
       </View>
     )
   }
