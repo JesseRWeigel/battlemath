@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, TextInput, Button } from 'react-native'
+import { StyleSheet, Text, View, TextInput, Button, Picker } from 'react-native'
 import './App.css'
 
 class App extends Component {
@@ -8,18 +8,67 @@ class App extends Component {
     numOfEnemies: 3,
     val1: 0,
     val2: 0,
-    won: false
+    won: false,
+    operator: '+',
+    mode: 'addition'
   }
 
   componentDidMount() {
     this.newProblem()
   }
 
+  handleSubmit = () => {
+    this.checkAnswer(this.state.mode)
+  }
+
+  handleModePicker = val => {
+    switch (val) {
+      case 'addition':
+        this.setState({ mode: val, operator: '+' })
+        break
+      case 'subtraction':
+        this.setState({ mode: val, operator: '-' })
+        break
+      case 'multiplication':
+        this.setState({ mode: val, operator: '*' })
+        break
+      case 'division':
+        this.setState({ mode: val, operator: '/' })
+        break
+      default:
+        console.log('not an option')
+    }
+  }
+
   randomNum = max => Math.floor(Math.random() * Math.floor(max))
 
-  checkAnswer = () => {
-    let correct =
-      parseInt(this.state.answer, 10) === this.state.val1 + this.state.val2
+  checkAnswer = operator => {
+    let correct
+    switch (operator) {
+      case 'addition':
+        correct =
+          parseInt(this.state.answer, 10) === this.state.val1 + this.state.val2
+        this.setState({ operator: '+' })
+        break
+      case 'subtraction':
+        correct =
+          parseInt(this.state.answer, 10) === this.state.val1 - this.state.val2
+        this.setState({ operator: '-' })
+        break
+      case 'multiplication':
+        correct =
+          parseInt(this.state.answer, 10) === this.state.val1 * this.state.val2
+        this.setState({ operator: '*' })
+        break
+      case 'division':
+        correct =
+          parseInt(this.state.answer, 10) === this.state.val1 / this.state.val2
+        this.setState({ operator: '/' })
+        break
+      default:
+        console.log('not an option')
+    }
+
     if (correct) {
       this.removeEnemy()
     } else {
@@ -57,6 +106,18 @@ class App extends Component {
     return (
       <View style={styles.root}>
         <Text>Battle Math</Text>
+        <Picker
+          selectedValue={this.state.language}
+          style={{ height: 50, width: 100 }}
+          onValueChange={(itemValue, itemIndex) =>
+            this.handleModePicker(itemValue)
+          }
+        >
+          <Picker.Item label="Additon(+)" value="addition" />
+          <Picker.Item label="Subtraction(-)" value="subtraction" />
+          <Picker.Item label="Multiplication(*)" value="multiplication" />
+          <Picker.Item label="Division(/)" value="division" />
+        </Picker>
         <View style={styles.battlefield}>
           <View style={styles.container}>
             <View style={styles.hero} />
@@ -73,7 +134,7 @@ class App extends Component {
           <View style={styles.mathContainer}>
             <View style={styles.mathRow}>
               <Text style={styles.mathText}>
-                {this.state.val1} + {this.state.val2} =
+                {this.state.val1} {this.state.operator} {this.state.val2} =
               </Text>
               <TextInput
                 style={styles.input}
@@ -82,7 +143,7 @@ class App extends Component {
               />
             </View>
             <Button
-              onPress={() => this.checkAnswer()}
+              onPress={() => this.handleSubmit()}
               title="Submit"
               color="#841584"
               accessibilityLabel="Learn more about this purple button"
