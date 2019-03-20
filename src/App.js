@@ -231,6 +231,10 @@ const themes = {
   }
 } */
 
+function randomNumberGenerator(min = 0, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
 const types = {
   SET_ANSWER: 0,
   ADD_ENEMY: 1,
@@ -246,6 +250,7 @@ function reducer(state, action) {
         ...state,
         answer: action.payload
       }
+
     case types.ADD_ENEMY:
       if (state.numOfEnemies < 6) {
         return {
@@ -254,6 +259,7 @@ function reducer(state, action) {
         }
       }
       break
+
     case types.REMOVE_ENEMY:
       const newState = { ...state }
       newState.numOfEnemies++
@@ -263,6 +269,7 @@ function reducer(state, action) {
       }
 
       return newState
+
     case types.CHECK_ANSWER:
       const answer = parseInt(state.answer, 10)
       // eval('2 + 4 === 6')
@@ -278,7 +285,13 @@ function reducer(state, action) {
 
       // Update problem
       return reducer(newState, { type: types.NEW_PROBLEM })
+
     case types.NEW_PROBLEM:
+      return {
+        ...state,
+        val1: randomNumberGenerator(0, 10),
+        val2: randomNumberGenerator(0, 10)
+      }
 
     default:
       throw new Error(`Invalid action ${action.type}`)
