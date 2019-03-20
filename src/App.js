@@ -1,8 +1,8 @@
-import React, { Component } from 'react'
+import React, { useState, useReducer } from 'react'
 import { StyleSheet, Text, View, TextInput, Button, Picker } from 'react-native'
 import './App.css'
 
-class App extends Component {
+/* class App extends Component {
   state = {
     answer: '',
     numOfEnemies: 3,
@@ -229,6 +229,66 @@ const themes = {
   division: {
     backgroundColor: 'orange'
   }
+} */
+
+const types = {
+  SET_ANSWER: 0,
+  ADD_ENEMY: 1,
+  REMOVE_ENEMY: 2,
+  CHECK_ANSWER: 3,
+  NEW_PROBLEM: 4
+}
+
+function reducer(state, action) {
+  switch (action.type) {
+    case types.SET_ANSWER:
+      let answer = parseInt(action.payload, 10)
+
+      if (isNaN(answer)) {
+        break
+      } else {
+        return {
+          ...state,
+          answer
+        }
+      }
+    case types.ADD_ENEMY:
+      if (state.numOfEnemies < 6) {
+        return {
+          ...state,
+          numOfEnemies: state.numOfEnemies + 1
+        }
+      }
+      break
+    case types.REMOVE_ENEMY:
+      const newState = { ...state }
+      newState.numOfEnemies++
+
+      if (newState.numOfEnemies === 0) {
+        newState.won = true
+      }
+
+      return newState
+    case types.CHECK_ANSWER:
+    default:
+      throw new Error(`Invalid action ${action.type}`)
+  }
+
+  return state
+}
+
+const initialState = {
+  answer: '',
+  numOfEnemies: 3,
+  val1: 0,
+  val2: 0,
+  won: false,
+  operator: '+',
+  mode: 'addition'
+}
+
+function App() {
+  const [state, dispatch] = useReducer(reducer, initialState)
 }
 
 export default App
