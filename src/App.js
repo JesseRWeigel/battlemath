@@ -103,12 +103,16 @@ class App extends Component {
   }
 
   render() {
+    const { mode, answer, numOfEnemies, val1, val2, won, operator } = this.state
+    const activeTheme = themes[mode]
     return (
-      <View style={styles.root}>
-        <Text>Battle Math</Text>
+      <View
+        style={[styles.root, { backgroundColor: activeTheme.backgroundColor }]}
+      >
+        <Text style={styles.title}>Battle Math</Text>
         <Picker
-          selectedValue={this.state.language}
-          style={{ height: 50, width: 100 }}
+          selectedValue={mode}
+          style={styles.picker}
           onValueChange={(itemValue, itemIndex) =>
             this.handleModePicker(itemValue)
           }
@@ -120,26 +124,26 @@ class App extends Component {
         </Picker>
         <View style={styles.battlefield}>
           <View style={styles.container}>
-            <View style={styles.hero} />
+            <View style={[styles.character, styles.hero]} />
           </View>
           <View style={styles.container}>
-            {[...Array(this.state.numOfEnemies)].map(i => (
-              <View key={i} style={styles.enemy} />
+            {[...Array(numOfEnemies)].map(i => (
+              <View key={i} style={[styles.character, styles.enemy]} />
             ))}
           </View>
         </View>
-        {this.state.won ? (
+        {won ? (
           <Text>Victory!</Text>
         ) : (
           <View style={styles.mathContainer}>
             <View style={styles.mathRow}>
               <Text style={styles.mathText}>
-                {this.state.val1} {this.state.operator} {this.state.val2} =
+                {val1} {operator} {val2} =
               </Text>
               <TextInput
                 style={styles.input}
                 onChangeText={answer => this.setState({ answer })}
-                value={this.state.answer}
+                value={answer}
               />
             </View>
             <Button
@@ -163,8 +167,14 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     left: 0,
-    right: 0
+    right: 0,
+    paddingVertical: 16
   },
+  title: {
+    fontSize: 32,
+    fontFamily: `"Comic Sans MS", cursive, sans-serif`
+  },
+  picker: { height: 60, width: 150 },
   battlefield: {
     flex: 1,
     flexDirection: 'row',
@@ -176,14 +186,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-evenly'
   },
+  character: {
+    width: 80,
+    height: 80
+  },
   hero: {
-    width: 40,
-    height: 40,
     backgroundColor: 'blue'
   },
   enemy: {
-    width: 40,
-    height: 40,
     backgroundColor: 'red'
   },
   mathContainer: {
@@ -195,7 +205,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8
   },
   mathText: {
-    fontSize: 26,
+    fontSize: 28,
     paddingRight: 8
   },
   input: {
@@ -205,5 +215,20 @@ const styles = StyleSheet.create({
     borderWidth: 1
   }
 })
+
+const themes = {
+  addition: {
+    backgroundColor: 'green'
+  },
+  subtraction: {
+    backgroundColor: 'pink'
+  },
+  multiplication: {
+    backgroundColor: 'yellow'
+  },
+  division: {
+    backgroundColor: 'orange'
+  }
+}
 
 export default App
