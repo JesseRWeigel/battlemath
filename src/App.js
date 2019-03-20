@@ -242,15 +242,9 @@ const types = {
 function reducer(state, action) {
   switch (action.type) {
     case types.SET_ANSWER:
-      let answer = parseInt(action.payload, 10)
-
-      if (isNaN(answer)) {
-        break
-      } else {
-        return {
-          ...state,
-          answer
-        }
+      return {
+        ...state,
+        answer: action.payload
       }
     case types.ADD_ENEMY:
       if (state.numOfEnemies < 6) {
