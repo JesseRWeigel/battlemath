@@ -263,7 +263,7 @@ function reducer(state, action) {
 
     case types.REMOVE_ENEMY:
       const newState = { ...state }
-      newState.numOfEnemies++
+      newState.numOfEnemies--
 
       if (newState.numOfEnemies === 0) {
         newState.won = true
@@ -273,10 +273,8 @@ function reducer(state, action) {
 
     case types.CHECK_ANSWER:
       const answer = parseInt(state.answer, 10)
-      // eval('2 + 4 === 6')
-      const expected = eval(
-        `${state.val1} ${state.operator} ${state.val2} === ${answer}`
-      )
+      // example: eval('2 + 4')
+      const expected = eval(`${state.val1} ${state.operator} ${state.val2}`)
 
       // Update enemies & won
       const stateWithEnemies =
@@ -290,8 +288,8 @@ function reducer(state, action) {
     case types.NEW_PROBLEM:
       return {
         ...state,
-        val1: randomNumberGenerator(0, 10),
-        val2: randomNumberGenerator(0, 10)
+        val1: randomNumberGenerator(0, 9),
+        val2: randomNumberGenerator(0, 9)
       }
 
     case types.SET_MODE:
