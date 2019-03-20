@@ -1,4 +1,4 @@
-import React, { useReducer, useCallback } from 'react'
+import React, { useReducer, useCallback, useEffect } from 'react'
 import { StyleSheet, Text, View, TextInput, Button, Picker } from 'react-native'
 import './App.css'
 
@@ -240,7 +240,8 @@ const types = {
   ADD_ENEMY: 1,
   REMOVE_ENEMY: 2,
   CHECK_ANSWER: 3,
-  NEW_PROBLEM: 4
+  NEW_PROBLEM: 4,
+  SET_MODE: 5
 }
 
 function reducer(state, action) {
@@ -278,19 +279,27 @@ function reducer(state, action) {
       )
 
       // Update enemies & won
-      const newState =
+      const stateWithEnemies =
         answer === expected
           ? reducer(state, { type: types.REMOVE_ENEMY })
           : reducer(state, { type: types.ADD_ENEMY })
 
       // Update problem
-      return reducer(newState, { type: types.NEW_PROBLEM })
+      return reducer(stateWithEnemies, { type: types.NEW_PROBLEM })
 
     case types.NEW_PROBLEM:
       return {
         ...state,
         val1: randomNumberGenerator(0, 10),
         val2: randomNumberGenerator(0, 10)
+      }
+
+    case types.SET_MODE:
+      const { mode, operator } = action.payload
+      return {
+        ...state,
+        mode,
+        operator
       }
 
     default:
@@ -310,6 +319,13 @@ const initialState = {
   mode: 'addition'
 }
 
+const operatorsByMode = {
+  addition: '+',
+  subtraction: '-',
+  multiplication: '*',
+  division: '/'
+}
+
 function App() {
   const [
     { answer, numOfEnemies, val1, val2, won, operator, mode },
@@ -324,7 +340,28 @@ function App() {
     [dispatch]
   )
 
+  const handleModePicker = useCallback(
+    mode => {
+      const operator = operatorsByMode[mode]
+      dispatch({
+        type: types.SET_MODE,
+        payload: { mode, operator }
+      })
+    },
+    [dispatch]
+  )
+
+  const handleSubmit = useCallback(() => {
+    dispatch({ type: types.CHECK_ANSWER })
+  }, [dispatch])
+
   const activeTheme = themes[mode]
+
+  // Equivalent of componentDidMount
+  useEffect(() => {
+    dispatch({ type: types.NEW_PROBLEM })
+  }, [])
+
   return (
     <View
       style={[styles.root, { backgroundColor: activeTheme.backgroundColor }]}
@@ -333,9 +370,7 @@ function App() {
       <Picker
         selectedValue={mode}
         style={styles.picker}
-        onValueChange={(itemValue, itemIndex) =>
-          this.handleModePicker(itemValue)
-        }
+        onValueChange={handleModePicker}
       >
         <Picker.Item label="Additon(+)" value="addition" />
         <Picker.Item label="Subtraction(-)" value="subtraction" />
@@ -367,7 +402,7 @@ function App() {
             />
           </View>
           <Button
-            onPress={() => this.handleSubmit()}
+            onPress={handleSubmit}
             title="Submit"
             color="#841584"
             accessibilityLabel="Learn more about this purple button"
