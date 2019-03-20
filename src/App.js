@@ -264,6 +264,16 @@ function reducer(state, action) {
 
       return newState
     case types.CHECK_ANSWER:
+      const answer = parseInt(state.answer, 10)
+      const expected = eval(`${state.val1} ${state.operator} ${state.val2}`)
+
+      // Update enemies & won
+      const newState =
+        answer === expected
+          ? reducer(state, { type: types.REMOVE_ENEMY })
+          : reducer(state, { type: types.ADD_ENEMY })
+
+      return reducer(newState, { type: types.NEW_PROBLEM })
     default:
       throw new Error(`Invalid action ${action.type}`)
   }
