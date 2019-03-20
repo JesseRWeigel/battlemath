@@ -288,8 +288,8 @@ function reducer(state, action) {
     case types.NEW_PROBLEM:
       return {
         ...state,
-        val1: randomNumberGenerator(0, 9),
-        val2: randomNumberGenerator(0, 9)
+        val1: randomNumberGenerator(1, 9),
+        val2: randomNumberGenerator(1, 9)
       }
 
     case types.SET_MODE:
