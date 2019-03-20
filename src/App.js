@@ -265,7 +265,10 @@ function reducer(state, action) {
       return newState
     case types.CHECK_ANSWER:
       const answer = parseInt(state.answer, 10)
-      const expected = eval(`${state.val1} ${state.operator} ${state.val2}`)
+      // eval('2 + 4 === 6')
+      const expected = eval(
+        `${state.val1} ${state.operator} ${state.val2} === ${answer}`
+      )
 
       // Update enemies & won
       const newState =
@@ -273,7 +276,10 @@ function reducer(state, action) {
           ? reducer(state, { type: types.REMOVE_ENEMY })
           : reducer(state, { type: types.ADD_ENEMY })
 
+      // Update problem
       return reducer(newState, { type: types.NEW_PROBLEM })
+    case types.NEW_PROBLEM:
+
     default:
       throw new Error(`Invalid action ${action.type}`)
   }
