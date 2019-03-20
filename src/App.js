@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from 'react'
+import React, { useReducer, useCallback } from 'react'
 import { StyleSheet, Text, View, TextInput, Button, Picker } from 'react-native'
 import './App.css'
 
@@ -157,7 +157,7 @@ import './App.css'
       </View>
     )
   }
-}
+} */
 
 const styles = StyleSheet.create({
   root: {
@@ -229,7 +229,7 @@ const themes = {
   division: {
     backgroundColor: 'orange'
   }
-} */
+}
 
 function randomNumberGenerator(min = 0, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -311,7 +311,71 @@ const initialState = {
 }
 
 function App() {
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const [
+    { answer, numOfEnemies, val1, val2, won, operator, mode },
+    dispatch
+  ] = useReducer(reducer, initialState)
+
+  // useCallback helps prevent rerendering via memoization
+  const handleAnswerChange = useCallback(
+    value => {
+      dispatch({ type: types.SET_ANSWER, payload: value })
+    },
+    [dispatch]
+  )
+
+  const activeTheme = themes[mode]
+  return (
+    <View
+      style={[styles.root, { backgroundColor: activeTheme.backgroundColor }]}
+    >
+      <Text style={styles.title}>Battle Math</Text>
+      <Picker
+        selectedValue={mode}
+        style={styles.picker}
+        onValueChange={(itemValue, itemIndex) =>
+          this.handleModePicker(itemValue)
+        }
+      >
+        <Picker.Item label="Additon(+)" value="addition" />
+        <Picker.Item label="Subtraction(-)" value="subtraction" />
+        <Picker.Item label="Multiplication(*)" value="multiplication" />
+        <Picker.Item label="Division(/)" value="division" />
+      </Picker>
+      <View style={styles.battlefield}>
+        <View style={styles.container}>
+          <View style={[styles.character, styles.hero]} />
+        </View>
+        <View style={styles.container}>
+          {[...Array(numOfEnemies)].map(i => (
+            <View key={i} style={[styles.character, styles.enemy]} />
+          ))}
+        </View>
+      </View>
+      {won ? (
+        <Text>Victory!</Text>
+      ) : (
+        <View style={styles.mathContainer}>
+          <View style={styles.mathRow}>
+            <Text style={styles.mathText}>
+              {val1} {operator} {val2} =
+            </Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={handleAnswerChange}
+              value={answer}
+            />
+          </View>
+          <Button
+            onPress={() => this.handleSubmit()}
+            title="Submit"
+            color="#841584"
+            accessibilityLabel="Learn more about this purple button"
+          />
+        </View>
+      )}
+    </View>
+  )
 }
 
 export default App
