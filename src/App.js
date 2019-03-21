@@ -131,7 +131,7 @@ function App() {
           <View style={[styles.character, styles.hero]} />
         </View>
         <View style={styles.container}>
-          {[...Array(numOfEnemies)].map(i => (
+          {[...Array(numOfEnemies)].map((_, i) => (
             <View key={i} style={[styles.character, styles.enemy]} />
           ))}
         </View>
