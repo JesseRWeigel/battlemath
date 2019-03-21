@@ -1,5 +1,7 @@
 import React, { useReducer, useCallback, useEffect } from 'react'
 import { StyleSheet, Text, View, TextInput, Button, Picker } from 'react-native'
+import { reducer, initialState, types } from './AppReducer'
+
 import './App.css'
 
 const styles = StyleSheet.create({
@@ -72,100 +74,6 @@ const themes = {
   division: {
     backgroundColor: 'orange'
   }
-}
-
-function randomNumberGenerator(min = 0, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-const types = {
-  SET_ANSWER: 0,
-  ADD_ENEMY: 1,
-  REMOVE_ENEMY: 2,
-  CHECK_ANSWER: 3,
-  NEW_PROBLEM: 4,
-  SET_MODE: 5
-}
-
-function reducer(state, action) {
-  switch (action.type) {
-    case types.SET_ANSWER:
-      return {
-        ...state,
-        answer: action.payload
-      }
-
-    case types.ADD_ENEMY:
-      if (state.numOfEnemies < 6) {
-        return {
-          ...state,
-          numOfEnemies: state.numOfEnemies + 1
-        }
-      }
-      break
-
-    case types.REMOVE_ENEMY:
-      const newState = { ...state }
-      newState.numOfEnemies--
-
-      if (newState.numOfEnemies === 0) {
-        newState.won = true
-      }
-
-      return newState
-
-    case types.CHECK_ANSWER:
-      const answer = parseInt(state.answer, 10)
-      // example: eval('2 + 4'); Note: eval is safe here because we control the input
-      // eslint-disable-next-line no-eval
-      const expected = eval(`${state.val1} ${state.operator} ${state.val2}`)
-
-      // Update enemies & won
-      const stateWithEnemies =
-        answer === expected
-          ? reducer(state, { type: types.REMOVE_ENEMY })
-          : reducer(state, { type: types.ADD_ENEMY })
-
-      // Update problem
-      return reducer(stateWithEnemies, { type: types.NEW_PROBLEM })
-
-    case types.NEW_PROBLEM:
-      return {
-        ...state,
-        val1: randomNumberGenerator(1, 9),
-        val2: randomNumberGenerator(1, 9)
-      }
-
-    case types.SET_MODE:
-      const mode = action.payload
-      return {
-        ...state,
-        mode,
-        operator: operatorsByMode[mode]
-      }
-
-    default:
-      throw new Error(`Invalid action ${action.type}`)
-  }
-
-  return state
-}
-
-const initialState = {
-  answer: '',
-  numOfEnemies: 3,
-  val1: 0,
-  val2: 0,
-  won: false,
-  operator: '+',
-  mode: 'addition'
-}
-
-const operatorsByMode = {
-  addition: '+',
-  subtraction: '-',
-  multiplication: '*',
-  division: '/'
 }
 
 function App() {
