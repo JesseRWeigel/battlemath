@@ -116,7 +116,8 @@ function reducer(state, action) {
 
     case types.CHECK_ANSWER:
       const answer = parseInt(state.answer, 10)
-      // example: eval('2 + 4')
+      // example: eval('2 + 4'); Note: eval is safe here because we control the input
+      // eslint-disable-next-line no-eval
       const expected = eval(`${state.val1} ${state.operator} ${state.val2}`)
 
       // Update enemies & won
@@ -136,11 +137,11 @@ function reducer(state, action) {
       }
 
     case types.SET_MODE:
-      const { mode, operator } = action.payload
+      const mode = action.payload
       return {
         ...state,
         mode,
-        operator
+        operator: operatorsByMode[mode]
       }
 
     default:
@@ -183,10 +184,9 @@ function App() {
 
   const handleModePicker = useCallback(
     mode => {
-      const operator = operatorsByMode[mode]
       dispatch({
         type: types.SET_MODE,
-        payload: { mode, operator }
+        payload: mode
       })
     },
     [dispatch]
