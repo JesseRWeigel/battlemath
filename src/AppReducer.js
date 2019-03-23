@@ -13,6 +13,13 @@ export const types = {
 
 export function reducer(state, action) {
   switch (action.type) {
+    case types.RESTART:
+      const restartState = { ...initialState }
+      restartState.mode = state.mode
+      restartState.operator = state.operator
+
+      return reducer(restartState, { type: types.NEW_PROBLEM })
+
     case types.SET_ANSWER:
       return {
         ...state,

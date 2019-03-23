@@ -100,6 +100,10 @@ function App() {
     [dispatch]
   )
 
+  const handleRestart = useCallback(() => {
+    dispatch({ type: types.RESTART })
+  }, [dispatch])
+
   const handleSubmit = useCallback(() => {
     dispatch({ type: types.CHECK_ANSWER })
   }, [dispatch])
@@ -137,7 +141,15 @@ function App() {
         </View>
       </View>
       {won ? (
-        <Text>Victory!</Text>
+        <View>
+          <Text>Victory!</Text>
+          <Button
+            onPress={handleRestart}
+            title="Restart"
+            color="#0080ff"
+            accessibilityLabel="Click this button to play again."
+          />
+        </View>
       ) : (
         <View style={styles.mathContainer}>
           <View style={styles.mathRow}>
