@@ -4,78 +4,6 @@ import { reducer, initialState, types } from './AppReducer'
 
 import './App.css'
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    alignItems: 'center',
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingVertical: 16
-  },
-  title: {
-    fontSize: 32,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`
-  },
-  picker: { height: 60, width: 150 },
-  battlefield: {
-    flex: 1,
-    flexDirection: 'row',
-    width: '100%',
-    paddingHorizontal: 16
-  },
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'space-evenly'
-  },
-  character: {
-    width: 80,
-    height: 80
-  },
-  hero: {
-    backgroundColor: 'blue'
-  },
-  enemy: {
-    backgroundColor: 'red'
-  },
-  mathContainer: {
-    paddingVertical: 16
-  },
-  mathRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingBottom: 8
-  },
-  mathText: {
-    fontSize: 28,
-    paddingRight: 8
-  },
-  input: {
-    height: 40,
-    width: 60,
-    borderColor: 'gray',
-    borderWidth: 1
-  }
-})
-
-const themes = {
-  addition: {
-    backgroundColor: 'green'
-  },
-  subtraction: {
-    backgroundColor: 'pink'
-  },
-  multiplication: {
-    backgroundColor: 'yellow'
-  },
-  division: {
-    backgroundColor: 'orange'
-  }
-}
-
 function App() {
   const [
     { answer, numOfEnemies, val1, val2, won, operator, mode },
@@ -132,11 +60,15 @@ function App() {
       </Picker>
       <View style={styles.battlefield}>
         <View style={styles.container}>
-          <View style={[styles.character, styles.hero]} />
+          <View nativeID="hero" style={[styles.character, styles.hero]} />
         </View>
         <View style={styles.container}>
           {[...Array(numOfEnemies)].map((_, i) => (
-            <View key={i} style={[styles.character, styles.enemy]} />
+            <View
+              className="enemy"
+              key={i}
+              style={[styles.character, styles.enemy]}
+            />
           ))}
         </View>
       </View>
@@ -153,10 +85,18 @@ function App() {
       ) : (
         <View style={styles.mathContainer}>
           <View style={styles.mathRow}>
-            <Text style={styles.mathText}>
-              {val1} {operator} {val2} =
+            <Text nativeID="val1" style={styles.mathText}>
+              {val1}
             </Text>
+            <Text nativeID="operator" style={styles.mathText}>
+              {operator}
+            </Text>
+            <Text nativeID="val2" style={styles.mathText}>
+              {val2}
+            </Text>
+            <Text style={styles.mathText}>=</Text>
             <TextInput
+              nativeID="answer-input"
               style={styles.input}
               onChangeText={handleAnswerChange}
               onSubmitEditing={handleSubmit}
@@ -164,6 +104,7 @@ function App() {
             />
           </View>
           <Button
+            nativeID="submit"
             onPress={handleSubmit}
             title="Submit"
             color="#841584"
@@ -173,6 +114,78 @@ function App() {
       )}
     </View>
   )
+}
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    alignItems: 'center',
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingVertical: 16
+  },
+  title: {
+    fontSize: 32,
+    fontFamily: `"Comic Sans MS", cursive, sans-serif`
+  },
+  picker: { height: 60, width: 150 },
+  battlefield: {
+    flex: 1,
+    flexDirection: 'row',
+    width: '100%',
+    paddingHorizontal: 16
+  },
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-evenly'
+  },
+  character: {
+    width: 80,
+    height: 80
+  },
+  hero: {
+    backgroundColor: 'blue'
+  },
+  enemy: {
+    backgroundColor: 'red'
+  },
+  mathContainer: {
+    paddingVertical: 16
+  },
+  mathRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingBottom: 8
+  },
+  mathText: {
+    fontSize: 28
+  },
+  input: {
+    height: 40,
+    width: 60,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginLeft: 8
+  }
+})
+
+const themes = {
+  addition: {
+    backgroundColor: 'green'
+  },
+  subtraction: {
+    backgroundColor: 'pink'
+  },
+  multiplication: {
+    backgroundColor: 'yellow'
+  },
+  division: {
+    backgroundColor: 'orange'
+  }
 }
 
 export default App

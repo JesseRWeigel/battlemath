@@ -17,7 +17,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "e2e": "mocha --timeout 30000 ./e2e/runner.js ./e2e/tests/*.spec.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -27,5 +28,10 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.0.2",
+    "puppeteer": "^1.14.0"
+  }
 }
