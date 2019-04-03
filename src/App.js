@@ -159,6 +159,7 @@ function App() {
             <TextInput
               style={styles.input}
               onChangeText={handleAnswerChange}
+              onSubmitEditing={handleSubmit}
               value={answer}
             />
           </View>
