@@ -1,4 +1,4 @@
-import React, { useReducer, useCallback, useEffect } from 'react'
+import React, { useReducer, useCallback, useEffect, useRef } from 'react'
 import { StyleSheet, Text, View, TextInput, Button, Picker } from 'react-native'
 import { reducer, initialState, types } from './AppReducer'
 
@@ -9,6 +9,8 @@ function App() {
     { answer, numOfEnemies, val1, val2, won, operator, mode },
     dispatch
   ] = useReducer(reducer, initialState)
+
+  let submitInputRef = useRef()
 
   // useCallback helps prevent rerendering via memoization
   const handleAnswerChange = useCallback(
@@ -38,10 +40,11 @@ function App() {
 
   const activeTheme = themes[mode]
 
-  // Equivalent of componentDidMount
+  // Equivalent of componentDidMount and componentDidUpdate when numOfEnemies changes
   useEffect(() => {
     dispatch({ type: types.NEW_PROBLEM })
-  }, [])
+    if (submitInputRef.current) submitInputRef.current.focus()
+  }, [numOfEnemies])
 
   return (
     <View
@@ -101,6 +104,7 @@ function App() {
               onChangeText={handleAnswerChange}
               onSubmitEditing={handleSubmit}
               value={answer}
+              ref={submitInputRef}
             />
           </View>
           <Button
