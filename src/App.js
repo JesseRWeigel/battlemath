@@ -1,5 +1,13 @@
 import React, { useReducer, useCallback, useEffect } from 'react'
-import { StyleSheet, Text, View, TextInput, Button, Picker } from 'react-native'
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Button,
+  Picker
+} from 'react-native'
 import { reducer, initialState, types } from './AppReducer'
 
 import './App.css'
@@ -103,13 +111,16 @@ function App() {
               value={answer}
             />
           </View>
-          <Button
+          <TouchableOpacity
             nativeID="submit"
             onPress={handleSubmit}
-            title="Submit"
             color="#841584"
             accessibilityLabel="Learn more about this purple button"
-          />
+          >
+            <View>
+              <Text>Submit</Text>
+            </View>
+          </TouchableOpacity>
         </View>
       )}
     </View>
