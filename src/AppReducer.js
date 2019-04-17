@@ -61,6 +61,17 @@ export function reducer(state, action) {
       return reducer(stateWithEnemies, { type: types.NEW_PROBLEM })
 
     case types.NEW_PROBLEM:
+      if (state.mode === 'division') {
+        let x = randomNumberGenerator(1, 9)
+        let y = randomNumberGenerator(1, 9)
+        let z = x * y
+        return {
+          ...state,
+          val1: z,
+          val2: y,
+          answer: ''
+        }
+      }
       return {
         ...state,
         val1: randomNumberGenerator(1, 9),
@@ -70,11 +81,14 @@ export function reducer(state, action) {
 
     case types.SET_MODE:
       const mode = action.payload
-      return {
-        ...state,
-        mode,
-        operator: operatorsByMode[mode]
-      }
+      return reducer(
+        {
+          ...state,
+          mode,
+          operator: operatorsByMode[mode]
+        },
+        { type: types.NEW_PROBLEM }
+      )
 
     default:
       throw new Error(`Invalid action ${action.type}`)
