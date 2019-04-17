@@ -65,6 +65,9 @@ export function reducer(state, action) {
         let x = randomNumberGenerator(1, 9)
         let y = randomNumberGenerator(1, 9)
         let z = x * y
+        if(z > 30 ){
+          return reducer(state, { type: types.NEW_PROBLEM});
+        }
         return {
           ...state,
           val1: z,
