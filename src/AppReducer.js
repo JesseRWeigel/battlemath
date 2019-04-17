@@ -50,10 +50,10 @@ export function reducer(state, action) {
     }
 
     case types.CHECK_ANSWER: {
-      let answer = parseInt(state.answer, 10)
+      const answer = parseInt(state.answer, 10)
       // example: eval('2 + 4'); Note: eval is safe here because we control the input
       // eslint-disable-next-line no-eval
-      let expected = eval(`${state.val1} ${state.operator} ${state.val2}`)
+      const expected = eval(`${state.val1} ${state.operator} ${state.val2}`)
 
       // Update enemies & won
       const stateWithEnemies =
