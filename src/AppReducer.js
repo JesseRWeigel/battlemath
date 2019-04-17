@@ -89,7 +89,7 @@ export function reducer(state, action) {
       }
 
       // if problem is the same, retry
-      if (x === state.val1 || y === state.val2) {
+      if (x === state.val1 && y === state.val2) {
         return reducer(state, { type: types.NEW_PROBLEM })
       }
 
