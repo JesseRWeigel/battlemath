@@ -36,15 +36,16 @@ function App() {
 
   const handleSubmit = useCallback(() => {
     dispatch({ type: types.CHECK_ANSWER })
+    if (submitInputRef.current) submitInputRef.current.focus()
   }, [dispatch])
 
   const activeTheme = themes[mode]
 
-  // Equivalent of componentDidMount and componentDidUpdate when numOfEnemies changes
+  // Equivalent of componentDidMount
   useEffect(() => {
     dispatch({ type: types.NEW_PROBLEM })
     if (submitInputRef.current) submitInputRef.current.focus()
-  }, [numOfEnemies])
+  }, [])
 
   return (
     <View
