@@ -70,11 +70,19 @@ export function reducer(state, action) {
       let y
 
       switch (state.mode) {
-        case 'division':
+        case 'division': {
           x = randomNumberGenerator(1, 9)
           y = randomNumberGenerator(1, Math.floor(9 / x)) // keeps x *= y below 10
           x *= y // divide by `y` to get back `x`
           break
+        }
+
+        case 'subtraction': {
+          x = randomNumberGenerator(1, 9)
+          y = randomNumberGenerator(1, x)
+          break
+        }
+
         default:
           x = randomNumberGenerator(1, 9)
           y = randomNumberGenerator(1, 9)
