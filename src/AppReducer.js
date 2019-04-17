@@ -88,19 +88,17 @@ export function reducer(state, action) {
           y = randomNumberGenerator(1, 9)
       }
 
-      const newState = {
+      // if problem is the same, retry
+      if (x === state.val1 || y === state.val2) {
+        return reducer(state, { type: types.NEW_PROBLEM })
+      }
+
+      return {
         ...state,
         val1: x,
         val2: y,
         answer: ''
       }
-
-      // if problem is the same, retry
-      if (newState.val1 === state.val1 || newState.val2 === state.val2) {
-        return reducer(state, { type: types.NEW_PROBLEM })
-      }
-
-      return newState
     }
 
     case types.SET_MODE: {
