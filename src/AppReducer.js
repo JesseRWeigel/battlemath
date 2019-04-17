@@ -61,10 +61,15 @@ export function reducer(state, action) {
       return reducer(stateWithEnemies, { type: types.NEW_PROBLEM })
 
     case types.NEW_PROBLEM:
+      let x = 0,
+        y = 0,
+        z = x * y
+      do {
+        x = randomNumberGenerator(1, 9)
+        y = randomNumberGenerator(1, 9)
+        z = x * y
+      } while (x === state.val1 || y === state.val2 || z === state.val1)
       if (state.mode === 'division') {
-        let x = randomNumberGenerator(1, 9)
-        let y = randomNumberGenerator(1, 9)
-        let z = x * y
         if (z > 9) {
           return reducer(state, { type: types.NEW_PROBLEM })
         }
@@ -77,8 +82,8 @@ export function reducer(state, action) {
       }
       return {
         ...state,
-        val1: randomNumberGenerator(1, 9),
-        val2: randomNumberGenerator(1, 9),
+        val1: x,
+        val2: y,
         answer: ''
       }
 
