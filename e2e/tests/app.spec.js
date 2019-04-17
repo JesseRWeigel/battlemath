@@ -41,16 +41,18 @@ describe('Home screen', () => {
       const val1 = await page.$eval('#val1', e => e.innerText)
       const val2 = await page.$eval('#val2', e => e.innerText)
 
-      const answer = val1 + val2
+      const answer = parseInt(val1, 10) + parseInt(val2, 10)
 
-      await page.type('#answerInput', answer)
+      await page.type('#answer-input', `${answer}`)
 
       await page.click('#submit')
 
       // There should only be 2 elements with the class enemy
-      const result = await page.$eval('body', e => e.innerHTML)
+      const enemies = await page.$$('.enemy')
 
-      expect(result).to.contain('hero')
+      const numOfEnemies = enemies.length
+
+      expect(numOfEnemies).to.equal(2)
     })
   )
 })
