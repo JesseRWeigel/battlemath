@@ -5,7 +5,6 @@ import {
   Text,
   View,
   TextInput,
-  TouchableOpacity,
   Button,
   Picker
 } from 'react-native'
@@ -116,16 +115,13 @@ function App() {
               ref={submitInputRef}
             />
           </View>
-          <TouchableOpacity
-            nativeID="submit"
+          <Button
+            testID="submit"
+            title="Submit"
             onPress={handleSubmit}
             color="#841584"
             accessibilityLabel="Learn more about this purple button"
-          >
-            <View>
-              <Text>Submit</Text>
-            </View>
-          </TouchableOpacity>
+          />
         </View>
       )}
     </View>
