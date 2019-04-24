@@ -20,7 +20,7 @@
     "deploy": "gh-pages -d build",
     "e2e": "cypress open"
   },
- "browserslist": [
+  "browserslist": [
     ">0.2%",
     "not dead",
     "not ie <= 11",

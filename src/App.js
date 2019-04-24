@@ -1,13 +1,5 @@
-
 import React, { useReducer, useCallback, useEffect, useRef } from 'react'
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  Button,
-  Picker
-} from 'react-native'
+import { StyleSheet, Text, View, TextInput, Button, Picker } from 'react-native'
 import { reducer, initialState, types } from './AppReducer'
 
 import './App.css'
@@ -20,7 +12,7 @@ function App() {
 
   let submitInputRef = useRef()
 
-  // useCallback helps prevent rerendering via memoization
+  // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
     value => {
       dispatch({ type: types.SET_ANSWER, payload: value })
@@ -44,15 +36,16 @@ function App() {
 
   const handleSubmit = useCallback(() => {
     dispatch({ type: types.CHECK_ANSWER })
+    if (submitInputRef.current) submitInputRef.current.focus()
   }, [dispatch])
 
   const activeTheme = themes[mode]
 
-  // Equivalent of componentDidMount and componentDidUpdate when numOfEnemies changes
+  // Equivalent of componentDidMount
   useEffect(() => {
     dispatch({ type: types.NEW_PROBLEM })
     if (submitInputRef.current) submitInputRef.current.focus()
-  }, [numOfEnemies])
+  }, [])
 
   return (
     <View
@@ -64,7 +57,7 @@ function App() {
         style={styles.picker}
         onValueChange={handleModePicker}
       >
-        <Picker.Item label="Additon(+)" value="addition" />
+        <Picker.Item label="Addition(+)" value="addition" />
         <Picker.Item label="Subtraction(-)" value="subtraction" />
         <Picker.Item label="Multiplication(*)" value="multiplication" />
         <Picker.Item label="Division(/)" value="division" />
