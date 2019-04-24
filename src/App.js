@@ -1,5 +1,13 @@
 import React, { useReducer, useCallback, useEffect, useRef } from 'react'
-import { StyleSheet, Text, View, TextInput, Button, Picker } from 'react-native'
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Button,
+  TouchableOpacity,
+  Picker
+} from 'react-native'
 import { reducer, initialState, types } from './AppReducer'
 
 import './App.css'
@@ -108,13 +116,15 @@ function App() {
               ref={submitInputRef}
             />
           </View>
-          <Button
+          <TouchableOpacity
+            style={styles.button}
             testID="submit"
             title="Submit"
             onPress={handleSubmit}
-            color="#841584"
             accessibilityLabel="Learn more about this purple button"
-          />
+          >
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -149,8 +159,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly'
   },
   character: {
-    width: 80,
-    height: 80
+    width: 40,
+    height: 40
   },
   hero: {
     backgroundColor: 'blue'
@@ -164,17 +174,28 @@ const styles = StyleSheet.create({
   mathRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingBottom: 8
+    paddingBottom: 16
   },
   mathText: {
-    fontSize: 28
+    fontSize: 40
   },
   input: {
-    height: 40,
+    height: 60,
     width: 60,
     borderColor: 'gray',
     borderWidth: 1,
     marginLeft: 8
+  },
+  button: {
+    height: 60,
+    width: 200,
+    backgroundColor: '#841584',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 40
   }
 })
 
