@@ -1,13 +1,13 @@
 {
-  "main.css": "/battlemath/static/css/main.1af0e3a4.chunk.css",
-  "main.js": "/battlemath/static/js/main.5a2a5763.chunk.js",
-  "main.js.map": "/battlemath/static/js/main.5a2a5763.chunk.js.map",
+  "main.css": "/battlemath/static/css/main.ba190564.chunk.css",
+  "main.js": "/battlemath/static/js/main.7d7b8243.chunk.js",
+  "main.js.map": "/battlemath/static/js/main.7d7b8243.chunk.js.map",
   "runtime~main.js": "/battlemath/static/js/runtime~main.39bcf31d.js",
   "runtime~main.js.map": "/battlemath/static/js/runtime~main.39bcf31d.js.map",
-  "static/js/2.680423dc.chunk.js": "/battlemath/static/js/2.680423dc.chunk.js",
-  "static/js/2.680423dc.chunk.js.map": "/battlemath/static/js/2.680423dc.chunk.js.map",
+  "static/js/2.66437f52.chunk.js": "/battlemath/static/js/2.66437f52.chunk.js",
+  "static/js/2.66437f52.chunk.js.map": "/battlemath/static/js/2.66437f52.chunk.js.map",
   "index.html": "/battlemath/index.html",
-  "precache-manifest.250c528dd28c2269be2472cc8fa26af7.js": "/battlemath/precache-manifest.250c528dd28c2269be2472cc8fa26af7.js",
+  "precache-manifest.353bf88ecbb7db0986d7543a66ecf1ad.js": "/battlemath/precache-manifest.353bf88ecbb7db0986d7543a66ecf1ad.js",
   "service-worker.js": "/battlemath/service-worker.js",
-  "static/css/main.1af0e3a4.chunk.css.map": "/battlemath/static/css/main.1af0e3a4.chunk.css.map"
+  "static/css/main.ba190564.chunk.css.map": "/battlemath/static/css/main.ba190564.chunk.css.map"
 }

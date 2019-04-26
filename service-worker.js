@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/battlemath/precache-manifest.250c528dd28c2269be2472cc8fa26af7.js"
+  "/battlemath/precache-manifest.353bf88ecbb7db0986d7543a66ecf1ad.js"
 );
 
 workbox.clientsClaim();
