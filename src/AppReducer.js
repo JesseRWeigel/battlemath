@@ -32,6 +32,7 @@ export function reducer(state, action) {
       if (state.numOfEnemies < 6) {
         return {
           ...state,
+          previousNumOfEnemies: state.numOfEnemies,
           numOfEnemies: state.numOfEnemies + 1
         }
       }
@@ -39,7 +40,7 @@ export function reducer(state, action) {
     }
 
     case types.REMOVE_ENEMY: {
-      const newState = { ...state }
+      const newState = { ...state, previousNumOfEnemies: state.numOfEnemies }
       newState.numOfEnemies--
 
       if (newState.numOfEnemies === 0) {
@@ -123,6 +124,7 @@ export function reducer(state, action) {
 export const initialState = {
   answer: '',
   numOfEnemies: 3,
+  previousNumOfEnemies: 3,
   val1: 0,
   val2: 0,
   won: false,
