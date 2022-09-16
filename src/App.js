@@ -9,17 +9,21 @@ import {
   Picker
 } from 'react-native'
 import { reducer, initialState, types } from './AppReducer'
+import { useMsgAfterSubmit } from './hooks'
 
 import './App.css'
 import HeroSvg from './components/HeroSvg'
 
 function App() {
   const [
-    { answer, numOfEnemies, val1, val2, won, operator, mode },
+    { answer, numOfEnemies, val1, val2, won, operator, mode, previousNumOfEnemies },
     dispatch
   ] = useReducer(reducer, initialState)
 
   let submitInputRef = useRef()
+
+  const variablesToLookFor = [previousNumOfEnemies, numOfEnemies]
+  const { msg, isErrorMessage } = useMsgAfterSubmit(variablesToLookFor)
 
   // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
@@ -54,6 +58,9 @@ function App() {
   useEffect(() => {
     dispatch({ type: types.NEW_PROBLEM })
   }, [])
+
+  const submitMsgText = isErrorMessage ? styles.msgTextError : styles.msgTextSuccess
+  const submitMessageBlock = !!msg && <View style={styles.submitMsgWrapper}><Text style={submitMsgText}>{msg}</Text></View>
 
   useEffect(() => {
     submitInputRef.current && submitInputRef.current.focus()
@@ -115,6 +122,7 @@ function App() {
         </View>
       ) : (
         <View style={styles.mathContainer}>
+          {submitMessageBlock}
           <View style={styles.mathRow}>
             <Text
               nativeID="val1"
@@ -242,8 +250,21 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
+    fontSize: 40
+  },
+  msgTextError: {
+    color: 'red',
+    fontSize: 25
+  }, 
+  msgTextSuccess: {
+    color: 'green',
+    fontSize: 25
+  },
+  submitMsgWrapper: {
+    paddingBottom: 15
     fontSize: 40,
     fontFamily: `"Comic Sans MS", cursive, sans-serif`
+
   }
 })
 
