@@ -1,3 +1,8 @@
+A simple browser based math game for children.
+
+
+----------------------------
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
