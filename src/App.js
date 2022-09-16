@@ -6,7 +6,7 @@ import {
   TextInput,
   Button,
   TouchableOpacity,
-  Picker
+  Picker,
 } from 'react-native'
 import { reducer, initialState, types } from './AppReducer'
 import { useMsgAfterSubmit } from './hooks'
@@ -16,8 +16,17 @@ import HeroSvg from './components/HeroSvg'
 
 function App() {
   const [
-    { answer, numOfEnemies, val1, val2, won, operator, mode, previousNumOfEnemies },
-    dispatch
+    {
+      answer,
+      numOfEnemies,
+      val1,
+      val2,
+      won,
+      operator,
+      mode,
+      previousNumOfEnemies,
+    },
+    dispatch,
   ] = useReducer(reducer, initialState)
 
   let submitInputRef = useRef()
@@ -27,17 +36,17 @@ function App() {
 
   // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
-    value => {
+    (value) => {
       dispatch({ type: types.SET_ANSWER, payload: value })
     },
     [dispatch]
   )
 
   const handleModePicker = useCallback(
-    mode => {
+    (mode) => {
       dispatch({
         type: types.SET_MODE,
-        payload: mode
+        payload: mode,
       })
     },
     [dispatch]
@@ -59,8 +68,14 @@ function App() {
     dispatch({ type: types.NEW_PROBLEM })
   }, [])
 
-  const submitMsgText = isErrorMessage ? styles.msgTextError : styles.msgTextSuccess
-  const submitMessageBlock = !!msg && <View style={styles.submitMsgWrapper}><Text style={submitMsgText}>{msg}</Text></View>
+  const submitMsgText = isErrorMessage
+    ? styles.msgTextError
+    : styles.msgTextSuccess
+  const submitMessageBlock = !!msg && (
+    <View style={styles.submitMsgWrapper}>
+      <Text style={submitMsgText}>{msg}</Text>
+    </View>
+  )
 
   useEffect(() => {
     submitInputRef.current && submitInputRef.current.focus()
@@ -90,7 +105,7 @@ function App() {
             style={[
               styles.character,
               styles.hero,
-              { backgroundColor: activeTheme.heroColor }
+              { backgroundColor: activeTheme.heroColor },
             ]}
           >
             <HeroSvg />
@@ -104,7 +119,7 @@ function App() {
               style={[
                 styles.character,
                 styles.enemy,
-                { backgroundColor: activeTheme.enemyColor }
+                { backgroundColor: activeTheme.enemyColor },
               ]}
             />
           ))}
@@ -157,7 +172,7 @@ function App() {
           <TouchableOpacity
             style={[
               styles.button,
-              { backgroundColor: activeTheme.buttonColor }
+              { backgroundColor: activeTheme.buttonColor },
             ]}
             testID="submit"
             title="Submit"
@@ -181,53 +196,53 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingVertical: 16
+    paddingVertical: 16,
   },
   title: {
     fontSize: 32,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`
+    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
   },
   picker: {
     height: 60,
     width: 150,
-    borderRadius: 8
+    borderRadius: 8,
   },
   pickerText: {
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`
+    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
   },
   battlefield: {
     flex: 1,
     flexDirection: 'row',
     width: '100%',
-    paddingHorizontal: 16
+    paddingHorizontal: 16,
   },
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'space-evenly'
+    justifyContent: 'space-evenly',
   },
   character: {
     width: 40,
     height: 40,
-    borderRadius: 20
+    borderRadius: 20,
   },
   hero: {
-    backgroundColor: 'blue'
+    backgroundColor: 'blue',
   },
   enemy: {
-    backgroundColor: 'red'
+    backgroundColor: 'red',
   },
   mathContainer: {
-    paddingVertical: 16
+    paddingVertical: 16,
   },
   mathRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingBottom: 16
+    paddingBottom: 16,
   },
   mathText: {
     fontSize: 40,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`
+    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
   },
   input: {
     height: 60,
@@ -238,7 +253,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 40,
     borderRadius: 8,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`
+    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
   },
   button: {
     height: 60,
@@ -246,26 +261,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#841584',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8
+    borderRadius: 8,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 40
+    fontSize: 40,
   },
   msgTextError: {
     color: 'red',
-    fontSize: 25
-  }, 
+    fontSize: 25,
+  },
   msgTextSuccess: {
     color: 'green',
-    fontSize: 25
+    fontSize: 25,
   },
   submitMsgWrapper: {
-    paddingBottom: 15
+    paddingBottom: 15,
     fontSize: 40,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`
-
-  }
+    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+  },
 })
 
 const themes = {
@@ -274,17 +288,17 @@ const themes = {
     heroColor: 'rgba(23, 190, 187, 1)',
     enemyColor: 'rgba(228, 87, 46, 1)',
     buttonColor: 'rgba(255, 201, 20, 1)',
-    textColor: '#fff'
+    textColor: '#fff',
   },
   subtraction: {
-    backgroundColor: 'pink'
+    backgroundColor: 'pink',
   },
   multiplication: {
-    backgroundColor: 'yellow'
+    backgroundColor: 'yellow',
   },
   division: {
-    backgroundColor: 'orange'
-  }
+    backgroundColor: 'orange',
+  },
 }
 
 export default App
