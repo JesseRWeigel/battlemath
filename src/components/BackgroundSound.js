@@ -43,6 +43,7 @@ const BackgroundSound = ({ url }) => {
 
     // try to auto play music browser allows
     try {
+      audioRef.current.loop = true
       await audioRef.current.play()
       setPlaying(true)
     } catch (err) {
