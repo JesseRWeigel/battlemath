@@ -100,7 +100,7 @@ function App() {
         <Picker.Item label="Multiplication(*)" value="multiplication" />
         <Picker.Item label="Division(/)" value="division" />
       </Picker>
-      <BackgroundSound url={bgSound} />
+
       <View style={styles.battlefield}>
         <View style={styles.container}>
           <View
@@ -186,6 +186,7 @@ function App() {
           </TouchableOpacity>
         </View>
       )}
+      <BackgroundSound url={bgSound} />
     </View>
   )
 }

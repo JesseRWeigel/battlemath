@@ -44,6 +44,7 @@ const BackgroundSound = ({ url }) => {
     // try to auto play music browser allows
     try {
       await audioRef.current.play()
+      setPlaying(true)
     } catch (err) {
       console.warn('Unable to auto play background sound.')
       console.warn(err)
@@ -53,10 +54,7 @@ const BackgroundSound = ({ url }) => {
   return (
     <>
       {isReady && (
-        <Button
-          onPress={handleToggerPress}
-          title={isPlaying ? 'Sound Off' : 'Sound On'}
-        />
+        <Button onPress={handleToggerPress} title={isPlaying ? '🔊' : '🔇'} />
       )}
       <audio ref={audioRef} onCanPlayThrough={handleCanPlayThrough}>
         <source src={url} type="audio/mpeg" />
