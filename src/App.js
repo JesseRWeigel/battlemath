@@ -13,6 +13,8 @@ import { useMsgAfterSubmit } from './hooks'
 
 import './App.css'
 import HeroSvg from './components/HeroSvg'
+import bgSound from './assets/music/background-music.mp3'
+import BackgroundSound from './components/BackgroundSound'
 
 function App() {
   const [
@@ -98,6 +100,7 @@ function App() {
         <Picker.Item label="Multiplication(*)" value="multiplication" />
         <Picker.Item label="Division(/)" value="division" />
       </Picker>
+      <BackgroundSound url={bgSound} />
       <View style={styles.battlefield}>
         <View style={styles.container}>
           <View
