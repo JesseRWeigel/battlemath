@@ -11,6 +11,7 @@ A simple browser based game that helps children learn the four basic fundamental
 
 - [React](https://reactjs.org/)
 - [Cypress](https://www.cypress.io/)
+- [Yarn](https://yarnpkg.com/)
 
 ### Quick Start
 
