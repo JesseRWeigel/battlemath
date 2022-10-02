@@ -1,19 +1,16 @@
-We are using the Virtual Coffee guide and will adapt it as needed.
 
 # Contributors Guide
 
-Welcome to the Virtual Coffee contributors guide! Thank you so much for considering contributing to this repository. We really appreciate all the contributors who try to make this space better. This document serves as a guide that will show you the path of least resistance for making valuable contributions to this project. Reading and following this guide shows that you respect the time of the developers managing and developing this space. In return, they will reciprocate that respect in addressing your issue, assessing changes, and helping you finalize your pull requests. This is the only way we can produce anything of value.
+Welcome to the contributors guide! Thank you so much for considering contributing to this repository. We really appreciate all the contributors who try to make this space better. This document serves as a guide that will show you the path of least resistance for making valuable contributions to this project. Reading and following this guide shows that you respect the time of the developers managing and developing this space. In return, they will reciprocate that respect in addressing your issue, assessing changes, and helping you finalize your pull requests. This is the only way we can produce anything of value.
 
-We take our [Code of Conduct](https://virtualcoffee.io/code-of-conduct/) very seriously, and all contributors must abide by it. Let’s treat each other with respect and remember we are all people who care and are trying. With that said, if you believe someone has violated the Code of Conduct, please fill out our [CoC Violation Form](https://virtualcoffee.io/report-coc-violation/), which you can do anonymously.
-
-As an open source community, Virtual Coffee recognizes the importance of supporting our members and creating clear paths of communication. We know that sometimes things get lost in translation and we want to assume positive intent.
+We take our [Code of Conduct](https://github.com/JesseRWeigel/battlemath/blob/main/CODE_OF_CONDUCT.md) very seriously, and all contributors must abide by it. Let’s treat each other with respect and remember we are all people who care and are trying. 
 
 ## Getting Started
 
 Before you begin:
 
-- Have you read our [Code of Conduct](https://virtualcoffee.io/code-of-conduct/)?
-- Check out [existing issues](https://github.com/Virtual-Coffee/virtualcoffee.io/issues) and the [discussion board](https://github.com/Virtual-Coffee/virtualcoffee.io/discussions) to ensure your issue hasn’t been brought up before.
+- Have you read our [Code of Conduct](https://github.com/JesseRWeigel/battlemath/blob/main/CODE_OF_CONDUCT.md)?
+- Check out [existing issues](https://github.com/JesseRWeigel/battlemath/issues) and the [discussion board](https://github.com/JesseRWeigel/battlemath/discussions) to ensure your issue hasn’t been brought up before.
 
 If you're looking to start learning how to work with this repo, this doc tries to provide all the resources to get you from confusion to productivity.
 
@@ -27,20 +24,20 @@ We really want to make space for all developers to feel comfortable and supporte
 
 # Table of Contents
 
-- [Contributors Guide](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#contributors-guide)
-- [Getting Started](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#getting-started)
-- [What type of contributions are desired](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#what-type-of-contributions-are-desired)
-- [The Basics](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#the-basics)
-  - [Making a Github Account](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#making-a-github-account)
-  - [Discussions](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#discussions)
-  - [Working with Issues](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#working-with-issues)
-  - [Local development](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#local-development)
-  - [Making Pull Requests](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#creating-a-pull-request)
-  - [Awaiting Review](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#awaiting-review)
-  - [Suggested Changes](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#suggested-changes)
-  - [Tips and Gotchas](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#tips-and-gotchas)
-- [Bug Reporting](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#reporting-a-bug)
-- [Labelling conventions](https://github.com/Virtual-Coffee/virtualcoffee.io/blob/main/CONTRIBUTING.md#labelling-conventions)
+- [Contributors Guide](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#contributors-guide)
+- [Getting Started](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#getting-started)
+- [What type of contributions are desired](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#what-type-of-contributions-are-desired)
+- [The Basics](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#the-basics)
+  - [Making a Github Account](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#making-a-github-account)
+  - [Discussions](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#discussions)
+  - [Working with Issues](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#working-with-issues)
+  - [Local development](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#local-development)
+  - [Making Pull Requests](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#creating-a-pull-request)
+  - [Awaiting Review](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#awaiting-review)
+  - [Suggested Changes](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#suggested-changes)
+  - [Tips and Gotchas](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#tips-and-gotchas)
+- [Bug Reporting](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#reporting-a-bug)
+- [Labelling conventions](https://github.com/JesseRWeigel/battlemath/blob/main/CONTRIBUTING.md#labelling-conventions)
 
 # What type of contributions we're looking for.
 
@@ -61,7 +58,7 @@ If you haven't made a github account as yet, make one [now](https://github.com).
 
 ## Discussions
 
-For questions, comments, or other discussion topics that don’t have a clear action, please use the [discussion board](https://github.com/Virtual-Coffee/virtualcoffee.io/discussions).
+For questions, comments, or other discussion topics that don’t have a clear action, please use the [discussion board](https://github.com/JesseRWeigel/battlemath/discussions).
 
 For example, if you want to ask “Should we do…” or “How do I do…”, you’ll start in the discussion board. This allows a whole-group conversation, and we can integrate the answer into docs or issues as necessary.
 
