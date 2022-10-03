@@ -16,7 +16,7 @@ const BackgroundSound = ({ url }) => {
 
   useEffect(() => {
     if (!audioRef.current) {
-      console.log('Audio not initialized yet')
+      // console.log('Audio not initialized yet')
       return
     }
 
@@ -47,8 +47,8 @@ const BackgroundSound = ({ url }) => {
       await audioRef.current.play()
       setPlaying(true)
     } catch (err) {
-      console.warn('Unable to auto play background sound.')
-      console.warn(err)
+      // console.warn('Unable to auto play background sound.')
+      // console.warn(err)
     }
   }
 
