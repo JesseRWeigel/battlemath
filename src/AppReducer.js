@@ -8,7 +8,8 @@ export const types = {
   REMOVE_ENEMY: 2,
   CHECK_ANSWER: 3,
   NEW_PROBLEM: 4,
-  SET_MODE: 5
+  SET_MODE: 5,
+  RESTORE_STATE:6,
 }
 
 export function reducer(state, action) {
@@ -24,6 +25,7 @@ export function reducer(state, action) {
     case types.SET_ANSWER: {
       return {
         ...state,
+        isStoredState:false,
         answer: action.payload
       }
     }
@@ -113,6 +115,11 @@ export function reducer(state, action) {
         { type: types.NEW_PROBLEM }
       )
     }
+    
+    case types.RESTORE_STATE:{
+      const storedState=action.payload;
+      return {...storedState,isStoredState:true}
+    }
 
     default:
       throw new Error(`Invalid action ${action.type}`)
@@ -129,7 +136,8 @@ export const initialState = {
   val2: 0,
   won: false,
   operator: '+',
-  mode: 'addition'
+  mode: 'addition',
+  isStoredState:true
 }
 
 const operatorsByMode = {
