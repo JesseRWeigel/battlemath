@@ -1,13 +1,14 @@
 {
-  "main.css": "/battlemath/static/css/main.ba190564.chunk.css",
-  "main.js": "/battlemath/static/js/main.7d7b8243.chunk.js",
-  "main.js.map": "/battlemath/static/js/main.7d7b8243.chunk.js.map",
-  "runtime~main.js": "/battlemath/static/js/runtime~main.39bcf31d.js",
-  "runtime~main.js.map": "/battlemath/static/js/runtime~main.39bcf31d.js.map",
-  "static/js/2.66437f52.chunk.js": "/battlemath/static/js/2.66437f52.chunk.js",
-  "static/js/2.66437f52.chunk.js.map": "/battlemath/static/js/2.66437f52.chunk.js.map",
-  "index.html": "/battlemath/index.html",
-  "precache-manifest.353bf88ecbb7db0986d7543a66ecf1ad.js": "/battlemath/precache-manifest.353bf88ecbb7db0986d7543a66ecf1ad.js",
-  "service-worker.js": "/battlemath/service-worker.js",
-  "static/css/main.ba190564.chunk.css.map": "/battlemath/static/css/main.ba190564.chunk.css.map"
+  "files": {
+    "main.css": "/battlemath/static/css/main.7a7d29af.css",
+    "main.js": "/battlemath/static/js/main.f81fc92d.js",
+    "static/media/background-music.mp3": "/battlemath/static/media/background-music.3d51c88e31e5663422f1.mp3",
+    "index.html": "/battlemath/index.html",
+    "main.7a7d29af.css.map": "/battlemath/static/css/main.7a7d29af.css.map",
+    "main.f81fc92d.js.map": "/battlemath/static/js/main.f81fc92d.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.7a7d29af.css",
+    "static/js/main.f81fc92d.js"
+  ]
 }
