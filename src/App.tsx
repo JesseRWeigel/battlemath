@@ -34,7 +34,10 @@ function App() {
 
   let submitInputRef = useRef<TextInput>(null)
 
-  const variablesToLookFor = [previousNumOfEnemies, numOfEnemies]
+  const variablesToLookFor: [number, number] = [
+    previousNumOfEnemies,
+    numOfEnemies,
+  ]
   const { msg, isErrorMessage } = useMsgAfterSubmit(variablesToLookFor)
 
   // useCallback helps prevent re-rendering via memoization
