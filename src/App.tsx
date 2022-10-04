@@ -6,9 +6,10 @@ import {
   TextInput,
   Button,
   TouchableOpacity,
+  // @ts-ignore
   Picker,
 } from 'react-native'
-import { reducer, initialState, types } from './AppReducer'
+import { reducer, initialState, TYPES } from './AppReducer'
 import { useMsgAfterSubmit } from './hooks'
 
 import './App.css'
@@ -38,16 +39,16 @@ function App() {
 
   // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
-    (value) => {
-      dispatch({ type: types.SET_ANSWER, payload: value })
+    (value: string) => {
+      dispatch({ type: TYPES.SET_ANSWER, payload: value })
     },
     [dispatch]
   )
 
   const handleModePicker = useCallback(
-    (mode) => {
+    (mode: string) => {
       dispatch({
-        type: types.SET_MODE,
+        type: TYPES.SET_MODE,
         payload: mode,
       })
     },
@@ -55,19 +56,19 @@ function App() {
   )
 
   const handleRestart = useCallback(() => {
-    dispatch({ type: types.RESTART })
+    dispatch({ type: TYPES.RESTART })
   }, [dispatch])
 
   const handleSubmit = useCallback(() => {
-    dispatch({ type: types.CHECK_ANSWER })
-    if (submitInputRef.current) submitInputRef.current.focus()
+    dispatch({ type: TYPES.CHECK_ANSWER })
+    // if (submitInputRef.current) submitInputRef.current.focus()
   }, [dispatch])
 
   const activeTheme = themes[mode]
 
   // Equivalent of componentDidMount
   useEffect(() => {
-    dispatch({ type: types.NEW_PROBLEM })
+    dispatch({ type: TYPES.NEW_PROBLEM })
   }, [])
 
   const submitMsgText = isErrorMessage
@@ -79,9 +80,9 @@ function App() {
     </View>
   )
 
-  useEffect(() => {
-    submitInputRef.current && submitInputRef.current.focus()
-  })
+  // useEffect(() => {
+  //   submitInputRef.current && submitInputRef.current.focus()
+  // })
 
   return (
     <View
@@ -117,7 +118,6 @@ function App() {
         <View style={styles.container}>
           {[...Array(numOfEnemies)].map((_, i) => (
             <View
-              className="enemy"
               key={i}
               style={[
                 styles.character,
@@ -169,7 +169,6 @@ function App() {
               onChangeText={handleAnswerChange}
               onSubmitEditing={handleSubmit}
               value={answer}
-              ref={submitInputRef}
             />
           </View>
           <TouchableOpacity
@@ -178,7 +177,6 @@ function App() {
               { backgroundColor: activeTheme.buttonColor },
             ]}
             testID="submit"
-            title="Submit"
             onPress={handleSubmit}
             accessibilityLabel="Learn more about this purple button"
           >
@@ -296,12 +294,24 @@ const themes = {
   },
   subtraction: {
     backgroundColor: 'pink',
+    heroColor: 'rgba(23, 190, 187, 1)',
+    enemyColor: 'rgba(228, 87, 46, 1)',
+    buttonColor: 'rgba(255, 201, 20, 1)',
+    textColor: '#000',
   },
   multiplication: {
     backgroundColor: 'yellow',
+    heroColor: 'rgba(23, 190, 187, 1)',
+    enemyColor: 'rgba(228, 87, 46, 1)',
+    buttonColor: 'rgba(255, 201, 20, 1)',
+    textColor: '#000',
   },
   division: {
     backgroundColor: 'orange',
+    heroColor: 'rgba(23, 190, 187, 1)',
+    enemyColor: 'rgba(228, 87, 46, 1)',
+    buttonColor: 'rgba(255, 201, 20, 1)',
+    textColor: '#000',
   },
 }
 

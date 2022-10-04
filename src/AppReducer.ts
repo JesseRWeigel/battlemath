@@ -1,45 +1,82 @@
-export function randomNumberGenerator(min = 0, max) {
+import { Reducer } from 'react'
+
+export function randomNumberGenerator(min = 0, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-export const types = {
+export const TYPES = {
   SET_ANSWER: 0,
   ADD_ENEMY: 1,
   REMOVE_ENEMY: 2,
   CHECK_ANSWER: 3,
   NEW_PROBLEM: 4,
-  SET_MODE: 5
+  SET_MODE: 5,
+  RESTART: 6,
+} as const
+
+const OPERATORS = {
+  addition: '+',
+  subtraction: '-',
+  multiplication: '*',
+  division: '/',
+} as const
+
+export type ActionType = {
+  type: typeof TYPES[keyof typeof TYPES]
+  payload?: unknown
 }
 
-export function reducer(state, action) {
+export type AppState = {
+  answer: string
+  numOfEnemies: number
+  previousNumOfEnemies: number
+  val1: number
+  val2: number
+  won: boolean
+  operator: typeof OPERATORS[keyof typeof OPERATORS]
+  mode: keyof typeof OPERATORS
+}
+
+export const initialState: AppState = {
+  answer: '',
+  numOfEnemies: 3,
+  previousNumOfEnemies: 3,
+  val1: 0,
+  val2: 0,
+  won: false,
+  operator: '+',
+  mode: 'addition',
+}
+
+export const reducer: Reducer<AppState, ActionType> = (state, action) => {
   switch (action.type) {
-    case types.RESTART: {
-      const restartState = { ...initialState }
-      restartState.mode = state.mode
-      restartState.operator = state.operator
-
-      return reducer(restartState, { type: types.NEW_PROBLEM })
-    }
-
-    case types.SET_ANSWER: {
+    case TYPES.RESTART: {
       return {
-        ...state,
-        answer: action.payload
+        ...initialState,
+        mode: state.mode,
+        opeartor: state.operator,
       }
     }
 
-    case types.ADD_ENEMY: {
+    case TYPES.SET_ANSWER: {
+      return {
+        ...state,
+        answer: action.payload as string,
+      }
+    }
+
+    case TYPES.ADD_ENEMY: {
       if (state.numOfEnemies < 6) {
         return {
           ...state,
           previousNumOfEnemies: state.numOfEnemies,
-          numOfEnemies: state.numOfEnemies + 1
+          numOfEnemies: state.numOfEnemies + 1,
         }
       }
       break
     }
 
-    case types.REMOVE_ENEMY: {
+    case TYPES.REMOVE_ENEMY: {
       const newState = { ...state, previousNumOfEnemies: state.numOfEnemies }
       newState.numOfEnemies--
 
@@ -50,8 +87,8 @@ export function reducer(state, action) {
       return newState
     }
 
-    case types.CHECK_ANSWER: {
-      const answer = parseInt(state.answer, 10)
+    case TYPES.CHECK_ANSWER: {
+      const answer = parseInt(state?.answer ?? '', 10)
       // example: eval('2 + 4'); Note: eval is safe here because we control the input
       // eslint-disable-next-line no-eval
       const expected = eval(`${state.val1} ${state.operator} ${state.val2}`)
@@ -59,14 +96,14 @@ export function reducer(state, action) {
       // Update enemies & won
       const stateWithEnemies =
         answer === expected
-          ? reducer(state, { type: types.REMOVE_ENEMY })
-          : reducer(state, { type: types.ADD_ENEMY })
+          ? reducer(state, { type: TYPES.REMOVE_ENEMY })
+          : reducer(state, { type: TYPES.ADD_ENEMY })
 
       // Update problem
-      return reducer(stateWithEnemies, { type: types.NEW_PROBLEM })
+      return reducer(stateWithEnemies, { type: TYPES.NEW_PROBLEM })
     }
 
-    case types.NEW_PROBLEM: {
+    case TYPES.NEW_PROBLEM: {
       let x
       let y
 
@@ -91,27 +128,24 @@ export function reducer(state, action) {
 
       // if problem is the same, retry
       if (x === state.val1 && y === state.val2) {
-        return reducer(state, { type: types.NEW_PROBLEM })
+        return reducer(state, { type: TYPES.NEW_PROBLEM })
       }
 
       return {
         ...state,
         val1: x,
         val2: y,
-        answer: ''
+        answer: '',
       }
     }
 
-    case types.SET_MODE: {
-      const mode = action.payload
-      return reducer(
-        {
-          ...state,
-          mode,
-          operator: operatorsByMode[mode]
-        },
-        { type: types.NEW_PROBLEM }
-      )
+    case TYPES.SET_MODE: {
+      const mode = action.payload as keyof typeof OPERATORS
+      return {
+        ...state,
+        mode,
+        operator: OPERATORS[mode],
+      }
     }
 
     default:
@@ -119,22 +153,4 @@ export function reducer(state, action) {
   }
 
   return state
-}
-
-export const initialState = {
-  answer: '',
-  numOfEnemies: 3,
-  previousNumOfEnemies: 3,
-  val1: 0,
-  val2: 0,
-  won: false,
-  operator: '+',
-  mode: 'addition'
-}
-
-const operatorsByMode = {
-  addition: '+',
-  subtraction: '-',
-  multiplication: '*',
-  division: '/'
 }
