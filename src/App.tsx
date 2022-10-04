@@ -1,4 +1,4 @@
-import React, { useReducer, useCallback, useEffect, useRef } from 'react'
+import React, { useReducer, useCallback, useEffect } from 'react'
 import {
   StyleSheet,
   Text,
@@ -32,7 +32,7 @@ function App() {
     dispatch,
   ] = useReducer(reducer, initialState)
 
-  let submitInputRef = useRef<TextInput>(null)
+  let submitInputRef = React.useRef<TextInput>(null)
 
   const variablesToLookFor: [number, number] = [
     previousNumOfEnemies,
