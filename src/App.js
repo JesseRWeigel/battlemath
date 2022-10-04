@@ -124,6 +124,7 @@ function App() {
         selectedValue={mode}
         style={[styles.picker, styles.pickerText]}
         onValueChange={handleModePicker}
+        nativeID="operation-selector"
       >
         <Picker.Item label="Addition(+)" value="addition" />
         <Picker.Item label="Subtraction(-)" value="subtraction" />
@@ -148,6 +149,8 @@ function App() {
           {[...Array(numOfEnemies)].map((_, i) => (
             <View
               className="enemy"
+            
+              testID="enemies"
               key={i}
               style={[
                 styles.character,
