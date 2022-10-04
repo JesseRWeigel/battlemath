@@ -32,7 +32,7 @@ function App() {
     dispatch,
   ] = useReducer(reducer, initialState)
 
-  let submitInputRef = useRef()
+  let submitInputRef = useRef<TextInput>(null)
 
   const variablesToLookFor = [previousNumOfEnemies, numOfEnemies]
   const { msg, isErrorMessage } = useMsgAfterSubmit(variablesToLookFor)
@@ -61,7 +61,7 @@ function App() {
 
   const handleSubmit = useCallback(() => {
     dispatch({ type: TYPES.CHECK_ANSWER })
-    // if (submitInputRef.current) submitInputRef.current.focus()
+    if (submitInputRef.current) submitInputRef.current.focus()
   }, [dispatch])
 
   const activeTheme = themes[mode]
@@ -80,9 +80,9 @@ function App() {
     </View>
   )
 
-  // useEffect(() => {
-  //   submitInputRef.current && submitInputRef.current.focus()
-  // })
+  useEffect(() => {
+    submitInputRef.current && submitInputRef.current.focus()
+  })
 
   return (
     <View
@@ -169,6 +169,7 @@ function App() {
               onChangeText={handleAnswerChange}
               onSubmitEditing={handleSubmit}
               value={answer}
+              ref={submitInputRef}
             />
           </View>
           <TouchableOpacity
