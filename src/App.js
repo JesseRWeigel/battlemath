@@ -11,7 +11,6 @@ import {
 import { reducer, initialState, types } from './AppReducer'
 import { useMsgAfterSubmit } from './hooks'
 
-import './App.css'
 import HeroSvg from './components/HeroSvg'
 import bgSound from './assets/music/background-music.mp3'
 import BackgroundSound from './components/BackgroundSound'
@@ -27,7 +26,7 @@ function App() {
       operator,
       mode,
       previousNumOfEnemies,
-      isStoredState
+      isStoredState,
     },
     dispatch,
   ] = useReducer(reducer, initialState)
@@ -35,7 +34,10 @@ function App() {
   let submitInputRef = useRef()
 
   const variablesToLookFor = [previousNumOfEnemies, numOfEnemies]
-  const { msg, isErrorMessage } = useMsgAfterSubmit(variablesToLookFor,isStoredState)
+  const { msg, isErrorMessage } = useMsgAfterSubmit(
+    variablesToLookFor,
+    isStoredState
+  )
 
   // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
@@ -69,36 +71,47 @@ function App() {
   // Equivalent of componentDidMount
   useEffect(() => {
     dispatch({ type: types.NEW_PROBLEM })
-    const storedData=localStorage.getItem('state');
-    if(storedData){
+    const storedData = localStorage.getItem('state')
+    if (storedData) {
       dispatch({ type: types.RESTORE_STATE, payload: JSON.parse(storedData) })
+    } else {
+      localStorage.setItem('state', {
+        answer,
+        numOfEnemies,
+        val1,
+        val2,
+        won,
+        operator,
+        mode,
+        previousNumOfEnemies,
+      })
     }
-    else{    
-      localStorage.setItem('state',{
-      answer,
-      numOfEnemies,
-      val1,
-      val2,
-      won,
-      operator,
-      mode,
-      previousNumOfEnemies,
-    })}
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('state',
+    localStorage.setItem(
+      'state',
       JSON.stringify({
-      answer,
-      numOfEnemies,
-      val1,
-      val2,
-      won,
-      operator,
-      mode,
-      previousNumOfEnemies,
-    }))
-  }, [answer, numOfEnemies, won,val1,val2,operator,mode,previousNumOfEnemies])
+        answer,
+        numOfEnemies,
+        val1,
+        val2,
+        won,
+        operator,
+        mode,
+        previousNumOfEnemies,
+      })
+    )
+  }, [
+    answer,
+    numOfEnemies,
+    won,
+    val1,
+    val2,
+    operator,
+    mode,
+    previousNumOfEnemies,
+  ])
 
   const submitMsgText = isErrorMessage
     ? styles.msgTextError
@@ -149,7 +162,6 @@ function App() {
           {[...Array(numOfEnemies)].map((_, i) => (
             <View
               className="enemy"
-            
               testID="enemies"
               key={i}
               style={[
