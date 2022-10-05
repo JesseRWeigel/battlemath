@@ -1,5 +1,5 @@
 {
-  "name": "test-app",
+  "name": "battlemath",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
