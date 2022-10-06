@@ -13,11 +13,12 @@
     "react-scripts": "5.0.1"
   },
   "scripts": {
+    "preinstall": "npx only-allow yarn",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "predeploy": "npm run build",
+    "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
     "e2e": "cypress open"
   },
