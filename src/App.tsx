@@ -12,7 +12,6 @@ import {
 import { reducer, initialState, TYPES } from './AppReducer'
 import { useMsgAfterSubmit } from './hooks'
 
-import './App.css'
 import HeroSvg from './components/HeroSvg'
 import bgSound from './assets/music/background-music.mp3'
 import BackgroundSound from './components/BackgroundSound'
@@ -71,7 +70,7 @@ function App() {
     if (submitInputRef.current) submitInputRef.current.focus()
   }, [dispatch])
 
-  const activeTheme = themes[mode]
+  const activeTheme = themes[mode as keyof typeof themes]
 
   // Equivalent of componentDidMount
   useEffect(() => {
