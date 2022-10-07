@@ -12,7 +12,6 @@ import {
 import { reducer, initialState, TYPES } from './AppReducer'
 import { useMsgAfterSubmit } from './hooks'
 
-import './App.css'
 import HeroSvg from './components/HeroSvg'
 import bgSound from './assets/music/background-music.mp3'
 import BackgroundSound from './components/BackgroundSound'
@@ -35,10 +34,14 @@ function App() {
 
   let submitInputRef = React.useRef<TextInput>(null)
 
+<<<<<<< HEAD:src/App.tsx
   const variablesToLookFor: [number, number] = [
     previousNumOfEnemies,
     numOfEnemies,
   ]
+=======
+  const variablesToLookFor = [previousNumOfEnemies, numOfEnemies]
+>>>>>>> main:src/App.js
   const { msg, isErrorMessage } = useMsgAfterSubmit(
     variablesToLookFor,
     isStoredState
@@ -75,6 +78,7 @@ function App() {
 
   // Equivalent of componentDidMount
   useEffect(() => {
+<<<<<<< HEAD:src/App.tsx
     dispatch({ type: TYPES.NEW_PROBLEM })
     const storedData = localStorage.getItem('state')
     if (storedData) {
@@ -93,6 +97,23 @@ function App() {
           previousNumOfEnemies,
         })
       )
+=======
+    dispatch({ type: types.NEW_PROBLEM })
+    const storedData = localStorage.getItem('state')
+    if (storedData) {
+      dispatch({ type: types.RESTORE_STATE, payload: JSON.parse(storedData) })
+    } else {
+      localStorage.setItem('state', {
+        answer,
+        numOfEnemies,
+        val1,
+        val2,
+        won,
+        operator,
+        mode,
+        previousNumOfEnemies,
+      })
+>>>>>>> main:src/App.js
     }
   }, [])
 
@@ -169,6 +190,10 @@ function App() {
         <View style={styles.container}>
           {[...Array(numOfEnemies)].map((_, i) => (
             <View
+<<<<<<< HEAD:src/App.tsx
+=======
+              className="enemy"
+>>>>>>> main:src/App.js
               testID="enemies"
               key={i}
               style={[
