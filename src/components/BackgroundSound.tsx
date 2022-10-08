@@ -1,14 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from 'react-native'
 
 /**
  * NOTE: Potentialy better to use ogg sound format
  */
 
-const BackgroundSound = ({ url }) => {
+export interface BackgroundSoundProps {
+  url: string
+}
+
+const BackgroundSound = ({ url }: BackgroundSoundProps) => {
   const [isReady, setReady] = useState(false)
   const [isPlaying, setPlaying] = useState(false)
-  const audioRef = useRef(null)
+  const audioRef = React.useRef<HTMLAudioElement>(null)
 
   useEffect(() => {
     setReady(false)
@@ -27,7 +31,7 @@ const BackgroundSound = ({ url }) => {
     if (!audioRef.current) return
 
     if (isPlaying) {
-      await audioRef.current.pause()
+      audioRef.current.pause()
       setPlaying(false)
       return
     }

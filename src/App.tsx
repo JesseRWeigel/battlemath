@@ -1,4 +1,4 @@
-import React, { useReducer, useCallback, useEffect, useRef } from 'react'
+import React, { useReducer, useCallback, useEffect } from 'react'
 import {
   StyleSheet,
   Text,
@@ -6,9 +6,10 @@ import {
   TextInput,
   Button,
   TouchableOpacity,
+  // @ts-ignore
   Picker,
 } from 'react-native'
-import { reducer, initialState, types } from './AppReducer'
+import { reducer, initialState, TYPES } from './AppReducer'
 import { useMsgAfterSubmit } from './hooks'
 
 import HeroSvg from './components/HeroSvg'
@@ -31,9 +32,12 @@ function App() {
     dispatch,
   ] = useReducer(reducer, initialState)
 
-  let submitInputRef = useRef()
+  let submitInputRef = React.useRef<TextInput>(null)
 
-  const variablesToLookFor = [previousNumOfEnemies, numOfEnemies]
+  const variablesToLookFor: [number, number] = [
+    previousNumOfEnemies,
+    numOfEnemies,
+  ]
   const { msg, isErrorMessage } = useMsgAfterSubmit(
     variablesToLookFor,
     isStoredState
@@ -41,16 +45,16 @@ function App() {
 
   // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
-    (value) => {
-      dispatch({ type: types.SET_ANSWER, payload: value })
+    (value: string) => {
+      dispatch({ type: TYPES.SET_ANSWER, payload: value })
     },
     [dispatch]
   )
 
   const handleModePicker = useCallback(
-    (mode) => {
+    (mode: string) => {
       dispatch({
-        type: types.SET_MODE,
+        type: TYPES.SET_MODE,
         payload: mode,
       })
     },
@@ -58,11 +62,11 @@ function App() {
   )
 
   const handleRestart = useCallback(() => {
-    dispatch({ type: types.RESTART })
+    dispatch({ type: TYPES.RESTART })
   }, [dispatch])
 
   const handleSubmit = useCallback(() => {
-    dispatch({ type: types.CHECK_ANSWER })
+    dispatch({ type: TYPES.CHECK_ANSWER })
     if (submitInputRef.current) submitInputRef.current.focus()
   }, [dispatch])
 
@@ -70,21 +74,24 @@ function App() {
 
   // Equivalent of componentDidMount
   useEffect(() => {
-    dispatch({ type: types.NEW_PROBLEM })
+    dispatch({ type: TYPES.NEW_PROBLEM })
     const storedData = localStorage.getItem('state')
     if (storedData) {
-      dispatch({ type: types.RESTORE_STATE, payload: JSON.parse(storedData) })
+      dispatch({ type: TYPES.RESTORE_STATE, payload: JSON.parse(storedData) })
     } else {
-      localStorage.setItem('state', {
-        answer,
-        numOfEnemies,
-        val1,
-        val2,
-        won,
-        operator,
-        mode,
-        previousNumOfEnemies,
-      })
+      localStorage.setItem(
+        'state',
+        JSON.stringify({
+          answer,
+          numOfEnemies,
+          val1,
+          val2,
+          won,
+          operator,
+          mode,
+          previousNumOfEnemies,
+        })
+      )
     }
   }, [])
 
@@ -161,7 +168,6 @@ function App() {
         <View style={styles.container}>
           {[...Array(numOfEnemies)].map((_, i) => (
             <View
-              className="enemy"
               testID="enemies"
               key={i}
               style={[
@@ -223,7 +229,6 @@ function App() {
               { backgroundColor: activeTheme.buttonColor },
             ]}
             testID="submit"
-            title="Submit"
             onPress={handleSubmit}
             accessibilityLabel="Learn more about this purple button"
           >
@@ -341,12 +346,24 @@ const themes = {
   },
   subtraction: {
     backgroundColor: 'pink',
+    heroColor: 'rgba(23, 190, 187, 1)',
+    enemyColor: 'rgba(228, 87, 46, 1)',
+    buttonColor: 'rgba(255, 201, 20, 1)',
+    textColor: '#000',
   },
   multiplication: {
     backgroundColor: 'yellow',
+    heroColor: 'rgba(23, 190, 187, 1)',
+    enemyColor: 'rgba(228, 87, 46, 1)',
+    buttonColor: 'rgba(255, 201, 20, 1)',
+    textColor: '#000',
   },
   division: {
     backgroundColor: 'orange',
+    heroColor: 'rgba(23, 190, 187, 1)',
+    enemyColor: 'rgba(228, 87, 46, 1)',
+    buttonColor: 'rgba(255, 201, 20, 1)',
+    textColor: '#000',
   },
 }
 
