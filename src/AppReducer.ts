@@ -52,12 +52,58 @@ export const initialState: AppState = {
 }
 
 export const reducer: Reducer<AppState, ActionType> = (state, action) => {
+  const randomNumber = () => {
+    let val1, val2
+    let x = 1,
+      y = 9
+
+    val1 = randomNumberGenerator(x, y)
+
+    switch (state.mode) {
+      case 'division': {
+        y = Math.floor(y / val1) // keeps x *= y below 10
+        break
+      }
+      case 'subtraction': {
+        y = val1
+        break
+      }
+    }
+
+    val2 = randomNumberGenerator(x, y)
+
+    return [val1, val2]
+  }
+
   switch (action.type) {
     case TYPES.RESTART: {
+      let val = randomNumber()
+
+      switch (state.mode) {
+        case 'division': {
+          state.operator = '/'
+          break
+        }
+        case 'subtraction': {
+          state.operator = '-'
+          break
+        }
+        case 'addition': {
+          state.operator = '+'
+          break
+        }
+        case 'multiplication': {
+          state.operator = '*'
+          break
+        }
+      }
+
       return {
         ...initialState,
         mode: state.mode,
-        opeartor: state.operator,
+        val1: val[0],
+        val2: val[1],
+        operator: state.operator,
       }
     }
 
@@ -108,46 +154,31 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
     }
 
     case TYPES.NEW_PROBLEM: {
-      let x
-      let y
+      let val = randomNumber()
 
-      switch (state.mode) {
-        case 'division': {
-          x = randomNumberGenerator(1, 9)
-          y = randomNumberGenerator(1, Math.floor(9 / x)) // keeps x *= y below 10
-          x *= y // divide by `y` to get back `x`
-          break
-        }
-
-        case 'subtraction': {
-          x = randomNumberGenerator(1, 9)
-          y = randomNumberGenerator(1, x)
-          break
-        }
-
-        default:
-          x = randomNumberGenerator(1, 9)
-          y = randomNumberGenerator(1, 9)
-      }
+      if (state.mode === 'division') val[0] *= val[1] // divide by `y` to get back `x`
 
       // if problem is the same, retry
-      if (x === state.val1 && y === state.val2) {
+      if (val[0] === state.val1 && val[1] === state.val2) {
         return reducer(state, { type: TYPES.NEW_PROBLEM })
       }
 
       return {
         ...state,
-        val1: x,
-        val2: y,
+        val1: val[0],
+        val2: val[1],
         answer: '',
       }
     }
 
     case TYPES.SET_MODE: {
       const mode = action.payload as keyof typeof OPERATORS
+      let val = randomNumber()
       return {
         ...state,
         mode,
+        val1: val[0],
+        val2: val[1],
         operator: OPERATORS[mode],
       }
     }
