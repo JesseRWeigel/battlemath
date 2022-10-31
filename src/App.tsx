@@ -46,7 +46,9 @@ function App() {
   // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
     (value: string) => {
-      dispatch({ type: TYPES.SET_ANSWER, payload: value })
+      if (/^\d+$/.test(value.toString()) || value === '') {
+        dispatch({ type: TYPES.SET_ANSWER, payload: value })
+      }
     },
     [dispatch]
   )
@@ -142,7 +144,7 @@ function App() {
       </Text>
       <Picker
         selectedValue={mode}
-        style={[styles.picker, styles.pickerText]}
+        style={styles.picker}
         onValueChange={handleModePicker}
         nativeID="operation-selector"
       >
@@ -260,8 +262,6 @@ const styles = StyleSheet.create({
     height: 60,
     width: 150,
     borderRadius: 8,
-  },
-  pickerText: {
     fontFamily: `"Comic Sans MS", cursive, sans-serif`,
   },
   battlefield: {
@@ -338,28 +338,28 @@ const styles = StyleSheet.create({
 
 const themes = {
   addition: {
-    backgroundColor: 'rgba(46, 40, 42, 1)',
+    backgroundColor: 'darkslateblue',
     heroColor: 'rgba(23, 190, 187, 1)',
     enemyColor: 'rgba(228, 87, 46, 1)',
     buttonColor: 'rgba(255, 201, 20, 1)',
     textColor: '#fff',
   },
   subtraction: {
-    backgroundColor: 'pink',
+    backgroundColor: 'deepskyblue',
     heroColor: 'rgba(23, 190, 187, 1)',
     enemyColor: 'rgba(228, 87, 46, 1)',
     buttonColor: 'rgba(255, 201, 20, 1)',
     textColor: '#000',
   },
   multiplication: {
-    backgroundColor: 'yellow',
+    backgroundColor: 'darkslategrey',
     heroColor: 'rgba(23, 190, 187, 1)',
     enemyColor: 'rgba(228, 87, 46, 1)',
     buttonColor: 'rgba(255, 201, 20, 1)',
-    textColor: '#000',
+    textColor: '#fff',
   },
   division: {
-    backgroundColor: 'orange',
+    backgroundColor: 'turquoise',
     heroColor: 'rgba(23, 190, 187, 1)',
     enemyColor: 'rgba(228, 87, 46, 1)',
     buttonColor: 'rgba(255, 201, 20, 1)',
