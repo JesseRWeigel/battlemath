@@ -1,7 +1,7 @@
 import { Reducer } from 'react'
 
-export function randomNumberGenerator(min = 0, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min
+export function randomNumberGenerator(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min)) + min
 }
 
 export const TYPES = {
@@ -11,8 +11,9 @@ export const TYPES = {
   CHECK_ANSWER: 3,
   NEW_PROBLEM: 4,
   SET_MODE: 5,
-  RESTART: 6,
-  RESTORE_STATE: 7,
+  SET_DIFFICULTY: 6,
+  RESTART: 7,
+  RESTORE_STATE: 8,
 } as const
 
 const OPERATORS = {
@@ -20,6 +21,12 @@ const OPERATORS = {
   subtraction: '-',
   multiplication: '*',
   division: '/',
+} as const
+
+const DIFFICULTIES = {
+  easy: 'easy',
+  medium: 'medium',
+  hard: 'hard'
 } as const
 
 export type ActionType = {
@@ -36,6 +43,7 @@ export type AppState = {
   won: boolean
   operator: typeof OPERATORS[keyof typeof OPERATORS]
   mode: keyof typeof OPERATORS
+  difficulty: keyof typeof DIFFICULTIES
   isStoredState: boolean
 }
 
@@ -48,20 +56,37 @@ export const initialState: AppState = {
   won: false,
   operator: '+',
   mode: 'addition',
+  difficulty: 'easy',
   isStoredState: true,
 }
 
 export const reducer: Reducer<AppState, ActionType> = (state, action) => {
-  const randomNumber = () => {
+  const randomNumber = (diff = state.difficulty, mode = state.mode) => {
     let val1, val2
-    let x = 1,
-      y = 9
+    let x, y
+
+    switch(diff) {
+      case 'easy': {
+        x = 1
+        y = 9
+        break
+      }
+      case 'medium': {
+        x = 10
+        y = 99
+        break
+      }
+      case 'hard': {
+        x = 100
+        y = 999
+        break
+      }
+    }
 
     val1 = randomNumberGenerator(x, y)
-
-    switch (state.mode) {
+    switch (mode) {
       case 'division': {
-        y = Math.floor(y / val1) // keeps x *= y below 10
+        y = Math.floor(y / val1) // keeps x *= y below 10\
         break
       }
       case 'subtraction': {
@@ -69,8 +94,15 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         break
       }
     }
+    
+    console.log(`This is x:${x}\nThis is y:${y}`)
 
     val2 = randomNumberGenerator(x, y)
+
+    while((val1 % val2) !== 0 && mode === 'division')
+      val2--
+
+    console.log(`This is val2:${val2}`)
 
     return [val1, val2]
   }
@@ -101,6 +133,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
       return {
         ...initialState,
         mode: state.mode,
+        difficulty: state.difficulty,
         val1: val[0],
         val2: val[1],
         operator: state.operator,
@@ -156,8 +189,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
     case TYPES.NEW_PROBLEM: {
       let val = randomNumber()
 
-      if (state.mode === 'division') val[0] *= val[1] // divide by `y` to get back `x`
-
+      
       // if problem is the same, retry
       if (val[0] === state.val1 && val[1] === state.val2) {
         return reducer(state, { type: TYPES.NEW_PROBLEM })
@@ -173,13 +205,25 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
 
     case TYPES.SET_MODE: {
       const mode = action.payload as keyof typeof OPERATORS
-      let val = randomNumber()
+      let val = randomNumber(this, mode)
       return {
         ...state,
         mode,
         val1: val[0],
         val2: val[1],
         operator: OPERATORS[mode],
+      }
+    }
+
+    case TYPES.SET_DIFFICULTY: {
+      const difficulty = action.payload as keyof typeof DIFFICULTIES
+
+      let val = randomNumber(difficulty)
+      return {
+        ...state,
+        difficulty,
+        val1: val[0],
+        val2: val[1],
       }
     }
 

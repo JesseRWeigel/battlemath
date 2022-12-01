@@ -26,6 +26,7 @@ function App() {
       won,
       operator,
       mode,
+      difficulty,
       previousNumOfEnemies,
       isStoredState,
     },
@@ -58,6 +59,16 @@ function App() {
       dispatch({
         type: TYPES.SET_MODE,
         payload: mode,
+      })
+    },
+    [dispatch]
+  )
+
+  const handleDifficultyPicker = useCallback(
+    (difficulty: string) => {
+      dispatch({
+        type: TYPES.SET_DIFFICULTY,
+        payload: difficulty
       })
     },
     [dispatch]
@@ -142,17 +153,30 @@ function App() {
       <Text style={[styles.title, { color: activeTheme.textColor }]}>
         Battle Math
       </Text>
-      <Picker
-        selectedValue={mode}
-        style={styles.picker}
-        onValueChange={handleModePicker}
-        nativeID="operation-selector"
-      >
-        <Picker.Item label="Addition(+)" value="addition" />
-        <Picker.Item label="Subtraction(-)" value="subtraction" />
-        <Picker.Item label="Multiplication(*)" value="multiplication" />
-        <Picker.Item label="Division(/)" value="division" />
-      </Picker>
+      <View style={styles.pickerContainer}>
+        <Picker
+          style={styles.picker}
+          selectedValue={mode}
+          onValueChange={handleModePicker}
+          nativeID="operation-selector"
+        >
+          <Picker.Item label="Addition(+)" value="addition" />
+          <Picker.Item label="Subtraction(-)" value="subtraction" />
+          <Picker.Item label="Multiplication(*)" value="multiplication" />
+          <Picker.Item label="Division(/)" value="division" />
+        </Picker>
+
+        <Picker
+          selectedValue={difficulty}
+          style={styles.picker}
+          onValueChange={handleDifficultyPicker}
+          nativeID="difficulty-selector"
+        >
+          <Picker.Item label="Easy" value="easy" />
+          <Picker.Item label="Medium" value="medium" />
+          <Picker.Item label="Hard" value="hard" />
+        </Picker>
+      </View>     
 
       <View style={styles.battlefield}>
         <View style={styles.container}>
@@ -258,11 +282,16 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontFamily: `"Comic Sans MS", cursive, sans-serif`,
   },
+  pickerContainer: {
+    flexDirection: 'row'
+  },
   picker: {
-    height: 60,
+    height: 40,
     width: 150,
     borderRadius: 8,
     fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    textAlign: 'center',
+    marginLeft: 10
   },
   battlefield: {
     flex: 1,
