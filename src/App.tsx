@@ -27,6 +27,7 @@ function App() {
       operator,
       mode,
       difficulty,
+      modeType,
       previousNumOfEnemies,
       isStoredState,
     },
@@ -47,7 +48,7 @@ function App() {
   // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
     (value: string) => {
-      if (/^\d+$/.test(value.toString()) || value === '') {
+      if (/^\d+|[.]$/.test(value.toString()) || value === '') {
         dispatch({ type: TYPES.SET_ANSWER, payload: value })
       }
     },
@@ -58,6 +59,16 @@ function App() {
     (mode: string) => {
       dispatch({
         type: TYPES.SET_MODE,
+        payload: mode,
+      })
+    },
+    [dispatch]
+  )
+
+  const handleModeType = useCallback(
+    (mode: string) => {
+      dispatch({
+        type: TYPES.SET_MODE_TYPES,
         payload: mode,
       })
     },
@@ -102,6 +113,8 @@ function App() {
           won,
           operator,
           mode,
+          difficulty,
+          modeType,
           previousNumOfEnemies,
         })
       )
@@ -119,6 +132,8 @@ function App() {
         won,
         operator,
         mode,
+        difficulty,
+        modeType,
         previousNumOfEnemies,
       })
     )
@@ -130,6 +145,8 @@ function App() {
     val2,
     operator,
     mode,
+    difficulty,
+    modeType,
     previousNumOfEnemies,
   ])
 
@@ -175,6 +192,16 @@ function App() {
           <Picker.Item label="Easy" value="easy" />
           <Picker.Item label="Medium" value="medium" />
           <Picker.Item label="Hard" value="hard" />
+        </Picker>
+
+        <Picker
+          selectedValue={modeType}
+          style={styles.picker}
+          onValueChange={handleModeType}
+          nativeID="modeType-selector"
+        >
+          <Picker.Item label="Whole Number" value="wholeNumber" />
+          <Picker.Item label="Decimals" value="decimal" />
         </Picker>
       </View>     
 
@@ -329,7 +356,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 60,
-    width: 60,
+    width: 200,
     borderColor: 'gray',
     borderWidth: 1,
     marginLeft: 8,
