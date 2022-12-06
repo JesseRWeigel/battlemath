@@ -1,7 +1,10 @@
 import { Reducer } from 'react'
 
-export function randomNumberGenerator(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min)) + min
+export function randomNumberGenerator(min: number, max: number, modeType: string): number {
+  if(modeType.includes('decimal'))
+   return Number.parseFloat((Math.random() * (max - min)).toFixed(2))
+  else
+    return Math.floor(Math.random() * (max - min)) + min
 }
 
 export const TYPES = {
@@ -13,7 +16,8 @@ export const TYPES = {
   SET_MODE: 5,
   SET_DIFFICULTY: 6,
   RESTART: 7,
-  RESTORE_STATE: 8,
+  SET_MODE_TYPES: 8,
+  RESTORE_STATE: 9,
 } as const
 
 const OPERATORS = {
@@ -27,6 +31,11 @@ const DIFFICULTIES = {
   easy: 'easy',
   medium: 'medium',
   hard: 'hard'
+} as const
+
+const MODE_TYPES = {
+  wholeNumber: 'wholeNumber',
+  decimals: 'decimal'
 } as const
 
 export type ActionType = {
@@ -44,6 +53,7 @@ export type AppState = {
   operator: typeof OPERATORS[keyof typeof OPERATORS]
   mode: keyof typeof OPERATORS
   difficulty: keyof typeof DIFFICULTIES
+  modeType: keyof typeof MODE_TYPES
   isStoredState: boolean
 }
 
@@ -57,20 +67,16 @@ export const initialState: AppState = {
   operator: '+',
   mode: 'addition',
   difficulty: 'easy',
+  modeType: 'wholeNumber',
   isStoredState: true,
 }
 
 export const reducer: Reducer<AppState, ActionType> = (state, action) => {
-  const randomNumber = (diff = state.difficulty, mode = state.mode) => {
+  const randomNumber = (diff = state.difficulty, mode = state.mode, modeType = state.modeType) => {
     let val1, val2
-    let x, y
+    let x = 1, y = 9
 
     switch(diff) {
-      case 'easy': {
-        x = 1
-        y = 9
-        break
-      }
       case 'medium': {
         x = 10
         y = 99
@@ -83,10 +89,11 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
       }
     }
 
-    val1 = randomNumberGenerator(x, y)
+    val1 = randomNumberGenerator(x, y, modeType)
+
     switch (mode) {
       case 'division': {
-        y = Math.floor(y / val1) // keeps x *= y below 10\
+        y = modeType.includes('decimal') ? y :  Math.floor(y / val1) // keeps x *= y below 10\
         break
       }
       case 'subtraction': {
@@ -94,15 +101,10 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         break
       }
     }
-    
-    console.log(`This is x:${x}\nThis is y:${y}`)
+    val2 = randomNumberGenerator(x, y, modeType)
 
-    val2 = randomNumberGenerator(x, y)
-
-    while((val1 % val2) !== 0 && mode === 'division')
+    while((val1 % val2) !== 0 && mode === 'division' && modeType.includes('wholeNumber'))
       val2--
-
-    console.log(`This is val2:${val2}`)
 
     return [val1, val2]
   }
@@ -110,7 +112,6 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
   switch (action.type) {
     case TYPES.RESTART: {
       let val = randomNumber()
-
       switch (state.mode) {
         case 'division': {
           state.operator = '/'
@@ -134,6 +135,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         ...initialState,
         mode: state.mode,
         difficulty: state.difficulty,
+        modeType: state.modeType,
         val1: val[0],
         val2: val[1],
         operator: state.operator,
@@ -171,10 +173,24 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
     }
 
     case TYPES.CHECK_ANSWER: {
-      const answer = parseInt(state?.answer ?? '', 10)
+
+      let answer
+
+      if(state.modeType)
+      {
+        if(state.modeType.includes('decimal'))
+          answer = parseFloat(state?.answer ?? '')
+        else
+          answer = parseInt(state?.answer ?? '', 10)
+      }
+
       // example: eval('2 + 4'); Note: eval is safe here because we control the input
       // eslint-disable-next-line no-eval
-      const expected = eval(`${state.val1} ${state.operator} ${state.val2}`)
+
+      let expected = eval(`${state.val1} ${state.operator} ${state.val2}`)
+      expected = Number.parseFloat(expected.toFixed(2))
+
+      console.log(expected)
 
       // Update enemies & won
       const stateWithEnemies =
@@ -222,6 +238,18 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
       return {
         ...state,
         difficulty,
+        val1: val[0],
+        val2: val[1],
+      }
+    }
+
+    case TYPES.SET_MODE_TYPES: {
+      const modeType = action.payload as keyof typeof MODE_TYPES
+
+      let val = randomNumber(this, this, modeType)
+      return {
+        ...state,
+        modeType,
         val1: val[0],
         val2: val[1],
       }
