@@ -47,7 +47,7 @@ npm run build
 ### Roadmap
 
 - [x] Simple UI with Additions, Substract, Multiplication, Divide questions.
-- [ ] Background music
+- [x] Background music
+- [x] Deploy to github pages
 - [ ] Point System
 - [ ] Character Arts enemies
-- [ ] Deploy to github pages
