@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   // @ts-ignore
   Picker,
+  ImageBackground,
+  Image,
 } from 'react-native'
 import { reducer, initialState, TYPES } from './AppReducer'
 import { useMsgAfterSubmit } from './hooks'
@@ -15,7 +17,6 @@ import { useMsgAfterSubmit } from './hooks'
 import HeroSvg from './components/HeroSvg'
 import bgSound from './assets/music/background-music.mp3'
 import BackgroundSound from './components/BackgroundSound'
-
 function App() {
   const [
     {
@@ -79,7 +80,7 @@ function App() {
     (difficulty: string) => {
       dispatch({
         type: TYPES.SET_DIFFICULTY,
-        payload: difficulty
+        payload: difficulty,
       })
     },
     [dispatch]
@@ -167,129 +168,128 @@ function App() {
     <View
       style={[styles.root, { backgroundColor: activeTheme.backgroundColor }]}
     >
-      <Text style={[styles.title, { color: activeTheme.textColor }]}>
-        Battle Math
-      </Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          style={styles.picker}
-          selectedValue={mode}
-          onValueChange={handleModePicker}
-          nativeID="operation-selector"
-        >
-          <Picker.Item label="Addition(+)" value="addition" />
-          <Picker.Item label="Subtraction(-)" value="subtraction" />
-          <Picker.Item label="Multiplication(*)" value="multiplication" />
-          <Picker.Item label="Division(/)" value="division" />
-        </Picker>
-
-        <Picker
-          selectedValue={difficulty}
-          style={styles.picker}
-          onValueChange={handleDifficultyPicker}
-          nativeID="difficulty-selector"
-        >
-          <Picker.Item label="Easy" value="easy" />
-          <Picker.Item label="Medium" value="medium" />
-          <Picker.Item label="Hard" value="hard" />
-        </Picker>
-
-        <Picker
-          selectedValue={modeType}
-          style={styles.picker}
-          onValueChange={handleModeType}
-          nativeID="modeType-selector"
-        >
-          <Picker.Item label="Whole Number" value="wholeNumber" />
-          <Picker.Item label="Decimals" value="decimal" />
-        </Picker>
-      </View>     
-
-      <View style={styles.battlefield}>
-        <View style={styles.container}>
-          <View
-            nativeID="hero"
-            style={[
-              styles.character,
-              styles.hero,
-              { backgroundColor: activeTheme.heroColor },
-            ]}
+      <ImageBackground
+        source={require('./assets/images/bg.jpg')}
+        style={styles.image}
+        resizeMode="cover"
+      >
+        <Text style={[styles.title, { color: activeTheme.textColor }]}>
+          Battle Math
+        </Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            style={styles.picker}
+            selectedValue={mode}
+            onValueChange={handleModePicker}
+            nativeID="operation-selector"
           >
-            <HeroSvg />
+            <Picker.Item label="Addition(+)" value="addition" />
+            <Picker.Item label="Subtraction(-)" value="subtraction" />
+            <Picker.Item label="Multiplication(*)" value="multiplication" />
+            <Picker.Item label="Division(/)" value="division" />
+          </Picker>
+
+          <Picker
+            selectedValue={difficulty}
+            style={styles.picker}
+            onValueChange={handleDifficultyPicker}
+            nativeID="difficulty-selector"
+          >
+            <Picker.Item label="Easy" value="easy" />
+            <Picker.Item label="Medium" value="medium" />
+            <Picker.Item label="Hard" value="hard" />
+          </Picker>
+
+          <Picker
+            selectedValue={modeType}
+            style={styles.picker}
+            onValueChange={handleModeType}
+            nativeID="modeType-selector"
+          >
+            <Picker.Item label="Whole Number" value="wholeNumber" />
+            <Picker.Item label="Decimals" value="decimal" />
+          </Picker>
+        </View>
+
+        <View style={styles.battlefield}>
+          <View style={styles.container}>
+            <View nativeID="hero">
+              <Image
+                source={require('./assets/images/hero.png')}
+                style={{ width: 100, height: 200 }}
+              />
+            </View>
+          </View>
+          <View style={styles.container}>
+            {[...Array(numOfEnemies)].map((_, i) => (
+              <View testID="enemies" key={i}>
+                <Image
+                  source={require('./assets/images/orc.png')}
+                  style={{ width: 100, height: 200 }}
+                />
+              </View>
+            ))}
           </View>
         </View>
-        <View style={styles.container}>
-          {[...Array(numOfEnemies)].map((_, i) => (
-            <View
-              testID="enemies"
-              key={i}
+        {won ? (
+          <View>
+            <Text style={{ color: activeTheme.textColor }}>Victory!</Text>
+            <Button
+              onPress={handleRestart}
+              title="Restart"
+              color={activeTheme.buttonColor}
+              accessibilityLabel="Click this button to play again."
+            />
+          </View>
+        ) : (
+          <View style={styles.mathContainer}>
+            {submitMessageBlock}
+            <View style={styles.mathRow}>
+              <Text
+                nativeID="val1"
+                style={[styles.mathText, { color: activeTheme.textColor }]}
+              >
+                {val1}
+              </Text>
+              <Text
+                nativeID="operator"
+                style={[styles.mathText, { color: activeTheme.textColor }]}
+              >
+                {operator}
+              </Text>
+              <Text
+                nativeID="val2"
+                style={[styles.mathText, { color: activeTheme.textColor }]}
+              >
+                {val2}
+              </Text>
+              <Text style={[styles.mathText, { color: activeTheme.textColor }]}>
+                =
+              </Text>
+              <TextInput
+                nativeID="answer-input"
+                style={styles.input}
+                onChangeText={handleAnswerChange}
+                onSubmitEditing={handleSubmit}
+                value={answer}
+                ref={submitInputRef}
+              />
+            </View>
+            <TouchableOpacity
               style={[
-                styles.character,
-                styles.enemy,
-                { backgroundColor: activeTheme.enemyColor },
+                styles.button,
+                { backgroundColor: activeTheme.buttonColor },
               ]}
-            />
-          ))}
-        </View>
-      </View>
-      {won ? (
-        <View>
-          <Text style={{ color: activeTheme.textColor }}>Victory!</Text>
-          <Button
-            onPress={handleRestart}
-            title="Restart"
-            color={activeTheme.buttonColor}
-            accessibilityLabel="Click this button to play again."
-          />
-        </View>
-      ) : (
-        <View style={styles.mathContainer}>
-          {submitMessageBlock}
-          <View style={styles.mathRow}>
-            <Text
-              nativeID="val1"
-              style={[styles.mathText, { color: activeTheme.textColor }]}
+              testID="submit"
+              onPress={handleSubmit}
+              accessibilityLabel="Learn more about this purple button"
             >
-              {val1}
-            </Text>
-            <Text
-              nativeID="operator"
-              style={[styles.mathText, { color: activeTheme.textColor }]}
-            >
-              {operator}
-            </Text>
-            <Text
-              nativeID="val2"
-              style={[styles.mathText, { color: activeTheme.textColor }]}
-            >
-              {val2}
-            </Text>
-            <Text style={[styles.mathText, { color: activeTheme.textColor }]}>
-              =
-            </Text>
-            <TextInput
-              nativeID="answer-input"
-              style={styles.input}
-              onChangeText={handleAnswerChange}
-              onSubmitEditing={handleSubmit}
-              value={answer}
-              ref={submitInputRef}
-            />
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              { backgroundColor: activeTheme.buttonColor },
-            ]}
-            testID="submit"
-            onPress={handleSubmit}
-            accessibilityLabel="Learn more about this purple button"
-          >
-            <Text style={styles.buttonText}>Submit</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      <BackgroundSound url={bgSound} />
+        )}
+        <BackgroundSound url={bgSound} />
+      </ImageBackground>
     </View>
   )
 }
@@ -303,6 +303,12 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  image: {
+    width: '100%',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingVertical: 16,
   },
   title: {
@@ -310,7 +316,7 @@ const styles = StyleSheet.create({
     fontFamily: `"Comic Sans MS", cursive, sans-serif`,
   },
   pickerContainer: {
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   picker: {
     height: 40,
@@ -318,7 +324,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     fontFamily: `"Comic Sans MS", cursive, sans-serif`,
     textAlign: 'center',
-    marginLeft: 10
+    marginLeft: 10,
   },
   battlefield: {
     flex: 1,
