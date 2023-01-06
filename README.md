@@ -50,4 +50,4 @@ npm run build
 - [x] Background music
 - [x] Deploy to github pages
 - [ ] Point System
-- [ ] Character Arts enemies
+- [x] Character Arts enemies
