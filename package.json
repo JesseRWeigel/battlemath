@@ -2,6 +2,7 @@
   "name": "battlemath",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "homepage": "https://jesserweigel.github.io/battlemath",
   "dependencies": {
     "@testing-library/jest-dom": "^5.14.1",
