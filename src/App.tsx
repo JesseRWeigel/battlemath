@@ -10,15 +10,11 @@ import {
   Text,
   View,
   TextInput,
-  Button,
   TouchableOpacity,
-  // @ts-ignore
-  Picker,
   Image,
 } from 'react-native';
 import { reducer, initialState, TYPES } from './AppReducer';
 import { useMsgAfterSubmit } from './hooks';
-
 import HeroSvg from './components/HeroSvg';
 import bgSound from './assets/music/background-music.mp3';
 import BackgroundSound from './components/BackgroundSound';
@@ -29,14 +25,73 @@ function displayOperator(op: string): string {
     case '+':
       return '+';
     case '-':
-      return '\u2212'; // proper minus U+2212
+      return '\u2212';
     case '*':
-      return '\u00D7'; // multiplication U+00D7
+      return '\u00D7';
     case '/':
-      return '\u00F7'; // division U+00F7
+      return '\u00F7';
     default:
       return op;
   }
+}
+
+const OPERATIONS = [
+  { label: '+', value: 'addition' },
+  { label: '\u2212', value: 'subtraction' },
+  { label: '\u00D7', value: 'multiplication' },
+  { label: '\u00F7', value: 'division' },
+];
+const DIFFICULTIES = [
+  { label: 'Easy', value: 'easy' },
+  { label: 'Medium', value: 'medium' },
+  { label: 'Hard', value: 'hard' },
+];
+const MODE_TYPES = [
+  { label: 'Whole', value: 'wholeNumber' },
+  { label: 'Decimal', value: 'decimal' },
+  { label: 'Negative', value: 'negative' },
+];
+
+function SegmentedButtonGroup({
+  options,
+  selectedValue,
+  onSelect,
+  accessibilityLabel,
+  testID,
+}: {
+  options: { label: string; value: string }[];
+  selectedValue: string;
+  onSelect: (value: string) => void;
+  accessibilityLabel: string;
+  testID?: string;
+}) {
+  return (
+    <View
+      style={styles.segmentedGroup}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="radiogroup"
+      nativeID={testID}
+    >
+      {options.map((option) => {
+        const isActive = option.value === selectedValue;
+        return (
+          <TouchableOpacity
+            key={option.value}
+            style={[
+              styles.segmentedButton,
+              isActive && styles.segmentedButtonActive,
+            ]}
+            onPress={() => onSelect(option.value)}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: isActive }}
+            accessibilityLabel={option.label}
+          >
+            <Text style={styles.segmentedButtonText}>{option.label}</Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
 }
 
 function App() {
@@ -62,13 +117,10 @@ function App() {
     },
     dispatch,
   ] = useReducer(reducer, initialState);
-
   const [timeLeft, setTimeLeft] = useState(30);
   const [showPoints, setShowPoints] = useState(false);
   const pointsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   let submitInputRef = useRef<TextInput>(null);
-
   const variablesToLookFor: [number, number] = [
     previousNumOfEnemies,
     numOfEnemies,
@@ -77,8 +129,6 @@ function App() {
     variablesToLookFor,
     isStoredState,
   );
-
-  // Play sound effects on correct/incorrect answers
   useEffect(() => {
     if (isStoredState) return;
     if (numOfEnemies < previousNumOfEnemies) {
@@ -87,82 +137,51 @@ function App() {
       if (soundEnabled) playIncorrectSound();
     }
   }, [numOfEnemies, previousNumOfEnemies, isStoredState, soundEnabled]);
-
   const handleSoundToggle = useCallback(() => {
-    dispatch({
-      type: TYPES.SET_SOUND_ENABLED,
-      payload: !soundEnabled,
-    });
+    dispatch({ type: TYPES.SET_SOUND_ENABLED, payload: !soundEnabled });
   }, [dispatch, soundEnabled]);
-
   const handleHighContrastToggle = useCallback(() => {
-    dispatch({
-      type: TYPES.SET_HIGH_CONTRAST,
-      payload: !highContrast,
-    });
+    dispatch({ type: TYPES.SET_HIGH_CONTRAST, payload: !highContrast });
   }, [dispatch, highContrast]);
-
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        dispatch({ type: TYPES.SET_ANSWER, payload: '' });
-      }
+      if (e.key === 'Escape') dispatch({ type: TYPES.SET_ANSWER, payload: '' });
     },
     [dispatch],
   );
-
-  // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
     (value: string) => {
-      if (/^-?\d*\.?\d*$/.test(value.toString()) || value === '') {
+      if (/^-?\d*\.?\d*$/.test(value.toString()) || value === '')
         dispatch({ type: TYPES.SET_ANSWER, payload: value });
-      }
     },
     [dispatch],
   );
-
   const handleModePicker = useCallback(
     (mode: string) => {
-      dispatch({
-        type: TYPES.SET_MODE,
-        payload: mode,
-      });
+      dispatch({ type: TYPES.SET_MODE, payload: mode });
     },
     [dispatch],
   );
-
   const handleModeType = useCallback(
     (mode: string) => {
-      dispatch({
-        type: TYPES.SET_MODE_TYPES,
-        payload: mode,
-      });
+      dispatch({ type: TYPES.SET_MODE_TYPES, payload: mode });
     },
     [dispatch],
   );
-
   const handleDifficultyPicker = useCallback(
     (difficulty: string) => {
-      dispatch({
-        type: TYPES.SET_DIFFICULTY,
-        payload: difficulty,
-      });
+      dispatch({ type: TYPES.SET_DIFFICULTY, payload: difficulty });
     },
     [dispatch],
   );
-
   const handleRestart = useCallback(() => {
     dispatch({ type: TYPES.RESTART });
   }, [dispatch]);
-
   const handleSubmit = useCallback(() => {
     dispatch({ type: TYPES.CHECK_ANSWER });
     if (submitInputRef.current) submitInputRef.current.focus();
   }, [dispatch]);
-
   const activeTheme = highContrast ? themes.highContrast : themes[mode];
-
-  // Equivalent of componentDidMount
   useEffect(() => {
     dispatch({ type: TYPES.NEW_PROBLEM });
     const storedData = localStorage.getItem('state');
@@ -186,7 +205,6 @@ function App() {
       );
     }
   }, []);
-
   useEffect(() => {
     localStorage.setItem(
       'state',
@@ -215,7 +233,6 @@ function App() {
     modeType,
     previousNumOfEnemies,
   ]);
-
   const submitMsgText = isErrorMessage
     ? highContrast
       ? styles.msgTextErrorHC
@@ -228,13 +245,9 @@ function App() {
       <Text style={submitMsgText}>{msg}</Text>
     </View>
   );
-
-  // Auto-focus the answer input after each new problem
   useEffect(() => {
     submitInputRef.current && submitInputRef.current.focus();
   }, [val1, val2]);
-
-  // Start timer when a new problem appears
   useEffect(() => {
     if (won) return;
     dispatch({ type: TYPES.START_TIMER });
@@ -244,8 +257,6 @@ function App() {
     }, 1000);
     return () => clearInterval(interval);
   }, [val1, val2, won]);
-
-  // Show points earned animation
   useEffect(() => {
     if (lastPointsEarned === null) return;
     setShowPoints(true);
@@ -255,7 +266,6 @@ function App() {
       if (pointsTimeoutRef.current) clearTimeout(pointsTimeoutRef.current);
     };
   }, [lastPointsEarned, val1, val2]);
-
   const timerColor =
     timeLeft > 15 ? '#4caf50' : timeLeft > 5 ? '#ff9800' : '#f44336';
 
@@ -267,243 +277,220 @@ function App() {
           backgroundColor: activeTheme.backgroundColor,
           backgroundImage: activeTheme.gradient,
           transition: 'background-image 0.5s ease',
-        } as any, // backgroundImage & transition are valid on web via react-native-web
+        } as any,
       ]}
     >
-      <View style={styles.content}>
-        <Text
-          style={[styles.title, { color: activeTheme.textColor }]}
-          accessibilityRole="header"
-        >
-          Battle Math
-        </Text>
-        <View style={styles.cardPanel}>
-          <View style={styles.pickerContainer}>
-            <Picker
-              style={styles.picker}
-              selectedValue={mode}
-              onValueChange={handleModePicker}
-              nativeID="operation-selector"
-              accessibilityLabel="Select math operation"
-            >
-              <Picker.Item label="Addition (+)" value="addition" />
-              <Picker.Item label="Subtraction (−)" value="subtraction" />
-              <Picker.Item label="Multiplication (×)" value="multiplication" />
-              <Picker.Item label="Division (÷)" value="division" />
-            </Picker>
-
-            <Picker
-              selectedValue={difficulty}
-              style={styles.picker}
-              onValueChange={handleDifficultyPicker}
-              nativeID="difficulty-selector"
-              accessibilityLabel="Select difficulty level"
-            >
-              <Picker.Item label="Easy" value="easy" />
-              <Picker.Item label="Medium" value="medium" />
-              <Picker.Item label="Hard" value="hard" />
-            </Picker>
-
-            <Picker
-              selectedValue={modeType}
-              style={styles.picker}
-              onValueChange={handleModeType}
-              nativeID="modeType-selector"
-              accessibilityLabel="Select number mode"
-            >
-              <Picker.Item label="Whole Number" value="wholeNumber" />
-              <Picker.Item label="Decimals" value="decimal" />
-              <Picker.Item label="Negatives" value="negative" />
-            </Picker>
-          </View>
-
-          <View style={styles.scoreTimerRow} accessibilityLiveRegion="polite">
-            <Text
-              style={[styles.timerText, { color: timerColor }]}
-              testID="timer"
-            >
-              {`\u23F1 ${timeLeft}s`}
-            </Text>
-            <Text style={[styles.scoreText, { color: '#fff' }]} testID="score">
-              {`Score: ${score}`}
-            </Text>
-            <Text
-              style={[styles.bestScoreText, { color: '#fff' }]}
-              testID="best-score"
-            >
-              {`Best: ${bestScore}`}
-            </Text>
-            {showPoints && lastPointsEarned !== null && (
-              <Text
-                style={[
-                  styles.pointsEarned,
-                  {
-                    color: lastPointsEarned > 0 ? '#4caf50' : '#f44336',
-                  },
-                ]}
-                testID="points-earned"
-              >
-                {`+${lastPointsEarned}`}
-              </Text>
-            )}
-          </View>
-          <View
-            style={styles.enemyCount}
-            accessibilityLiveRegion="polite"
-            accessibilityRole="text"
+      <View style={styles.gameContainer}>
+        <View style={styles.content}>
+          <Text
+            style={[styles.title, { color: activeTheme.textColor }]}
+            accessibilityRole="header"
           >
-            <Text style={[styles.enemyCountText, { color: '#fff' }]}>
-              {`Enemies: ${numOfEnemies}`}
-            </Text>
-          </View>
-          <View style={styles.soundControls}>
-            <BackgroundSound url={bgSound} />
-            <TouchableOpacity
-              onPress={handleSoundToggle}
-              accessibilityLabel={
-                soundEnabled ? 'Mute sound effects' : 'Unmute sound effects'
-              }
-              accessibilityRole="button"
-              testID="sound-toggle"
-            >
-              <Text
-                style={[
-                  styles.soundToggleText,
-                  highContrast && highContrastStyles.settingsButton,
-                ]}
-              >
-                {soundEnabled ? 'SFX On' : 'SFX Off'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleHighContrastToggle}
-              accessibilityLabel={
-                highContrast
-                  ? 'Disable high contrast mode'
-                  : 'Enable high contrast mode'
-              }
-              accessibilityRole="button"
-              testID="high-contrast-toggle"
-            >
-              <Text
-                style={[
-                  styles.soundToggleText,
-                  highContrast && highContrastStyles.settingsButton,
-                ]}
-              >
-                {highContrast ? 'High Contrast On' : 'High Contrast Off'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.battlefield}>
-          <View style={styles.container}>
-            <View nativeID="hero" accessibilityLabel="Your hero character">
-              <Image
-                source={require('./assets/images/hero.png')}
-                style={{ width: 100, height: 200 }}
-                accessibilityLabel="Hero"
+            Battle Math
+          </Text>
+          <View style={styles.cardPanel}>
+            <View style={styles.pickerContainer}>
+              <SegmentedButtonGroup
+                options={OPERATIONS}
+                selectedValue={mode}
+                onSelect={handleModePicker}
+                accessibilityLabel="Select math operation"
+                testID="operation-selector"
+              />
+              <SegmentedButtonGroup
+                options={DIFFICULTIES}
+                selectedValue={difficulty}
+                onSelect={handleDifficultyPicker}
+                accessibilityLabel="Select difficulty level"
+                testID="difficulty-selector"
+              />
+              <SegmentedButtonGroup
+                options={MODE_TYPES}
+                selectedValue={modeType}
+                onSelect={handleModeType}
+                accessibilityLabel="Select number mode"
+                testID="modeType-selector"
               />
             </View>
+            <View style={styles.scoreTimerRow} accessibilityLiveRegion="polite">
+              <Text
+                style={[styles.timerText, { color: timerColor }]}
+                testID="timer"
+              >{`\u23F1 ${timeLeft}s`}</Text>
+              <Text
+                style={[styles.scoreText, { color: '#fff' }]}
+                testID="score"
+              >{`Score: ${score}`}</Text>
+              <Text
+                style={[styles.bestScoreText, { color: '#fff' }]}
+                testID="best-score"
+              >{`Best: ${bestScore}`}</Text>
+              {showPoints && lastPointsEarned !== null && (
+                <Text
+                  style={[
+                    styles.pointsEarned,
+                    { color: lastPointsEarned > 0 ? '#4caf50' : '#f44336' },
+                  ]}
+                  testID="points-earned"
+                >{`+${lastPointsEarned}`}</Text>
+              )}
+            </View>
+            <View
+              style={styles.enemyCount}
+              accessibilityLiveRegion="polite"
+              accessibilityRole="text"
+            >
+              <Text
+                style={[styles.enemyCountText, { color: '#fff' }]}
+              >{`Enemies: ${numOfEnemies}`}</Text>
+            </View>
+            <View style={styles.soundControls}>
+              <BackgroundSound url={bgSound} />
+              <TouchableOpacity
+                onPress={handleSoundToggle}
+                style={styles.touchTarget}
+                accessibilityLabel={
+                  soundEnabled ? 'Mute sound effects' : 'Unmute sound effects'
+                }
+                accessibilityRole="button"
+                testID="sound-toggle"
+              >
+                <Text
+                  style={[
+                    styles.soundToggleText,
+                    highContrast && highContrastStyles.settingsButton,
+                  ]}
+                >
+                  {soundEnabled ? 'SFX On' : 'SFX Off'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleHighContrastToggle}
+                style={styles.touchTarget}
+                accessibilityLabel={
+                  highContrast
+                    ? 'Disable high contrast mode'
+                    : 'Enable high contrast mode'
+                }
+                accessibilityRole="button"
+                testID="high-contrast-toggle"
+              >
+                <Text
+                  style={[
+                    styles.soundToggleText,
+                    highContrast && highContrastStyles.settingsButton,
+                  ]}
+                >
+                  {highContrast ? 'High Contrast On' : 'High Contrast Off'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <View style={styles.container}>
-            {[...Array(numOfEnemies)].map((_, i) => (
-              <View testID="enemies" key={i}>
+          <View style={styles.battlefield}>
+            <View style={styles.heroContainer}>
+              <View nativeID="hero" accessibilityLabel="Your hero character">
                 <Image
-                  source={require('./assets/images/orc.png')}
-                  style={{ width: 100, height: 200 }}
-                  accessibilityLabel={`Enemy ${i + 1}`}
+                  source={require('./assets/images/hero.png')}
+                  style={styles.characterImage}
+                  accessibilityLabel="Hero"
                 />
               </View>
-            ))}
-          </View>
-        </View>
-        {won ? (
-          <View style={[styles.cardPanel, { alignItems: 'center' }]}>
-            <Text
-              style={{
-                color: '#fff',
-                fontSize: 32,
-                fontFamily: '"Fredoka One", "Quicksand", sans-serif',
-              }}
-              accessibilityRole="text"
-            >
-              Victory!
-            </Text>
-            <Text
-              style={{
-                color: '#fff',
-                fontSize: 24,
-                fontFamily: '"Poppins", sans-serif',
-                paddingVertical: 8,
-              }}
-              accessibilityRole="text"
-            >
-              {`Final Score: ${score}`}
-            </Text>
-            <Button
-              onPress={handleRestart}
-              title="Restart"
-              color={activeTheme.buttonColor}
-              accessibilityLabel="Play again"
-            />
-          </View>
-        ) : (
-          <View style={[styles.mathContainer, styles.cardPanel]}>
-            {submitMessageBlock}
-            <View style={styles.mathRow}>
-              <Text
-                nativeID="val1"
-                style={[styles.mathText, { color: '#fff' }]}
-              >
-                {val1 < 0 ? `(${val1})` : val1}
-              </Text>
-              <Text
-                nativeID="operator"
-                style={[styles.mathText, { color: '#fff' }]}
-              >
-                {displayOperator(operator)}
-              </Text>
-              <Text
-                nativeID="val2"
-                style={[styles.mathText, { color: '#fff' }]}
-              >
-                {val2 < 0 ? `(${val2})` : val2}
-              </Text>
-              <Text style={[styles.mathText, { color: '#fff' }]}>=</Text>
-              <TextInput
-                nativeID="answer-input"
-                style={[styles.input, highContrast && highContrastStyles.input]}
-                onChangeText={handleAnswerChange}
-                onSubmitEditing={handleSubmit}
-                onKeyPress={handleKeyDown as any}
-                value={answer}
-                ref={submitInputRef}
-                accessibilityLabel="Enter your answer"
-              />
             </View>
-            <TouchableOpacity
-              style={[
-                styles.button,
-                { backgroundColor: activeTheme.buttonColor },
-                highContrast && highContrastStyles.button,
-              ]}
-              testID="submit"
-              onPress={handleSubmit}
-              accessibilityLabel="Submit answer"
-              accessibilityRole="button"
-            >
-              <Text
-                style={[
-                  styles.buttonText,
-                  highContrast && highContrastStyles.buttonText,
-                ]}
-              >
-                Submit
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.enemiesContainer}>
+              {[...Array(numOfEnemies)].map((_, i) => (
+                <View testID="enemies" key={i}>
+                  <Image
+                    source={require('./assets/images/orc.png')}
+                    style={styles.characterImage}
+                    accessibilityLabel={`Enemy ${i + 1}`}
+                  />
+                </View>
+              ))}
+            </View>
           </View>
-        )}
+          {won ? (
+            <View style={[styles.cardPanel, styles.victoryPanel]}>
+              <Text style={styles.victoryText} accessibilityRole="text">
+                Victory!
+              </Text>
+              <Text
+                style={styles.victoryScore}
+                accessibilityRole="text"
+              >{`Final Score: ${score}`}</Text>
+              <TouchableOpacity
+                onPress={handleRestart}
+                style={[
+                  styles.restartButton,
+                  { backgroundColor: activeTheme.buttonColor },
+                ]}
+                accessibilityLabel="Play again"
+                accessibilityRole="button"
+              >
+                <Text style={styles.restartButtonText}>Restart</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={[styles.mathContainer, styles.cardPanel]}>
+              {submitMessageBlock}
+              <View style={styles.mathRow}>
+                <Text
+                  nativeID="val1"
+                  style={[styles.mathText, { color: '#fff' }]}
+                >
+                  {val1 < 0 ? `(${val1})` : val1}
+                </Text>
+                <Text
+                  nativeID="operator"
+                  style={[styles.mathText, { color: '#fff' }]}
+                >
+                  {displayOperator(operator)}
+                </Text>
+                <Text
+                  nativeID="val2"
+                  style={[styles.mathText, { color: '#fff' }]}
+                >
+                  {val2 < 0 ? `(${val2})` : val2}
+                </Text>
+                <Text style={[styles.mathText, { color: '#fff' }]}>=</Text>
+                <TextInput
+                  nativeID="answer-input"
+                  style={[
+                    styles.input,
+                    highContrast && highContrastStyles.input,
+                  ]}
+                  onChangeText={handleAnswerChange}
+                  onSubmitEditing={handleSubmit}
+                  onKeyPress={handleKeyDown as any}
+                  value={answer}
+                  ref={submitInputRef}
+                  accessibilityLabel="Enter your answer"
+                />
+              </View>
+              <View style={styles.submitRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.button,
+                    { backgroundColor: activeTheme.buttonColor },
+                    highContrast && highContrastStyles.button,
+                  ]}
+                  testID="submit"
+                  onPress={handleSubmit}
+                  accessibilityLabel="Submit answer"
+                  accessibilityRole="button"
+                >
+                  <Text
+                    style={[
+                      styles.buttonText,
+                      highContrast && highContrastStyles.buttonText,
+                    ]}
+                  >
+                    Submit
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -518,6 +505,14 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+    overflow: 'auto' as any,
+  },
+  gameContainer: {
+    maxWidth: 600,
+    width: '100%',
+    alignSelf: 'center',
+    flex: 1,
+    paddingHorizontal: 16,
   },
   content: {
     width: '100%',
@@ -537,38 +532,63 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.55)',
     borderRadius: 16,
     padding: 20,
-    marginHorizontal: 16,
     marginVertical: 8,
+    width: '100%',
   },
-  pickerContainer: {
+  pickerContainer: { flexDirection: 'column', gap: 4, width: '100%' },
+  segmentedGroup: {
     flexDirection: 'row',
+    gap: 6,
+    marginVertical: 4,
+    width: '100%',
   },
-  picker: {
-    height: 40,
-    width: 150,
-    borderRadius: 8,
+  segmentedButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+  },
+  segmentedButtonActive: {
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    borderColor: '#fff',
+  },
+  segmentedButtonText: {
+    color: '#fff',
+    fontSize: 14,
     fontFamily: '"Quicksand", sans-serif',
-    textAlign: 'center',
-    marginLeft: 10,
+    fontWeight: '600',
   },
   battlefield: {
     flex: 1,
     flexDirection: 'row',
     width: '100%',
-    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
-  container: {
+  heroContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  enemiesContainer: {
     flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-evenly',
   },
-  mathContainer: {
-    paddingVertical: 16,
-  },
+  characterImage: { width: 80, height: 160, resizeMode: 'contain' as any },
+  mathContainer: { paddingVertical: 16, alignItems: 'center' },
   mathRow: {
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
     paddingBottom: 16,
+    flexWrap: 'wrap',
   },
   mathText: {
     fontSize: 40,
@@ -576,30 +596,64 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   input: {
-    height: 60,
-    width: 200,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginLeft: 8,
+    width: '100%',
+    maxWidth: 280,
+    height: 56,
+    fontSize: 28,
+    borderRadius: 12,
+    textAlign: 'center' as any,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.6)',
     color: '#fff',
-    fontSize: 40,
-    borderRadius: 8,
     fontFamily: '"Poppins", sans-serif',
+    marginLeft: 8,
   },
+  submitRow: { alignItems: 'center', width: '100%' },
   button: {
-    height: 60,
-    width: 200,
+    width: '100%',
+    maxWidth: 280,
+    height: 56,
+    borderRadius: 12,
     backgroundColor: '#841584',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
+    minHeight: 44,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 40,
+    fontSize: 24,
     fontFamily: '"Quicksand", sans-serif',
     fontWeight: '700',
   },
+  victoryPanel: { alignItems: 'center' },
+  victoryText: {
+    color: '#fff',
+    fontSize: 32,
+    fontFamily: '"Fredoka One", "Quicksand", sans-serif',
+  },
+  victoryScore: {
+    color: '#fff',
+    fontSize: 24,
+    fontFamily: '"Poppins", sans-serif',
+    paddingVertical: 8,
+  },
+  restartButton: {
+    width: '100%',
+    maxWidth: 280,
+    height: 56,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 44,
+    marginTop: 8,
+  },
+  restartButtonText: {
+    color: '#fff',
+    fontSize: 24,
+    fontFamily: '"Quicksand", sans-serif',
+    fontWeight: '700',
+  },
+  touchTarget: { minHeight: 44, justifyContent: 'center' },
   msgTextError: {
     color: 'red',
     fontSize: 25,
@@ -620,6 +674,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingVertical: 8,
+    flexWrap: 'wrap',
   },
   soundToggleText: {
     color: '#fff',
@@ -627,7 +682,7 @@ const styles = StyleSheet.create({
     fontFamily: '"Quicksand", sans-serif',
     backgroundColor: 'rgba(0,0,0,0.4)',
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 8,
     borderRadius: 6,
   },
   scoreTimerRow: {
@@ -636,6 +691,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
     paddingVertical: 4,
+    flexWrap: 'wrap',
   },
   timerText: {
     fontSize: 24,
@@ -657,9 +713,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: '"Poppins", sans-serif',
   },
-  enemyCount: {
-    paddingVertical: 4,
-  },
+  enemyCount: { paddingVertical: 4 },
   enemyCountText: {
     fontSize: 20,
     fontFamily: '"Quicksand", sans-serif',
@@ -678,7 +732,6 @@ const styles = StyleSheet.create({
     fontFamily: '"Quicksand", sans-serif',
   },
 });
-
 const highContrastStyles = StyleSheet.create({
   input: {
     borderColor: '#fff',
@@ -686,14 +739,8 @@ const highContrastStyles = StyleSheet.create({
     backgroundColor: '#000',
     color: '#fff',
   },
-  button: {
-    borderColor: '#fff',
-    borderWidth: 3,
-  },
-  buttonText: {
-    color: '#000',
-    fontWeight: 'bold',
-  },
+  button: { borderColor: '#fff', borderWidth: 3 },
+  buttonText: { color: '#000', fontWeight: 'bold' },
   settingsButton: {
     borderColor: '#fff',
     borderWidth: 2,
@@ -701,7 +748,6 @@ const highContrastStyles = StyleSheet.create({
     color: '#fff',
   },
 });
-
 const themes: Record<
   string,
   {
@@ -742,5 +788,4 @@ const themes: Record<
     textColor: '#fff',
   },
 };
-
 export default App;
