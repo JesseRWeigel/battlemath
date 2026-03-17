@@ -25,6 +25,8 @@ export const TYPES = {
   SET_HIGH_CONTRAST: 11,
   START_TIMER: 12,
   SET_ADAPTIVE: 13,
+  DISMISS_TUTORIAL: 14,
+  SHOW_TUTORIAL: 15,
 } as const;
 
 const OPERATORS = {
@@ -77,7 +79,27 @@ export type AppState = {
   streak: number;
   maxStreak: number;
   streakBonus: number;
+  showTutorial: boolean;
+  hasSeenTutorial: boolean;
+  totalAttempts: number;
+  correctAttempts: number;
+  totalAnswerTime: number;
+  starsEarned: number;
 };
+
+export function calculateStars(
+  correctAttempts: number,
+  totalAttempts: number,
+  totalAnswerTime: number,
+): number {
+  if (totalAttempts === 0) return 0;
+  const accuracy = correctAttempts / totalAttempts;
+  const avgTime = totalAnswerTime / correctAttempts;
+
+  if (accuracy >= 0.9 && avgTime < 10000) return 3; // 90%+ acc, <10s avg
+  if (accuracy >= 0.7) return 2; // 70%+ accuracy
+  return 1; // completed
+}
 
 export const initialState: AppState = {
   answer: '',
@@ -105,6 +127,12 @@ export const initialState: AppState = {
   streak: 0,
   maxStreak: 0,
   streakBonus: 0,
+  showTutorial: false,
+  hasSeenTutorial: false,
+  totalAttempts: 0,
+  correctAttempts: 0,
+  totalAnswerTime: 0,
+  starsEarned: 0,
 };
 
 /**
@@ -330,6 +358,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         }
       }
 
+      // Track total attempts for star rating
+      const newTotalAttempts = state.totalAttempts + 1;
+
       if (isCorrect) {
         const elapsed = Date.now() - state.questionStartTime;
         const basePoints = calculatePoints(elapsed);
@@ -345,6 +376,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         const newScore = state.score + pointsEarned + streakBonus;
         const newBestScore = Math.max(state.bestScore, newScore);
 
+        const newCorrectAttempts = state.correctAttempts + 1;
+        const newTotalAnswerTime = state.totalAnswerTime + elapsed;
+
         const stateWithEnemies = reducer(
           { ...state, difficulty: newDifficulty },
           { type: TYPES.REMOVE_ENEMY },
@@ -352,6 +386,15 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         const stateWithProblem = reducer(stateWithEnemies, {
           type: TYPES.NEW_PROBLEM,
         });
+
+        const isVictory = stateWithEnemies.won;
+        const starsEarned = isVictory
+          ? calculateStars(
+              newCorrectAttempts,
+              newTotalAttempts,
+              newTotalAnswerTime,
+            )
+          : state.starsEarned;
 
         return {
           ...stateWithProblem,
@@ -367,6 +410,10 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
           streak: newStreak,
           maxStreak: newMaxStreak,
           streakBonus,
+          totalAttempts: newTotalAttempts,
+          correctAttempts: newCorrectAttempts,
+          totalAnswerTime: newTotalAnswerTime,
+          starsEarned,
         };
       }
 
@@ -394,6 +441,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
           adaptiveMessage,
           streak: 0,
           streakBonus: 0,
+          totalAttempts: newTotalAttempts,
         };
       }
 
@@ -404,6 +452,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         hintLevel: newAttempts,
         lastPointsEarned: null,
         recentResults: newRecentResults,
+        totalAttempts: newTotalAttempts,
       };
     }
 
@@ -483,9 +532,29 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
       };
     }
 
+    case TYPES.DISMISS_TUTORIAL: {
+      return {
+        ...state,
+        showTutorial: false,
+        hasSeenTutorial: true,
+      };
+    }
+
+    case TYPES.SHOW_TUTORIAL: {
+      return {
+        ...state,
+        showTutorial: true,
+      };
+    }
+
     case TYPES.RESTORE_STATE: {
       const storedState = action.payload as AppState;
-      return { ...storedState, isStoredState: true };
+      return {
+        ...storedState,
+        isStoredState: true,
+        showTutorial: storedState.hasSeenTutorial ? false : true,
+        hasSeenTutorial: storedState.hasSeenTutorial ?? false,
+      };
     }
 
     case TYPES.START_TIMER: {
