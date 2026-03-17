@@ -17,6 +17,7 @@ import { useMsgAfterSubmit } from './hooks';
 import HeroSvg from './components/HeroSvg';
 import bgSound from './assets/music/background-music.mp3';
 import BackgroundSound from './components/BackgroundSound';
+import { playCorrectSound, playIncorrectSound } from './utils/SoundEffects';
 function App() {
   const [
     {
@@ -31,6 +32,7 @@ function App() {
       modeType,
       previousNumOfEnemies,
       isStoredState,
+      soundEnabled,
     },
     dispatch,
   ] = useReducer(reducer, initialState);
@@ -45,6 +47,23 @@ function App() {
     variablesToLookFor,
     isStoredState,
   );
+
+  // Play sound effects on correct/incorrect answers
+  useEffect(() => {
+    if (isStoredState) return;
+    if (numOfEnemies < previousNumOfEnemies) {
+      if (soundEnabled) playCorrectSound();
+    } else if (numOfEnemies > previousNumOfEnemies) {
+      if (soundEnabled) playIncorrectSound();
+    }
+  }, [numOfEnemies, previousNumOfEnemies, isStoredState, soundEnabled]);
+
+  const handleSoundToggle = useCallback(() => {
+    dispatch({
+      type: TYPES.SET_SOUND_ENABLED,
+      payload: !soundEnabled,
+    });
+  }, [dispatch, soundEnabled]);
 
   // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
@@ -288,7 +307,20 @@ function App() {
             </TouchableOpacity>
           </View>
         )}
-        <BackgroundSound url={bgSound} />
+        <View style={styles.soundControls}>
+          <BackgroundSound url={bgSound} />
+          <TouchableOpacity
+            onPress={handleSoundToggle}
+            accessibilityLabel={
+              soundEnabled ? 'Mute sound effects' : 'Unmute sound effects'
+            }
+            testID="sound-toggle"
+          >
+            <Text style={styles.soundToggleText}>
+              {soundEnabled ? 'SFX On' : 'SFX Off'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ImageBackground>
     </View>
   );
@@ -395,6 +427,21 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     fontSize: 40,
     fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+  },
+  soundControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 8,
+  },
+  soundToggleText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
   },
 });
 
