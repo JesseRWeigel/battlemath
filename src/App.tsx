@@ -367,7 +367,11 @@ function App() {
         {won ? (
           <View style={{ alignItems: 'center' }}>
             <Text
-              style={{ color: activeTheme.textColor, fontSize: 32 }}
+              style={{
+                color: activeTheme.textColor,
+                fontSize: 32,
+                fontFamily: '"Fredoka One", "Quicksand", sans-serif',
+              }}
               accessibilityRole="text"
             >
               Victory!
@@ -376,7 +380,7 @@ function App() {
               style={{
                 color: activeTheme.textColor,
                 fontSize: 24,
-                fontFamily: '"Comic Sans MS", cursive, sans-serif',
+                fontFamily: '"Poppins", sans-serif',
                 paddingVertical: 8,
               }}
               accessibilityRole="text"
@@ -511,7 +515,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Fredoka One", "Quicksand", sans-serif',
   },
   pickerContainer: {
     flexDirection: 'row',
@@ -520,7 +524,7 @@ const styles = StyleSheet.create({
     height: 40,
     width: 150,
     borderRadius: 8,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Quicksand", sans-serif',
     textAlign: 'center',
     marginLeft: 10,
   },
@@ -556,7 +560,8 @@ const styles = StyleSheet.create({
   },
   mathText: {
     fontSize: 40,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Poppins", sans-serif',
+    fontWeight: '700',
   },
   input: {
     height: 60,
@@ -567,7 +572,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 40,
     borderRadius: 8,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Poppins", sans-serif',
   },
   button: {
     height: 60,
@@ -580,19 +585,23 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 40,
+    fontFamily: '"Quicksand", sans-serif',
+    fontWeight: '700',
   },
   msgTextError: {
     color: 'red',
     fontSize: 25,
+    fontFamily: '"Quicksand", sans-serif',
   },
   msgTextSuccess: {
     color: 'green',
     fontSize: 25,
+    fontFamily: '"Quicksand", sans-serif',
   },
   submitMsgWrapper: {
     paddingBottom: 15,
     fontSize: 40,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Quicksand", sans-serif',
   },
   soundControls: {
     flexDirection: 'row',
@@ -603,7 +612,7 @@ const styles = StyleSheet.create({
   soundToggleText: {
     color: '#fff',
     fontSize: 16,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Quicksand", sans-serif',
     backgroundColor: 'rgba(0,0,0,0.4)',
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -619,40 +628,42 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    fontFamily: '"Comic Sans MS", cursive, sans-serif',
+    fontFamily: '"Poppins", sans-serif',
   },
   scoreText: {
     fontSize: 22,
     fontWeight: 'bold',
-    fontFamily: '"Comic Sans MS", cursive, sans-serif',
+    fontFamily: '"Poppins", sans-serif',
   },
   bestScoreText: {
     fontSize: 16,
-    fontFamily: '"Comic Sans MS", cursive, sans-serif',
+    fontFamily: '"Poppins", sans-serif',
     opacity: 0.8,
   },
   pointsEarned: {
     fontSize: 22,
     fontWeight: 'bold',
-    fontFamily: '"Comic Sans MS", cursive, sans-serif',
+    fontFamily: '"Poppins", sans-serif',
   },
   enemyCount: {
     paddingVertical: 4,
   },
   enemyCountText: {
     fontSize: 20,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Quicksand", sans-serif',
     fontWeight: 'bold',
   },
   msgTextErrorHC: {
     color: '#ff6b6b',
     fontSize: 25,
     fontWeight: 'bold',
+    fontFamily: '"Quicksand", sans-serif',
   },
   msgTextSuccessHC: {
     color: '#69ff69',
     fontSize: 25,
     fontWeight: 'bold',
+    fontFamily: '"Quicksand", sans-serif',
   },
 });
 
