@@ -1,14 +1,13 @@
 {
   "files": {
-    "main.js": "/battlemath/static/js/main.a8d1124f.js",
+    "main.js": "/battlemath/static/js/main.a78a8be7.js",
     "static/media/background-music.mp3": "/battlemath/static/media/background-music.3d51c88e31e5663422f1.mp3",
-    "static/media/bg.jpg": "/battlemath/static/media/bg.ca1d297bf2bec172a380.jpg",
     "static/media/orc.png": "/battlemath/static/media/orc.a509f3c097b8b3980c61.png",
     "static/media/hero.png": "/battlemath/static/media/hero.32e725365304a31a6899.png",
     "index.html": "/battlemath/index.html",
-    "main.a8d1124f.js.map": "/battlemath/static/js/main.a8d1124f.js.map"
+    "main.a78a8be7.js.map": "/battlemath/static/js/main.a78a8be7.js.map"
   },
   "entrypoints": [
-    "static/js/main.a8d1124f.js"
+    "static/js/main.a78a8be7.js"
   ]
 }
