@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 import { reducer, initialState, TYPES } from './AppReducer';
 import { useMsgAfterSubmit } from './hooks';
-import { generateHint } from './utils';
 
 import HeroSvg from './components/HeroSvg';
 import bgSound from './assets/music/background-music.mp3';
@@ -128,7 +127,6 @@ function App() {
       questionStartTime,
       bestScore,
       lastPointsEarned,
-      hintLevel,
       adaptiveDifficulty,
       adaptiveMessage,
     },
