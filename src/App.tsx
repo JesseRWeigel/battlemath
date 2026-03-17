@@ -124,6 +124,8 @@ function App() {
   const pointsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [shaking, setShaking] = useState(false);
   const [defeatingEnemy, setDefeatingEnemy] = useState(false);
+  const [heroAnim, setHeroAnim] = useState<'idle' | 'attack' | 'hurt'>('idle');
+  const [newEnemyIndex, setNewEnemyIndex] = useState<number | null>(null);
   const prevHintLevelRef = useRef(0);
   let submitInputRef = useRef<TextInput>(null);
   const variablesToLookFor: [number, number] = [
@@ -140,14 +142,18 @@ function App() {
       if (soundEnabled) playCorrectSound();
       // Correct answer confetti
       setDefeatingEnemy(true);
+      setHeroAnim('attack');
       confetti({
         particleCount: 80,
         spread: 70,
         origin: { y: 0.6 },
       });
       setTimeout(() => setDefeatingEnemy(false), 500);
+      setTimeout(() => setHeroAnim('idle'), 400);
     } else if (numOfEnemies > previousNumOfEnemies) {
       if (soundEnabled) playIncorrectSound();
+      setNewEnemyIndex(numOfEnemies - 1);
+      setTimeout(() => setNewEnemyIndex(null), 500);
     }
   }, [numOfEnemies, previousNumOfEnemies, isStoredState, soundEnabled]);
 
@@ -155,7 +161,11 @@ function App() {
   useEffect(() => {
     if (hintLevel > 0 && hintLevel > prevHintLevelRef.current) {
       setShaking(true);
-      const timer = setTimeout(() => setShaking(false), 500);
+      setHeroAnim('hurt');
+      const timer = setTimeout(() => {
+        setShaking(false);
+        setHeroAnim('idle');
+      }, 400);
       return () => clearTimeout(timer);
     }
     prevHintLevelRef.current = hintLevel;
@@ -304,6 +314,25 @@ function App() {
       if (pointsTimeoutRef.current) clearTimeout(pointsTimeoutRef.current);
     };
   }, [lastPointsEarned, val1, val2]);
+  const heroAnimStyle: Record<string, React.CSSProperties> = {
+    idle: {
+      animationName: 'heroIdle',
+      animationDuration: '2s',
+      animationIterationCount: 'infinite',
+      animationTimingFunction: 'ease-in-out',
+    },
+    attack: {
+      animationName: 'heroAttack',
+      animationDuration: '0.4s',
+      animationIterationCount: 1 as any,
+      animationTimingFunction: 'ease-out',
+    },
+    hurt: {
+      animationName: 'heroHurt',
+      animationDuration: '0.4s',
+      animationIterationCount: 1 as any,
+    },
+  };
   const timerColor =
     timeLeft > 15 ? '#4caf50' : timeLeft > 5 ? '#ff9800' : '#f44336';
 
@@ -434,7 +463,10 @@ function App() {
               <View nativeID="hero" accessibilityLabel="Your hero character">
                 <Image
                   source={require('./assets/images/hero.png')}
-                  style={styles.characterImage}
+                  style={[
+                    styles.characterImage,
+                    heroAnimStyle[heroAnim] as any,
+                  ]}
                   accessibilityLabel="Hero"
                 />
               </View>
@@ -456,7 +488,24 @@ function App() {
                 >
                   <Image
                     source={require('./assets/images/orc.png')}
-                    style={styles.characterImage}
+                    style={[
+                      styles.characterImage,
+                      defeatingEnemy && i === numOfEnemies - 1
+                        ? undefined
+                        : newEnemyIndex === i
+                          ? ({
+                              animationName: 'enemyEntrance',
+                              animationDuration: '0.5s',
+                              animationFillMode: 'forwards',
+                            } as any)
+                          : ({
+                              animationName: 'enemySway',
+                              animationDuration: '1.5s',
+                              animationIterationCount: 'infinite',
+                              animationTimingFunction: 'ease-in-out',
+                              animationDelay: `${i * 0.3}s`,
+                            } as any),
+                    ]}
                     accessibilityLabel={`Enemy ${i + 1}`}
                   />
                 </View>
