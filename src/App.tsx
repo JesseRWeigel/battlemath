@@ -260,7 +260,6 @@ function App() {
     timeLeft > 15 ? '#4caf50' : timeLeft > 5 ? '#ff9800' : '#f44336';
 
   return (
-    // @ts-ignore backgroundImage & transition are valid on web via react-native-web
     <View
       style={[
         styles.root,
@@ -268,7 +267,7 @@ function App() {
           backgroundColor: activeTheme.backgroundColor,
           backgroundImage: activeTheme.gradient,
           transition: 'background-image 0.5s ease',
-        },
+        } as any, // backgroundImage & transition are valid on web via react-native-web
       ]}
     >
       <View style={styles.content}>
