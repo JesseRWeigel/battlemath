@@ -415,10 +415,10 @@ describe('reducer', () => {
 
     it('preserves the correct operator for each mode on restart', () => {
       const modes = [
-        { mode: 'addition' as const, op: '+' },
-        { mode: 'subtraction' as const, op: '-' },
-        { mode: 'multiplication' as const, op: '*' },
-        { mode: 'division' as const, op: '/' },
+        { mode: 'addition' as const, op: '+' as const },
+        { mode: 'subtraction' as const, op: '-' as const },
+        { mode: 'multiplication' as const, op: '*' as const },
+        { mode: 'division' as const, op: '/' as const },
       ]
 
       for (const { mode, op } of modes) {
