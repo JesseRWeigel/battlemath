@@ -548,8 +548,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
     }
 
     case TYPES.RESTORE_STATE: {
-      const storedState = action.payload as AppState;
+      const storedState = action.payload as Partial<AppState>;
       return {
+        ...initialState,
         ...storedState,
         isStoredState: true,
         showTutorial: storedState.hasSeenTutorial ? false : true,
