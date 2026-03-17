@@ -15,8 +15,6 @@ import {
 } from 'react-native';
 import { reducer, initialState, TYPES } from './AppReducer';
 import { useMsgAfterSubmit } from './hooks';
-import { generateHint } from './utils';
-
 import HeroSvg from './components/HeroSvg';
 import bgSound from './assets/music/background-music.mp3';
 import BackgroundSound from './components/BackgroundSound';
@@ -43,13 +41,11 @@ const OPERATIONS = [
   { label: '\u00D7', value: 'multiplication' },
   { label: '\u00F7', value: 'division' },
 ];
-
 const DIFFICULTIES = [
   { label: 'Easy', value: 'easy' },
   { label: 'Medium', value: 'medium' },
   { label: 'Hard', value: 'hard' },
 ];
-
 const MODE_TYPES = [
   { label: 'Whole', value: 'wholeNumber' },
   { label: 'Decimal', value: 'decimal' },
@@ -62,14 +58,12 @@ function SegmentedButtonGroup({
   onSelect,
   accessibilityLabel,
   testID,
-  disabled,
 }: {
   options: { label: string; value: string }[];
   selectedValue: string;
   onSelect: (value: string) => void;
   accessibilityLabel: string;
   testID?: string;
-  disabled?: boolean;
 }) {
   return (
     <View
@@ -86,21 +80,13 @@ function SegmentedButtonGroup({
             style={[
               styles.segmentedButton,
               isActive && styles.segmentedButtonActive,
-              disabled && styles.segmentedButtonDisabled,
             ]}
-            onPress={() => !disabled && onSelect(option.value)}
+            onPress={() => onSelect(option.value)}
             accessibilityRole="radio"
-            accessibilityState={{ selected: isActive, disabled }}
+            accessibilityState={{ selected: isActive }}
             accessibilityLabel={option.label}
           >
-            <Text
-              style={[
-                styles.segmentedButtonText,
-                disabled && styles.segmentedButtonTextDisabled,
-              ]}
-            >
-              {option.label}
-            </Text>
+            <Text style={styles.segmentedButtonText}>{option.label}</Text>
           </TouchableOpacity>
         );
       })}
@@ -128,23 +114,13 @@ function App() {
       questionStartTime,
       bestScore,
       lastPointsEarned,
-      hintLevel,
-      adaptiveDifficulty,
-      adaptiveMessage,
     },
     dispatch,
   ] = useReducer(reducer, initialState);
-
   const [timeLeft, setTimeLeft] = useState(30);
   const [showPoints, setShowPoints] = useState(false);
-  const [showAdaptiveMsg, setShowAdaptiveMsg] = useState(false);
-  const [adaptiveMsgText, setAdaptiveMsgText] = useState<string | null>(null);
-  const [adaptiveMsgIsUp, setAdaptiveMsgIsUp] = useState(false);
   const pointsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const adaptiveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   let submitInputRef = useRef<TextInput>(null);
-
   const variablesToLookFor: [number, number] = [
     previousNumOfEnemies,
     numOfEnemies,
@@ -153,8 +129,6 @@ function App() {
     variablesToLookFor,
     isStoredState,
   );
-
-  // Play sound effects on correct/incorrect answers
   useEffect(() => {
     if (isStoredState) return;
     if (numOfEnemies < previousNumOfEnemies) {
@@ -163,104 +137,51 @@ function App() {
       if (soundEnabled) playIncorrectSound();
     }
   }, [numOfEnemies, previousNumOfEnemies, isStoredState, soundEnabled]);
-
-  // Show adaptive difficulty change message
-  useEffect(() => {
-    if (!adaptiveMessage) return;
-    const isUp = adaptiveMessage.includes('harder');
-    setAdaptiveMsgText(adaptiveMessage);
-    setAdaptiveMsgIsUp(isUp);
-    setShowAdaptiveMsg(true);
-    if (adaptiveTimeoutRef.current) clearTimeout(adaptiveTimeoutRef.current);
-    adaptiveTimeoutRef.current = setTimeout(
-      () => setShowAdaptiveMsg(false),
-      1500,
-    );
-    return () => {
-      if (adaptiveTimeoutRef.current) clearTimeout(adaptiveTimeoutRef.current);
-    };
-  }, [adaptiveMessage, val1, val2]);
-
   const handleSoundToggle = useCallback(() => {
-    dispatch({
-      type: TYPES.SET_SOUND_ENABLED,
-      payload: !soundEnabled,
-    });
+    dispatch({ type: TYPES.SET_SOUND_ENABLED, payload: !soundEnabled });
   }, [dispatch, soundEnabled]);
-
   const handleHighContrastToggle = useCallback(() => {
-    dispatch({
-      type: TYPES.SET_HIGH_CONTRAST,
-      payload: !highContrast,
-    });
+    dispatch({ type: TYPES.SET_HIGH_CONTRAST, payload: !highContrast });
   }, [dispatch, highContrast]);
-
-  const handleAdaptiveToggle = useCallback(() => {
-    dispatch({
-      type: TYPES.SET_ADAPTIVE,
-      payload: !adaptiveDifficulty,
-    });
-  }, [dispatch, adaptiveDifficulty]);
-
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        dispatch({ type: TYPES.SET_ANSWER, payload: '' });
-      }
+      if (e.key === 'Escape') dispatch({ type: TYPES.SET_ANSWER, payload: '' });
     },
     [dispatch],
   );
-
   const handleAnswerChange = useCallback(
     (value: string) => {
-      if (/^-?\d*\.?\d*$/.test(value.toString()) || value === '') {
+      if (/^-?\d*\.?\d*$/.test(value.toString()) || value === '')
         dispatch({ type: TYPES.SET_ANSWER, payload: value });
-      }
     },
     [dispatch],
   );
-
   const handleModePicker = useCallback(
     (mode: string) => {
-      dispatch({
-        type: TYPES.SET_MODE,
-        payload: mode,
-      });
+      dispatch({ type: TYPES.SET_MODE, payload: mode });
     },
     [dispatch],
   );
-
   const handleModeType = useCallback(
     (mode: string) => {
-      dispatch({
-        type: TYPES.SET_MODE_TYPES,
-        payload: mode,
-      });
+      dispatch({ type: TYPES.SET_MODE_TYPES, payload: mode });
     },
     [dispatch],
   );
-
   const handleDifficultyPicker = useCallback(
     (difficulty: string) => {
-      dispatch({
-        type: TYPES.SET_DIFFICULTY,
-        payload: difficulty,
-      });
+      dispatch({ type: TYPES.SET_DIFFICULTY, payload: difficulty });
     },
     [dispatch],
   );
-
   const handleRestart = useCallback(() => {
     dispatch({ type: TYPES.RESTART });
   }, [dispatch]);
-
   const handleSubmit = useCallback(() => {
     dispatch({ type: TYPES.CHECK_ANSWER });
     if (submitInputRef.current) submitInputRef.current.focus();
   }, [dispatch]);
-
   const activeTheme = highContrast ? themes.highContrast : themes[mode];
-
   useEffect(() => {
     dispatch({ type: TYPES.NEW_PROBLEM });
     const storedData = localStorage.getItem('state');
@@ -284,7 +205,6 @@ function App() {
       );
     }
   }, []);
-
   useEffect(() => {
     localStorage.setItem(
       'state',
@@ -313,7 +233,6 @@ function App() {
     modeType,
     previousNumOfEnemies,
   ]);
-
   const submitMsgText = isErrorMessage
     ? highContrast
       ? styles.msgTextErrorHC
@@ -326,11 +245,9 @@ function App() {
       <Text style={submitMsgText}>{msg}</Text>
     </View>
   );
-
   useEffect(() => {
     submitInputRef.current && submitInputRef.current.focus();
   }, [val1, val2]);
-
   useEffect(() => {
     if (won) return;
     dispatch({ type: TYPES.START_TIMER });
@@ -340,7 +257,6 @@ function App() {
     }, 1000);
     return () => clearInterval(interval);
   }, [val1, val2, won]);
-
   useEffect(() => {
     if (lastPointsEarned === null) return;
     setShowPoints(true);
@@ -350,19 +266,6 @@ function App() {
       if (pointsTimeoutRef.current) clearTimeout(pointsTimeoutRef.current);
     };
   }, [lastPointsEarned, val1, val2]);
-
-  useEffect(() => {
-    if (hintLevel === 3) {
-      const timer = setTimeout(() => {
-        dispatch({ type: TYPES.NEW_PROBLEM });
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [hintLevel, dispatch]);
-
-  const hintMessage =
-    hintLevel > 0 ? generateHint(val1, val2, operator, hintLevel) : '';
-
   const timerColor =
     timeLeft > 15 ? '#4caf50' : timeLeft > 5 ? '#ff9800' : '#f44336';
 
@@ -394,43 +297,13 @@ function App() {
                 accessibilityLabel="Select math operation"
                 testID="operation-selector"
               />
-
-              <View style={styles.difficultyRow}>
-                <View style={styles.difficultyButtonsWrapper}>
-                  <SegmentedButtonGroup
-                    options={DIFFICULTIES}
-                    selectedValue={difficulty}
-                    onSelect={handleDifficultyPicker}
-                    accessibilityLabel="Select difficulty level"
-                    testID="difficulty-selector"
-                    disabled={adaptiveDifficulty}
-                  />
-                </View>
-                <TouchableOpacity
-                  onPress={handleAdaptiveToggle}
-                  style={[
-                    styles.adaptiveToggle,
-                    adaptiveDifficulty && styles.adaptiveToggleActive,
-                  ]}
-                  accessibilityLabel={
-                    adaptiveDifficulty
-                      ? 'Disable adaptive difficulty'
-                      : 'Enable adaptive difficulty'
-                  }
-                  accessibilityRole="button"
-                  testID="adaptive-toggle"
-                >
-                  <Text
-                    style={[
-                      styles.adaptiveToggleText,
-                      adaptiveDifficulty && styles.adaptiveToggleTextActive,
-                    ]}
-                  >
-                    {adaptiveDifficulty ? 'Adaptive \u2713' : 'Adaptive'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
+              <SegmentedButtonGroup
+                options={DIFFICULTIES}
+                selectedValue={difficulty}
+                onSelect={handleDifficultyPicker}
+                accessibilityLabel="Select difficulty level"
+                testID="difficulty-selector"
+              />
               <SegmentedButtonGroup
                 options={MODE_TYPES}
                 selectedValue={modeType}
@@ -439,66 +312,37 @@ function App() {
                 testID="modeType-selector"
               />
             </View>
-
             <View style={styles.scoreTimerRow} accessibilityLiveRegion="polite">
               <Text
                 style={[styles.timerText, { color: timerColor }]}
                 testID="timer"
-              >
-                {`\u23F1 ${timeLeft}s`}
-              </Text>
+              >{`\u23F1 ${timeLeft}s`}</Text>
               <Text
                 style={[styles.scoreText, { color: '#fff' }]}
                 testID="score"
-              >
-                {`Score: ${score}`}
-              </Text>
+              >{`Score: ${score}`}</Text>
               <Text
                 style={[styles.bestScoreText, { color: '#fff' }]}
                 testID="best-score"
-              >
-                {`Best: ${bestScore}`}
-              </Text>
+              >{`Best: ${bestScore}`}</Text>
               {showPoints && lastPointsEarned !== null && (
                 <Text
                   style={[
                     styles.pointsEarned,
-                    {
-                      color: lastPointsEarned > 0 ? '#4caf50' : '#f44336',
-                    },
+                    { color: lastPointsEarned > 0 ? '#4caf50' : '#f44336' },
                   ]}
                   testID="points-earned"
-                >
-                  {`+${lastPointsEarned}`}
-                </Text>
+                >{`+${lastPointsEarned}`}</Text>
               )}
             </View>
-            {showAdaptiveMsg && adaptiveMsgText && (
-              <View
-                style={styles.adaptiveMsgWrapper}
-                accessibilityLiveRegion="polite"
-                testID="adaptive-message"
-              >
-                <Text
-                  style={[
-                    styles.adaptiveMsgText,
-                    {
-                      color: adaptiveMsgIsUp ? '#69ff69' : '#ffcc80',
-                    },
-                  ]}
-                >
-                  {adaptiveMsgText}
-                </Text>
-              </View>
-            )}
             <View
               style={styles.enemyCount}
               accessibilityLiveRegion="polite"
               accessibilityRole="text"
             >
-              <Text style={[styles.enemyCountText, { color: '#fff' }]}>
-                {`Enemies: ${numOfEnemies}`}
-              </Text>
+              <Text
+                style={[styles.enemyCountText, { color: '#fff' }]}
+              >{`Enemies: ${numOfEnemies}`}</Text>
             </View>
             <View style={styles.soundControls}>
               <BackgroundSound url={bgSound} />
@@ -569,9 +413,10 @@ function App() {
               <Text style={styles.victoryText} accessibilityRole="text">
                 Victory!
               </Text>
-              <Text style={styles.victoryScore} accessibilityRole="text">
-                {`Final Score: ${score}`}
-              </Text>
+              <Text
+                style={styles.victoryScore}
+                accessibilityRole="text"
+              >{`Final Score: ${score}`}</Text>
               <TouchableOpacity
                 onPress={handleRestart}
                 style={[
@@ -586,16 +431,7 @@ function App() {
             </View>
           ) : (
             <View style={[styles.mathContainer, styles.cardPanel]}>
-              {hintLevel > 0 ? (
-                <View
-                  style={styles.hintBubble}
-                  accessibilityLiveRegion="polite"
-                >
-                  <Text style={styles.hintText}>{hintMessage}</Text>
-                </View>
-              ) : (
-                submitMessageBlock
-              )}
+              {submitMessageBlock}
               <View style={styles.mathRow}>
                 <Text
                   nativeID="val1"
@@ -699,20 +535,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     width: '100%',
   },
-  pickerContainer: {
-    flexDirection: 'column',
-    gap: 4,
-    width: '100%',
-  },
-  difficultyRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    width: '100%',
-  },
-  difficultyButtonsWrapper: {
-    flex: 1,
-  },
+  pickerContainer: { flexDirection: 'column', gap: 4, width: '100%' },
   segmentedGroup: {
     flexDirection: 'row',
     gap: 6,
@@ -734,50 +557,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.25)',
     borderColor: '#fff',
   },
-  segmentedButtonDisabled: {
-    opacity: 0.4,
-  },
   segmentedButtonText: {
     color: '#fff',
     fontSize: 14,
     fontFamily: '"Quicksand", sans-serif',
     fontWeight: '600',
-  },
-  segmentedButtonTextDisabled: {
-    opacity: 0.6,
-  },
-  adaptiveToggle: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 44,
-    marginVertical: 4,
-  },
-  adaptiveToggleActive: {
-    backgroundColor: 'rgba(76, 175, 80, 0.35)',
-    borderColor: '#4caf50',
-  },
-  adaptiveToggleText: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 13,
-    fontFamily: '"Quicksand", sans-serif',
-    fontWeight: '600',
-  },
-  adaptiveToggleTextActive: {
-    color: '#fff',
-  },
-  adaptiveMsgWrapper: {
-    paddingVertical: 4,
-    alignItems: 'center',
-  },
-  adaptiveMsgText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: '"Quicksand", sans-serif',
   },
   battlefield: {
     flex: 1,
@@ -797,15 +581,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-evenly',
   },
-  characterImage: {
-    width: 80,
-    height: 160,
-    resizeMode: 'contain' as any,
-  },
-  mathContainer: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
+  characterImage: { width: 80, height: 160, resizeMode: 'contain' as any },
+  mathContainer: { paddingVertical: 16, alignItems: 'center' },
   mathRow: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -831,10 +608,7 @@ const styles = StyleSheet.create({
     fontFamily: '"Poppins", sans-serif',
     marginLeft: 8,
   },
-  submitRow: {
-    alignItems: 'center',
-    width: '100%',
-  },
+  submitRow: { alignItems: 'center', width: '100%' },
   button: {
     width: '100%',
     maxWidth: 280,
@@ -851,9 +625,7 @@ const styles = StyleSheet.create({
     fontFamily: '"Quicksand", sans-serif',
     fontWeight: '700',
   },
-  victoryPanel: {
-    alignItems: 'center',
-  },
+  victoryPanel: { alignItems: 'center' },
   victoryText: {
     color: '#fff',
     fontSize: 32,
@@ -881,25 +653,7 @@ const styles = StyleSheet.create({
     fontFamily: '"Quicksand", sans-serif',
     fontWeight: '700',
   },
-  touchTarget: {
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  hintBubble: {
-    backgroundColor: 'rgba(255, 152, 0, 0.85)',
-    borderRadius: 12,
-    padding: 12,
-    marginVertical: 8,
-    maxWidth: 350,
-    alignSelf: 'center' as any,
-  },
-  hintText: {
-    color: '#fff',
-    fontSize: 18,
-    fontFamily: '"Quicksand", sans-serif',
-    fontWeight: '600',
-    textAlign: 'center' as any,
-  },
+  touchTarget: { minHeight: 44, justifyContent: 'center' },
   msgTextError: {
     color: 'red',
     fontSize: 25,
@@ -959,9 +713,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontFamily: '"Poppins", sans-serif',
   },
-  enemyCount: {
-    paddingVertical: 4,
-  },
+  enemyCount: { paddingVertical: 4 },
   enemyCountText: {
     fontSize: 20,
     fontFamily: '"Quicksand", sans-serif',
@@ -980,7 +732,6 @@ const styles = StyleSheet.create({
     fontFamily: '"Quicksand", sans-serif',
   },
 });
-
 const highContrastStyles = StyleSheet.create({
   input: {
     borderColor: '#fff',
@@ -988,14 +739,8 @@ const highContrastStyles = StyleSheet.create({
     backgroundColor: '#000',
     color: '#fff',
   },
-  button: {
-    borderColor: '#fff',
-    borderWidth: 3,
-  },
-  buttonText: {
-    color: '#000',
-    fontWeight: 'bold',
-  },
+  button: { borderColor: '#fff', borderWidth: 3 },
+  buttonText: { color: '#000', fontWeight: 'bold' },
   settingsButton: {
     borderColor: '#fff',
     borderWidth: 2,
@@ -1003,7 +748,6 @@ const highContrastStyles = StyleSheet.create({
     color: '#fff',
   },
 });
-
 const themes: Record<
   string,
   {
@@ -1044,5 +788,4 @@ const themes: Record<
     textColor: '#fff',
   },
 };
-
 export default App;
