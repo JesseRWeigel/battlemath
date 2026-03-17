@@ -4,6 +4,7 @@ import {
   TYPES,
   randomNumberGenerator,
   calculatePoints,
+  getAdaptiveDifficulty,
   AppState,
   ActionType,
 } from './AppReducer';
@@ -49,6 +50,54 @@ describe('randomNumberGenerator', () => {
       expect(result).toBeGreaterThanOrEqual(100);
       expect(result).toBeLessThanOrEqual(999);
     }
+  });
+});
+
+describe('getAdaptiveDifficulty', () => {
+  it('returns medium when 3 correct on easy', () => {
+    expect(getAdaptiveDifficulty('easy', [true, true, true])).toBe('medium');
+  });
+
+  it('returns hard when 3 correct on medium', () => {
+    expect(getAdaptiveDifficulty('medium', [true, true, true])).toBe('hard');
+  });
+
+  it('returns null when 3 correct already on hard', () => {
+    expect(getAdaptiveDifficulty('hard', [true, true, true])).toBeNull();
+  });
+
+  it('returns medium when 2 wrong on hard', () => {
+    expect(getAdaptiveDifficulty('hard', [false, false])).toBe('medium');
+  });
+
+  it('returns easy when 2 wrong on medium', () => {
+    expect(getAdaptiveDifficulty('medium', [false, false])).toBe('easy');
+  });
+
+  it('returns null when 2 wrong already on easy', () => {
+    expect(getAdaptiveDifficulty('easy', [false, false])).toBeNull();
+  });
+
+  it('returns null for mixed results', () => {
+    expect(getAdaptiveDifficulty('easy', [true, false, true])).toBeNull();
+    expect(getAdaptiveDifficulty('medium', [false, true, false])).toBeNull();
+    expect(getAdaptiveDifficulty('hard', [true, false])).toBeNull();
+  });
+
+  it('returns null when fewer than 2 results', () => {
+    expect(getAdaptiveDifficulty('easy', [])).toBeNull();
+    expect(getAdaptiveDifficulty('easy', [true])).toBeNull();
+  });
+
+  it('only looks at last 3 for increase and last 2 for decrease', () => {
+    // Last 3 are correct even though earlier ones are wrong
+    expect(
+      getAdaptiveDifficulty('easy', [false, false, true, true, true]),
+    ).toBe('medium');
+    // Last 2 are wrong even though earlier ones are correct
+    expect(
+      getAdaptiveDifficulty('hard', [true, true, true, false, false]),
+    ).toBe('medium');
   });
 });
 
@@ -345,7 +394,7 @@ describe('reducer', () => {
       expect(result.answer).toBe('');
     });
 
-    it('adds an enemy when the answer is wrong', () => {
+    it('adds an enemy when the answer is wrong 3 times', () => {
       const state = makeState({
         val1: 3,
         val2: 4,
@@ -354,6 +403,7 @@ describe('reducer', () => {
         answer: '999',
         numOfEnemies: 3,
         modeType: 'wholeNumber',
+        attempts: 2,
       });
       const result = reducer(state, { type: TYPES.CHECK_ANSWER });
 
@@ -421,6 +471,211 @@ describe('reducer', () => {
       expect(result.numOfEnemies).toBe(0);
       expect(result.won).toBe(true);
     });
+
+    it('pushes to recentResults on correct answer', () => {
+      const state = makeState({
+        val1: 2,
+        val2: 3,
+        operator: '+',
+        mode: 'addition',
+        answer: '5',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        recentResults: [false],
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+
+      expect(result.recentResults).toEqual([false, true]);
+    });
+
+    it('pushes to recentResults on wrong answer', () => {
+      const state = makeState({
+        val1: 2,
+        val2: 3,
+        operator: '+',
+        mode: 'addition',
+        answer: '999',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        recentResults: [true],
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+
+      expect(result.recentResults).toEqual([true, false]);
+    });
+
+    it('keeps recentResults to max 5 entries', () => {
+      const state = makeState({
+        val1: 2,
+        val2: 3,
+        operator: '+',
+        mode: 'addition',
+        answer: '5',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        recentResults: [true, false, true, false, true],
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+
+      expect(result.recentResults.length).toBe(5);
+      expect(result.recentResults[4]).toBe(true);
+    });
+
+    it('auto-adjusts difficulty up after 3 correct with adaptive on', () => {
+      const startTime = 1700000000000;
+      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      const state = makeState({
+        val1: 2,
+        val2: 3,
+        operator: '+',
+        mode: 'addition',
+        answer: '5',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        difficulty: 'easy',
+        recentResults: [true, true],
+        adaptiveDifficulty: true,
+        questionStartTime: startTime,
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+
+      expect(result.difficulty).toBe('medium');
+      expect(result.adaptiveMessage).toBe("Great job! Here's a harder one!");
+      jest.restoreAllMocks();
+    });
+
+    it('auto-adjusts difficulty down after 2 wrong with adaptive on', () => {
+      const startTime = 1700000000000;
+      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      const state = makeState({
+        val1: 2,
+        val2: 3,
+        operator: '+',
+        mode: 'addition',
+        answer: '999',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        difficulty: 'hard',
+        recentResults: [false],
+        adaptiveDifficulty: true,
+        questionStartTime: startTime,
+        attempts: 2,
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+
+      expect(result.difficulty).toBe('medium');
+      expect(result.adaptiveMessage).toBe("Let's practice with easier ones!");
+      jest.restoreAllMocks();
+    });
+
+    it('does not auto-adjust when adaptive is off', () => {
+      const startTime = 1700000000000;
+      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      const state = makeState({
+        val1: 2,
+        val2: 3,
+        operator: '+',
+        mode: 'addition',
+        answer: '5',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        difficulty: 'easy',
+        recentResults: [true, true],
+        adaptiveDifficulty: false,
+        questionStartTime: startTime,
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+
+      expect(result.difficulty).toBe('easy');
+      expect(result.adaptiveMessage).toBeNull();
+      jest.restoreAllMocks();
+    });
+
+    it('wrong attempt 1: increments attempts/hintLevel, enemy count unchanged', () => {
+      const state = makeState({
+        val1: 3,
+        val2: 4,
+        operator: '+',
+        mode: 'addition',
+        answer: '999',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        attempts: 0,
+        hintLevel: 0,
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+
+      expect(result.numOfEnemies).toBe(3);
+      expect(result.attempts).toBe(1);
+      expect(result.hintLevel).toBe(1);
+      expect(result.answer).toBe('');
+    });
+
+    it('wrong attempt 2: increments attempts/hintLevel, enemy count unchanged', () => {
+      const state = makeState({
+        val1: 3,
+        val2: 4,
+        operator: '+',
+        mode: 'addition',
+        answer: '999',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        attempts: 1,
+        hintLevel: 1,
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+
+      expect(result.numOfEnemies).toBe(3);
+      expect(result.attempts).toBe(2);
+      expect(result.hintLevel).toBe(2);
+      expect(result.answer).toBe('');
+    });
+
+    it('wrong attempt 3: adds enemy, reveals answer, generates new problem', () => {
+      const state = makeState({
+        val1: 3,
+        val2: 4,
+        operator: '+',
+        mode: 'addition',
+        answer: '999',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        attempts: 2,
+        hintLevel: 2,
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+
+      expect(result.numOfEnemies).toBe(4);
+      expect(result.attempts).toBe(3);
+      expect(result.hintLevel).toBe(3);
+    });
+
+    it('correct on attempt 2: removes enemy, awards 50% points', () => {
+      const startTime = 1700000000000;
+      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      const state = makeState({
+        val1: 3,
+        val2: 4,
+        operator: '+',
+        mode: 'addition',
+        answer: '7',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        attempts: 1,
+        hintLevel: 1,
+        questionStartTime: startTime,
+        score: 0,
+        bestScore: 0,
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+
+      expect(result.numOfEnemies).toBe(2);
+      expect(result.attempts).toBe(0);
+      expect(result.hintLevel).toBe(0);
+      // 10 base points * 0.5 = 5
+      expect(result.score).toBe(5);
+      jest.restoreAllMocks();
+    });
   });
 
   describe('RESTART', () => {
@@ -466,6 +721,50 @@ describe('reducer', () => {
         const result = reducer(state, { type: TYPES.RESTART });
         expect(result.operator).toBe(op);
       }
+    });
+
+    it('clears recentResults but preserves adaptiveDifficulty', () => {
+      const state = makeState({
+        recentResults: [true, false, true],
+        adaptiveDifficulty: true,
+      });
+      const result = reducer(state, { type: TYPES.RESTART });
+
+      expect(result.recentResults).toEqual([]);
+      expect(result.adaptiveDifficulty).toBe(true);
+    });
+
+    it('preserves adaptiveDifficulty=false through restart', () => {
+      const state = makeState({
+        recentResults: [true, false],
+        adaptiveDifficulty: false,
+      });
+      const result = reducer(state, { type: TYPES.RESTART });
+
+      expect(result.recentResults).toEqual([]);
+      expect(result.adaptiveDifficulty).toBe(false);
+    });
+  });
+
+  describe('SET_ADAPTIVE', () => {
+    it('toggles adaptiveDifficulty on', () => {
+      const state = makeState({ adaptiveDifficulty: false });
+      const result = reducer(state, {
+        type: TYPES.SET_ADAPTIVE,
+        payload: true,
+      });
+      expect(result.adaptiveDifficulty).toBe(true);
+      expect(result.adaptiveMessage).toBeNull();
+    });
+
+    it('toggles adaptiveDifficulty off', () => {
+      const state = makeState({ adaptiveDifficulty: true });
+      const result = reducer(state, {
+        type: TYPES.SET_ADAPTIVE,
+        payload: false,
+      });
+      expect(result.adaptiveDifficulty).toBe(false);
+      expect(result.adaptiveMessage).toBeNull();
     });
   });
 
@@ -536,6 +835,7 @@ describe('reducer', () => {
         questionStartTime: startTime,
         score: 5,
         bestScore: 5,
+        attempts: 2,
       });
       const result = reducer(state, { type: TYPES.CHECK_ANSWER });
       expect(result.score).toBe(5);
