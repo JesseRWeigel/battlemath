@@ -23,6 +23,7 @@ export const TYPES = {
   RESTORE_STATE: 9,
   SET_SOUND_ENABLED: 10,
   SET_HIGH_CONTRAST: 11,
+  START_TIMER: 12,
 } as const;
 
 const OPERATORS = {
@@ -63,6 +64,10 @@ export type AppState = {
   isStoredState: boolean;
   soundEnabled: boolean;
   highContrast: boolean;
+  score: number;
+  questionStartTime: number;
+  bestScore: number;
+  lastPointsEarned: number | null;
 };
 
 export const initialState: AppState = {
@@ -79,7 +84,25 @@ export const initialState: AppState = {
   isStoredState: true,
   soundEnabled: true,
   highContrast: false,
+  score: 0,
+  questionStartTime: 0,
+  bestScore: 0,
+  lastPointsEarned: null,
 };
+
+/**
+ * Calculate points earned based on how quickly the answer was given.
+ * Faster answers earn more points.
+ */
+export function calculatePoints(elapsedMs: number): number {
+  const seconds = elapsedMs / 1000;
+  if (seconds < 5) return 10;
+  if (seconds < 10) return 8;
+  if (seconds < 15) return 6;
+  if (seconds < 20) return 4;
+  if (seconds < 25) return 2;
+  return 1;
+}
 
 export const reducer: Reducer<AppState, ActionType> = (state, action) => {
   const randomNumber = (
@@ -167,6 +190,8 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         val1: val[0],
         val2: val[1],
         operator: state.operator,
+        bestScore: state.bestScore,
+        questionStartTime: Date.now(),
       };
     }
 
@@ -217,14 +242,31 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
 
       console.log(expected);
 
+      const isCorrect = answer === expected;
+
+      // Calculate points based on elapsed time
+      const elapsed = Date.now() - state.questionStartTime;
+      const pointsEarned = isCorrect ? calculatePoints(elapsed) : 0;
+      const newScore = state.score + pointsEarned;
+      const newBestScore = Math.max(state.bestScore, newScore);
+
       // Update enemies & won
-      const stateWithEnemies =
-        answer === expected
-          ? reducer(state, { type: TYPES.REMOVE_ENEMY })
-          : reducer(state, { type: TYPES.ADD_ENEMY });
+      const stateWithEnemies = isCorrect
+        ? reducer(state, { type: TYPES.REMOVE_ENEMY })
+        : reducer(state, { type: TYPES.ADD_ENEMY });
 
       // Update problem
-      return reducer(stateWithEnemies, { type: TYPES.NEW_PROBLEM });
+      const stateWithProblem = reducer(stateWithEnemies, {
+        type: TYPES.NEW_PROBLEM,
+      });
+
+      return {
+        ...stateWithProblem,
+        score: newScore,
+        bestScore: newBestScore,
+        lastPointsEarned: pointsEarned,
+        questionStartTime: Date.now(),
+      };
     }
 
     case TYPES.NEW_PROBLEM: {
@@ -240,6 +282,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         val1: val[0],
         val2: val[1],
         answer: '',
+        questionStartTime: state.questionStartTime || Date.now(),
       };
     }
 
@@ -296,6 +339,13 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
     case TYPES.RESTORE_STATE: {
       const storedState = action.payload as AppState;
       return { ...storedState, isStoredState: true };
+    }
+
+    case TYPES.START_TIMER: {
+      return {
+        ...state,
+        questionStartTime: Date.now(),
+      };
     }
 
     default:

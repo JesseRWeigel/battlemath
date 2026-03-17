@@ -3,6 +3,7 @@ import {
   initialState,
   TYPES,
   randomNumberGenerator,
+  calculatePoints,
   AppState,
   ActionType,
 } from './AppReducer';
@@ -468,6 +469,135 @@ describe('reducer', () => {
     });
   });
 
+  describe('START_TIMER', () => {
+    it('sets questionStartTime to current time', () => {
+      const now = 1700000000000;
+      jest.spyOn(Date, 'now').mockReturnValue(now);
+      const state = makeState({ questionStartTime: 0 });
+      const result = reducer(state, { type: TYPES.START_TIMER });
+      expect(result.questionStartTime).toBe(now);
+      jest.restoreAllMocks();
+    });
+  });
+
+  describe('CHECK_ANSWER with scoring', () => {
+    it('awards 10 points for a correct answer under 5 seconds', () => {
+      const startTime = 1700000000000;
+      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      const state = makeState({
+        val1: 2,
+        val2: 3,
+        operator: '+',
+        mode: 'addition',
+        answer: '5',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        questionStartTime: startTime,
+        score: 0,
+        bestScore: 0,
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+      expect(result.score).toBe(10);
+      expect(result.lastPointsEarned).toBe(10);
+      jest.restoreAllMocks();
+    });
+
+    it('awards 8 points for a correct answer under 10 seconds', () => {
+      const startTime = 1700000000000;
+      jest.spyOn(Date, 'now').mockReturnValue(startTime + 7000);
+      const state = makeState({
+        val1: 2,
+        val2: 3,
+        operator: '+',
+        mode: 'addition',
+        answer: '5',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        questionStartTime: startTime,
+        score: 0,
+        bestScore: 0,
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+      expect(result.score).toBe(8);
+      jest.restoreAllMocks();
+    });
+
+    it('awards 0 points for a wrong answer', () => {
+      const startTime = 1700000000000;
+      jest.spyOn(Date, 'now').mockReturnValue(startTime + 2000);
+      const state = makeState({
+        val1: 2,
+        val2: 3,
+        operator: '+',
+        mode: 'addition',
+        answer: '999',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        questionStartTime: startTime,
+        score: 5,
+        bestScore: 5,
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+      expect(result.score).toBe(5);
+      expect(result.lastPointsEarned).toBe(0);
+      jest.restoreAllMocks();
+    });
+
+    it('accumulates score across multiple correct answers', () => {
+      const startTime = 1700000000000;
+      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      const state = makeState({
+        val1: 2,
+        val2: 3,
+        operator: '+',
+        mode: 'addition',
+        answer: '5',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        questionStartTime: startTime,
+        score: 20,
+        bestScore: 20,
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+      expect(result.score).toBe(30);
+      jest.restoreAllMocks();
+    });
+
+    it('updates bestScore when score exceeds it', () => {
+      const startTime = 1700000000000;
+      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      const state = makeState({
+        val1: 2,
+        val2: 3,
+        operator: '+',
+        mode: 'addition',
+        answer: '5',
+        numOfEnemies: 3,
+        modeType: 'wholeNumber',
+        questionStartTime: startTime,
+        score: 50,
+        bestScore: 55,
+      });
+      const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+      expect(result.score).toBe(60);
+      expect(result.bestScore).toBe(60);
+      jest.restoreAllMocks();
+    });
+  });
+
+  describe('RESTART with scoring', () => {
+    it('resets score to 0 but preserves bestScore', () => {
+      const state = makeState({
+        score: 42,
+        bestScore: 58,
+        won: true,
+      });
+      const result = reducer(state, { type: TYPES.RESTART });
+      expect(result.score).toBe(0);
+      expect(result.bestScore).toBe(58);
+    });
+  });
+
   describe('invalid action', () => {
     it('throws an error for unknown action types', () => {
       const state = makeState();
@@ -475,5 +605,39 @@ describe('reducer', () => {
         reducer(state, { type: 999 as any });
       }).toThrow('Invalid action 999');
     });
+  });
+});
+
+describe('calculatePoints', () => {
+  it('returns 10 for under 5 seconds', () => {
+    expect(calculatePoints(0)).toBe(10);
+    expect(calculatePoints(2000)).toBe(10);
+    expect(calculatePoints(4999)).toBe(10);
+  });
+
+  it('returns 8 for under 10 seconds', () => {
+    expect(calculatePoints(5000)).toBe(8);
+    expect(calculatePoints(9999)).toBe(8);
+  });
+
+  it('returns 6 for under 15 seconds', () => {
+    expect(calculatePoints(10000)).toBe(6);
+    expect(calculatePoints(14999)).toBe(6);
+  });
+
+  it('returns 4 for under 20 seconds', () => {
+    expect(calculatePoints(15000)).toBe(4);
+    expect(calculatePoints(19999)).toBe(4);
+  });
+
+  it('returns 2 for under 25 seconds', () => {
+    expect(calculatePoints(20000)).toBe(2);
+    expect(calculatePoints(24999)).toBe(2);
+  });
+
+  it('returns 1 for 25 seconds or more', () => {
+    expect(calculatePoints(25000)).toBe(1);
+    expect(calculatePoints(30000)).toBe(1);
+    expect(calculatePoints(100000)).toBe(1);
   });
 });

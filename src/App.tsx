@@ -1,4 +1,10 @@
-import React, { useReducer, useCallback, useEffect, useRef } from 'react';
+import React, {
+  useReducer,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   StyleSheet,
   Text,
@@ -34,9 +40,17 @@ function App() {
       isStoredState,
       soundEnabled,
       highContrast,
+      score,
+      questionStartTime,
+      bestScore,
+      lastPointsEarned,
     },
     dispatch,
   ] = useReducer(reducer, initialState);
+
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [showPoints, setShowPoints] = useState(false);
+  const pointsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   let submitInputRef = useRef<TextInput>(null);
 
@@ -205,6 +219,31 @@ function App() {
     submitInputRef.current && submitInputRef.current.focus();
   }, [val1, val2]);
 
+  // Start timer when a new problem appears
+  useEffect(() => {
+    if (won) return;
+    dispatch({ type: TYPES.START_TIMER });
+    setTimeLeft(30);
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [val1, val2, won]);
+
+  // Show points earned animation
+  useEffect(() => {
+    if (lastPointsEarned === null) return;
+    setShowPoints(true);
+    if (pointsTimeoutRef.current) clearTimeout(pointsTimeoutRef.current);
+    pointsTimeoutRef.current = setTimeout(() => setShowPoints(false), 1500);
+    return () => {
+      if (pointsTimeoutRef.current) clearTimeout(pointsTimeoutRef.current);
+    };
+  }, [lastPointsEarned, val1, val2]);
+
+  const timerColor =
+    timeLeft > 15 ? '#4caf50' : timeLeft > 5 ? '#ff9800' : '#f44336';
+
   return (
     <View
       style={[styles.root, { backgroundColor: activeTheme.backgroundColor }]}
@@ -259,6 +298,39 @@ function App() {
           </Picker>
         </View>
 
+        <View style={styles.scoreTimerRow} accessibilityLiveRegion="polite">
+          <Text
+            style={[styles.timerText, { color: timerColor }]}
+            testID="timer"
+          >
+            {`\u23F1 ${timeLeft}s`}
+          </Text>
+          <Text
+            style={[styles.scoreText, { color: activeTheme.textColor }]}
+            testID="score"
+          >
+            {`Score: ${score}`}
+          </Text>
+          <Text
+            style={[styles.bestScoreText, { color: activeTheme.textColor }]}
+            testID="best-score"
+          >
+            {`Best: ${bestScore}`}
+          </Text>
+          {showPoints && lastPointsEarned !== null && (
+            <Text
+              style={[
+                styles.pointsEarned,
+                {
+                  color: lastPointsEarned > 0 ? '#4caf50' : '#f44336',
+                },
+              ]}
+              testID="points-earned"
+            >
+              {`+${lastPointsEarned}`}
+            </Text>
+          )}
+        </View>
         <View
           style={styles.enemyCount}
           accessibilityLiveRegion="polite"
@@ -293,12 +365,23 @@ function App() {
           </View>
         </View>
         {won ? (
-          <View>
+          <View style={{ alignItems: 'center' }}>
             <Text
               style={{ color: activeTheme.textColor, fontSize: 32 }}
               accessibilityRole="text"
             >
               Victory!
+            </Text>
+            <Text
+              style={{
+                color: activeTheme.textColor,
+                fontSize: 24,
+                fontFamily: '"Comic Sans MS", cursive, sans-serif',
+                paddingVertical: 8,
+              }}
+              accessibilityRole="text"
+            >
+              {`Final Score: ${score}`}
             </Text>
             <Button
               onPress={handleRestart}
@@ -525,6 +608,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 6,
+  },
+  scoreTimerRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+    paddingVertical: 4,
+  },
+  timerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    fontFamily: '"Comic Sans MS", cursive, sans-serif',
+  },
+  scoreText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    fontFamily: '"Comic Sans MS", cursive, sans-serif',
+  },
+  bestScoreText: {
+    fontSize: 16,
+    fontFamily: '"Comic Sans MS", cursive, sans-serif',
+    opacity: 0.8,
+  },
+  pointsEarned: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    fontFamily: '"Comic Sans MS", cursive, sans-serif',
   },
   enemyCount: {
     paddingVertical: 4,
