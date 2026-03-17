@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import confetti from 'canvas-confetti';
 import { reducer, initialState, TYPES } from './AppReducer';
 import { useMsgAfterSubmit } from './hooks';
 import HeroSvg from './components/HeroSvg';
@@ -114,12 +115,16 @@ function App() {
       questionStartTime,
       bestScore,
       lastPointsEarned,
+      hintLevel,
     },
     dispatch,
   ] = useReducer(reducer, initialState);
   const [timeLeft, setTimeLeft] = useState(30);
   const [showPoints, setShowPoints] = useState(false);
   const pointsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [shaking, setShaking] = useState(false);
+  const [defeatingEnemy, setDefeatingEnemy] = useState(false);
+  const prevHintLevelRef = useRef(0);
   let submitInputRef = useRef<TextInput>(null);
   const variablesToLookFor: [number, number] = [
     previousNumOfEnemies,
@@ -133,10 +138,43 @@ function App() {
     if (isStoredState) return;
     if (numOfEnemies < previousNumOfEnemies) {
       if (soundEnabled) playCorrectSound();
+      // Correct answer confetti
+      setDefeatingEnemy(true);
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 },
+      });
+      setTimeout(() => setDefeatingEnemy(false), 500);
     } else if (numOfEnemies > previousNumOfEnemies) {
       if (soundEnabled) playIncorrectSound();
     }
   }, [numOfEnemies, previousNumOfEnemies, isStoredState, soundEnabled]);
+
+  // Wrong answer shake
+  useEffect(() => {
+    if (hintLevel > 0 && hintLevel > prevHintLevelRef.current) {
+      setShaking(true);
+      const timer = setTimeout(() => setShaking(false), 500);
+      return () => clearTimeout(timer);
+    }
+    prevHintLevelRef.current = hintLevel;
+  }, [hintLevel]);
+
+  // Victory celebration confetti
+  useEffect(() => {
+    if (!won) return;
+    const end = Date.now() + 3000;
+    const interval = setInterval(() => {
+      confetti({
+        particleCount: 50,
+        spread: 80,
+        origin: { x: Math.random(), y: Math.random() * 0.5 },
+      });
+      if (Date.now() > end) clearInterval(interval);
+    }, 250);
+    return () => clearInterval(interval);
+  }, [won]);
   const handleSoundToggle = useCallback(() => {
     dispatch({ type: TYPES.SET_SOUND_ENABLED, payload: !soundEnabled });
   }, [dispatch, soundEnabled]);
@@ -329,7 +367,12 @@ function App() {
                 <Text
                   style={[
                     styles.pointsEarned,
-                    { color: lastPointsEarned > 0 ? '#4caf50' : '#f44336' },
+                    {
+                      color: lastPointsEarned > 0 ? '#4caf50' : '#f44336',
+                      animationName: 'floatUp',
+                      animationDuration: '1.5s',
+                      animationFillMode: 'forwards',
+                    } as any,
                   ]}
                   testID="points-earned"
                 >{`+${lastPointsEarned}`}</Text>
@@ -398,7 +441,19 @@ function App() {
             </View>
             <View style={styles.enemiesContainer}>
               {[...Array(numOfEnemies)].map((_, i) => (
-                <View testID="enemies" key={i}>
+                <View
+                  testID="enemies"
+                  key={i}
+                  style={
+                    defeatingEnemy && i === numOfEnemies - 1
+                      ? ({
+                          animationName: 'enemyDefeat',
+                          animationDuration: '0.5s',
+                          animationFillMode: 'forwards',
+                        } as any)
+                      : undefined
+                  }
+                >
                   <Image
                     source={require('./assets/images/orc.png')}
                     style={styles.characterImage}
@@ -410,27 +465,57 @@ function App() {
           </View>
           {won ? (
             <View style={[styles.cardPanel, styles.victoryPanel]}>
-              <Text style={styles.victoryText} accessibilityRole="text">
+              <Text
+                style={[
+                  styles.victoryText,
+                  {
+                    animationName: 'victoryBounce',
+                    animationDuration: '0.8s',
+                    animationFillMode: 'forwards',
+                  } as any,
+                ]}
+                accessibilityRole="text"
+              >
                 Victory!
               </Text>
               <Text
                 style={styles.victoryScore}
                 accessibilityRole="text"
               >{`Final Score: ${score}`}</Text>
+              <Text
+                style={styles.victoryBest}
+                accessibilityRole="text"
+              >{`Best Score: ${bestScore}`}</Text>
               <TouchableOpacity
                 onPress={handleRestart}
                 style={[
                   styles.restartButton,
-                  { backgroundColor: activeTheme.buttonColor },
+                  {
+                    backgroundColor: activeTheme.buttonColor,
+                    animationName: 'pulse',
+                    animationDuration: '1.5s',
+                    animationIterationCount: 'infinite',
+                  } as any,
                 ]}
                 accessibilityLabel="Play again"
                 accessibilityRole="button"
               >
-                <Text style={styles.restartButtonText}>Restart</Text>
+                <Text style={styles.restartButtonText}>Play Again</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={[styles.mathContainer, styles.cardPanel]}>
+            <View
+              style={[
+                styles.mathContainer,
+                styles.cardPanel,
+                shaking
+                  ? ({
+                      animationName: 'shake',
+                      animationDuration: '0.5s',
+                    } as any)
+                  : undefined,
+              ]}
+            >
               {submitMessageBlock}
               <View style={styles.mathRow}>
                 <Text
@@ -636,6 +721,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: '"Poppins", sans-serif',
     paddingVertical: 8,
+  },
+  victoryBest: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 18,
+    fontFamily: '"Poppins", sans-serif',
+    paddingBottom: 8,
   },
   restartButton: {
     width: '100%',
