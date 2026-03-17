@@ -17,6 +17,7 @@ import confetti from 'canvas-confetti';
 import { reducer, initialState, TYPES, getStreakMilestone } from './AppReducer';
 import { useMsgAfterSubmit } from './hooks';
 import HeroSvg from './components/HeroSvg';
+import Tutorial from './components/Tutorial';
 import bgSound from './assets/music/background-music.mp3';
 import BackgroundSound from './components/BackgroundSound';
 import { playCorrectSound, playIncorrectSound } from './utils/SoundEffects';
@@ -119,6 +120,12 @@ function App() {
       streak,
       maxStreak,
       streakBonus,
+      showTutorial,
+      hasSeenTutorial,
+      totalAttempts,
+      correctAttempts,
+      totalAnswerTime,
+      starsEarned,
     },
     dispatch,
   ] = useReducer(reducer, initialState);
@@ -229,6 +236,12 @@ function App() {
   const handleRestart = useCallback(() => {
     dispatch({ type: TYPES.RESTART });
   }, [dispatch]);
+  const handleDismissTutorial = useCallback(() => {
+    dispatch({ type: TYPES.DISMISS_TUTORIAL });
+  }, [dispatch]);
+  const handleShowTutorial = useCallback(() => {
+    dispatch({ type: TYPES.SHOW_TUTORIAL });
+  }, [dispatch]);
   const handleSubmit = useCallback(() => {
     dispatch({ type: TYPES.CHECK_ANSWER });
     if (submitInputRef.current) submitInputRef.current.focus();
@@ -240,6 +253,7 @@ function App() {
     if (storedData) {
       dispatch({ type: TYPES.RESTORE_STATE, payload: JSON.parse(storedData) });
     } else {
+      dispatch({ type: TYPES.SHOW_TUTORIAL });
       localStorage.setItem(
         'state',
         JSON.stringify({
@@ -253,6 +267,7 @@ function App() {
           difficulty,
           modeType,
           previousNumOfEnemies,
+          hasSeenTutorial: false,
         }),
       );
     }
@@ -271,6 +286,7 @@ function App() {
         difficulty,
         modeType,
         previousNumOfEnemies,
+        hasSeenTutorial,
       }),
     );
   }, [
@@ -284,6 +300,7 @@ function App() {
     difficulty,
     modeType,
     previousNumOfEnemies,
+    hasSeenTutorial,
   ]);
   const submitMsgText = isErrorMessage
     ? highContrast
@@ -382,6 +399,7 @@ function App() {
         } as any,
       ]}
     >
+      {showTutorial && <Tutorial onDismiss={handleDismissTutorial} />}
       <View style={styles.gameContainer}>
         <View style={styles.content}>
           <Text
@@ -520,6 +538,15 @@ function App() {
                 >
                   {highContrast ? 'High Contrast On' : 'High Contrast Off'}
                 </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleShowTutorial}
+                style={styles.helpButton}
+                accessibilityLabel="Show tutorial"
+                accessibilityRole="button"
+                testID="help-button"
+              >
+                <Text style={styles.helpButtonText}>?</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -952,6 +979,22 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
+  },
+  helpButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 44,
+    minWidth: 44,
+  },
+  helpButtonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontFamily: '"Quicksand", sans-serif',
+    fontWeight: '700',
   },
   enemyCount: { paddingVertical: 4 },
   enemyCountText: {
