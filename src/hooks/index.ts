@@ -1,1 +1,1 @@
-export * from './useMsgAfterSubmit'
+export * from './useMsgAfterSubmit';

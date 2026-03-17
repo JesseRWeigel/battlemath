@@ -1,38 +1,38 @@
-import { useState, useEffect } from 'react'
-import { MESSAGES } from '../utils'
+import { useState, useEffect } from 'react';
+import { MESSAGES } from '../utils';
 
-const submitMsgInitiaState = { isErrorMessage: false, msg: '' }
+const submitMsgInitiaState = { isErrorMessage: false, msg: '' };
 
 export const useMsgAfterSubmit = (
   variablesToLookFor: [number, number],
   isStoredState: boolean,
-  messages?: Record<string, string>
+  messages?: Record<string, string>,
 ) => {
-  const [submitMsg, setSubmitMsg] = useState(submitMsgInitiaState)
+  const [submitMsg, setSubmitMsg] = useState(submitMsgInitiaState);
   const setMsg = (submitMessage: string, isErrorMessage = false) => {
-    setSubmitMsg({ msg: submitMessage, isErrorMessage })
-    setTimeout(() => setSubmitMsg(submitMsgInitiaState), 1500)
-  }
+    setSubmitMsg({ msg: submitMessage, isErrorMessage });
+    setTimeout(() => setSubmitMsg(submitMsgInitiaState), 1500);
+  };
 
-  const [previousNumOfEnemies, numOfEnemies] = variablesToLookFor
+  const [previousNumOfEnemies, numOfEnemies] = variablesToLookFor;
   const {
     successMsg = MESSAGES.ANSWER_SUBMIT.SUCCESS,
     errorMsg = MESSAGES.ANSWER_SUBMIT.ERROR,
-  } = messages ?? {}
+  } = messages ?? {};
 
   useEffect(() => {
     if (!isStoredState) {
       // when after submit the current number of enimies is higher than before
       if (previousNumOfEnemies - numOfEnemies > 0) {
-        setMsg(successMsg)
+        setMsg(successMsg);
       }
 
       // when after submit the current number of enimies is lower than before
       if (previousNumOfEnemies - numOfEnemies < 0) {
-        setMsg(errorMsg, true)
+        setMsg(errorMsg, true);
       }
     }
-  }, variablesToLookFor)
+  }, variablesToLookFor);
 
-  return submitMsg
-}
+  return submitMsg;
+};

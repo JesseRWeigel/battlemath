@@ -1,4 +1,4 @@
-import React, { useReducer, useCallback, useEffect } from 'react'
+import React, { useReducer, useCallback, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,13 +10,13 @@ import {
   Picker,
   ImageBackground,
   Image,
-} from 'react-native'
-import { reducer, initialState, TYPES } from './AppReducer'
-import { useMsgAfterSubmit } from './hooks'
+} from 'react-native';
+import { reducer, initialState, TYPES } from './AppReducer';
+import { useMsgAfterSubmit } from './hooks';
 
-import HeroSvg from './components/HeroSvg'
-import bgSound from './assets/music/background-music.mp3'
-import BackgroundSound from './components/BackgroundSound'
+import HeroSvg from './components/HeroSvg';
+import bgSound from './assets/music/background-music.mp3';
+import BackgroundSound from './components/BackgroundSound';
 function App() {
   const [
     {
@@ -33,76 +33,76 @@ function App() {
       isStoredState,
     },
     dispatch,
-  ] = useReducer(reducer, initialState)
+  ] = useReducer(reducer, initialState);
 
-  let submitInputRef = React.useRef<TextInput>(null)
+  let submitInputRef = React.useRef<TextInput>(null);
 
   const variablesToLookFor: [number, number] = [
     previousNumOfEnemies,
     numOfEnemies,
-  ]
+  ];
   const { msg, isErrorMessage } = useMsgAfterSubmit(
     variablesToLookFor,
-    isStoredState
-  )
+    isStoredState,
+  );
 
   // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
     (value: string) => {
       if (/^\d+|[.]$/.test(value.toString()) || value === '') {
-        dispatch({ type: TYPES.SET_ANSWER, payload: value })
+        dispatch({ type: TYPES.SET_ANSWER, payload: value });
       }
     },
-    [dispatch]
-  )
+    [dispatch],
+  );
 
   const handleModePicker = useCallback(
     (mode: string) => {
       dispatch({
         type: TYPES.SET_MODE,
         payload: mode,
-      })
+      });
     },
-    [dispatch]
-  )
+    [dispatch],
+  );
 
   const handleModeType = useCallback(
     (mode: string) => {
       dispatch({
         type: TYPES.SET_MODE_TYPES,
         payload: mode,
-      })
+      });
     },
-    [dispatch]
-  )
+    [dispatch],
+  );
 
   const handleDifficultyPicker = useCallback(
     (difficulty: string) => {
       dispatch({
         type: TYPES.SET_DIFFICULTY,
         payload: difficulty,
-      })
+      });
     },
-    [dispatch]
-  )
+    [dispatch],
+  );
 
   const handleRestart = useCallback(() => {
-    dispatch({ type: TYPES.RESTART })
-  }, [dispatch])
+    dispatch({ type: TYPES.RESTART });
+  }, [dispatch]);
 
   const handleSubmit = useCallback(() => {
-    dispatch({ type: TYPES.CHECK_ANSWER })
-    if (submitInputRef.current) submitInputRef.current.focus()
-  }, [dispatch])
+    dispatch({ type: TYPES.CHECK_ANSWER });
+    if (submitInputRef.current) submitInputRef.current.focus();
+  }, [dispatch]);
 
-  const activeTheme = themes[mode]
+  const activeTheme = themes[mode];
 
   // Equivalent of componentDidMount
   useEffect(() => {
-    dispatch({ type: TYPES.NEW_PROBLEM })
-    const storedData = localStorage.getItem('state')
+    dispatch({ type: TYPES.NEW_PROBLEM });
+    const storedData = localStorage.getItem('state');
     if (storedData) {
-      dispatch({ type: TYPES.RESTORE_STATE, payload: JSON.parse(storedData) })
+      dispatch({ type: TYPES.RESTORE_STATE, payload: JSON.parse(storedData) });
     } else {
       localStorage.setItem(
         'state',
@@ -117,10 +117,10 @@ function App() {
           difficulty,
           modeType,
           previousNumOfEnemies,
-        })
-      )
+        }),
+      );
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(
@@ -136,8 +136,8 @@ function App() {
         difficulty,
         modeType,
         previousNumOfEnemies,
-      })
-    )
+      }),
+    );
   }, [
     answer,
     numOfEnemies,
@@ -149,20 +149,20 @@ function App() {
     difficulty,
     modeType,
     previousNumOfEnemies,
-  ])
+  ]);
 
   const submitMsgText = isErrorMessage
     ? styles.msgTextError
-    : styles.msgTextSuccess
+    : styles.msgTextSuccess;
   const submitMessageBlock = !!msg && (
     <View style={styles.submitMsgWrapper}>
       <Text style={submitMsgText}>{msg}</Text>
     </View>
-  )
+  );
 
   useEffect(() => {
-    submitInputRef.current && submitInputRef.current.focus()
-  })
+    submitInputRef.current && submitInputRef.current.focus();
+  });
 
   return (
     <View
@@ -291,7 +291,7 @@ function App() {
         <BackgroundSound url={bgSound} />
       </ImageBackground>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontFamily: `"Comic Sans MS", cursive, sans-serif`,
   },
-})
+});
 
 const themes = {
   addition: {
@@ -427,6 +427,6 @@ const themes = {
     buttonColor: 'rgba(255, 201, 20, 1)',
     textColor: '#000',
   },
-}
+};
 
-export default App
+export default App;
