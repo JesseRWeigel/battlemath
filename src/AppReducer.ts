@@ -21,6 +21,7 @@ export const TYPES = {
   RESTART: 7,
   SET_MODE_TYPES: 8,
   RESTORE_STATE: 9,
+  SET_SOUND_ENABLED: 10,
 } as const;
 
 const OPERATORS = {
@@ -39,6 +40,7 @@ const DIFFICULTIES = {
 const MODE_TYPES = {
   wholeNumber: 'wholeNumber',
   decimals: 'decimal',
+  negative: 'negative',
 } as const;
 
 export type ActionType = {
@@ -58,6 +60,7 @@ export type AppState = {
   difficulty: keyof typeof DIFFICULTIES;
   modeType: keyof typeof MODE_TYPES;
   isStoredState: boolean;
+  soundEnabled: boolean;
 };
 
 export const initialState: AppState = {
@@ -72,6 +75,7 @@ export const initialState: AppState = {
   difficulty: 'easy',
   modeType: 'wholeNumber',
   isStoredState: true,
+  soundEnabled: true,
 };
 
 export const reducer: Reducer<AppState, ActionType> = (state, action) => {
@@ -114,9 +118,18 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
     while (
       val1 % val2 !== 0 &&
       mode === 'division' &&
-      modeType.includes('wholeNumber')
+      (modeType.includes('wholeNumber') || modeType.includes('negative'))
     )
       val2--;
+
+    // In negative mode, randomly negate one of the values
+    if (modeType.includes('negative')) {
+      if (Math.random() < 0.5) {
+        val1 = -val1;
+      } else {
+        val2 = -val2;
+      }
+    }
 
     return [val1, val2];
   };
@@ -190,7 +203,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
       if (state.modeType) {
         if (state.modeType.includes('decimal'))
           answer = parseFloat(state?.answer ?? '');
-        else answer = parseInt(state?.answer ?? '', 10);
+        else answer = parseFloat(state?.answer ?? '');
       }
 
       // example: eval('2 + 4'); Note: eval is safe here because we control the input
@@ -260,6 +273,13 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         modeType,
         val1: val[0],
         val2: val[1],
+      };
+    }
+
+    case TYPES.SET_SOUND_ENABLED: {
+      return {
+        ...state,
+        soundEnabled: action.payload as boolean,
       };
     }
 
