@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { reducer, initialState, TYPES } from './AppReducer';
 import { useMsgAfterSubmit } from './hooks';
+import { generateHint } from './utils';
 
 import HeroSvg from './components/HeroSvg';
 import bgSound from './assets/music/background-music.mp3';
@@ -127,6 +128,7 @@ function App() {
       questionStartTime,
       bestScore,
       lastPointsEarned,
+      hintLevel,
       adaptiveDifficulty,
       adaptiveMessage,
     },
@@ -348,6 +350,18 @@ function App() {
       if (pointsTimeoutRef.current) clearTimeout(pointsTimeoutRef.current);
     };
   }, [lastPointsEarned, val1, val2]);
+
+  useEffect(() => {
+    if (hintLevel === 3) {
+      const timer = setTimeout(() => {
+        dispatch({ type: TYPES.NEW_PROBLEM });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [hintLevel, dispatch]);
+
+  const hintMessage =
+    hintLevel > 0 ? generateHint(val1, val2, operator, hintLevel) : '';
 
   const timerColor =
     timeLeft > 15 ? '#4caf50' : timeLeft > 5 ? '#ff9800' : '#f44336';
@@ -572,7 +586,16 @@ function App() {
             </View>
           ) : (
             <View style={[styles.mathContainer, styles.cardPanel]}>
-              {submitMessageBlock}
+              {hintLevel > 0 ? (
+                <View
+                  style={styles.hintBubble}
+                  accessibilityLiveRegion="polite"
+                >
+                  <Text style={styles.hintText}>{hintMessage}</Text>
+                </View>
+              ) : (
+                submitMessageBlock
+              )}
               <View style={styles.mathRow}>
                 <Text
                   nativeID="val1"
@@ -861,6 +884,21 @@ const styles = StyleSheet.create({
   touchTarget: {
     minHeight: 44,
     justifyContent: 'center',
+  },
+  hintBubble: {
+    backgroundColor: 'rgba(255, 152, 0, 0.85)',
+    borderRadius: 12,
+    padding: 12,
+    marginVertical: 8,
+    maxWidth: 350,
+    alignSelf: 'center' as any,
+  },
+  hintText: {
+    color: '#fff',
+    fontSize: 18,
+    fontFamily: '"Quicksand", sans-serif',
+    fontWeight: '600',
+    textAlign: 'center' as any,
   },
   msgTextError: {
     color: 'red',
