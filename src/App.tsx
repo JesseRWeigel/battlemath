@@ -1,4 +1,4 @@
-import React, { useReducer, useCallback, useEffect } from 'react';
+import React, { useReducer, useCallback, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -33,11 +33,12 @@ function App() {
       previousNumOfEnemies,
       isStoredState,
       soundEnabled,
+      highContrast,
     },
     dispatch,
   ] = useReducer(reducer, initialState);
 
-  let submitInputRef = React.useRef<TextInput>(null);
+  let submitInputRef = useRef<TextInput>(null);
 
   const variablesToLookFor: [number, number] = [
     previousNumOfEnemies,
@@ -64,6 +65,22 @@ function App() {
       payload: !soundEnabled,
     });
   }, [dispatch, soundEnabled]);
+
+  const handleHighContrastToggle = useCallback(() => {
+    dispatch({
+      type: TYPES.SET_HIGH_CONTRAST,
+      payload: !highContrast,
+    });
+  }, [dispatch, highContrast]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        dispatch({ type: TYPES.SET_ANSWER, payload: '' });
+      }
+    },
+    [dispatch],
+  );
 
   // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
@@ -114,7 +131,7 @@ function App() {
     if (submitInputRef.current) submitInputRef.current.focus();
   }, [dispatch]);
 
-  const activeTheme = themes[mode];
+  const activeTheme = highContrast ? themes.highContrast : themes[mode];
 
   // Equivalent of componentDidMount
   useEffect(() => {
@@ -171,17 +188,22 @@ function App() {
   ]);
 
   const submitMsgText = isErrorMessage
-    ? styles.msgTextError
-    : styles.msgTextSuccess;
+    ? highContrast
+      ? styles.msgTextErrorHC
+      : styles.msgTextError
+    : highContrast
+      ? styles.msgTextSuccessHC
+      : styles.msgTextSuccess;
   const submitMessageBlock = !!msg && (
-    <View style={styles.submitMsgWrapper}>
+    <View style={styles.submitMsgWrapper} accessibilityLiveRegion="polite">
       <Text style={submitMsgText}>{msg}</Text>
     </View>
   );
 
+  // Auto-focus the answer input after each new problem
   useEffect(() => {
     submitInputRef.current && submitInputRef.current.focus();
-  });
+  }, [val1, val2]);
 
   return (
     <View
@@ -192,7 +214,10 @@ function App() {
         style={styles.image}
         resizeMode="cover"
       >
-        <Text style={[styles.title, { color: activeTheme.textColor }]}>
+        <Text
+          style={[styles.title, { color: activeTheme.textColor }]}
+          accessibilityRole="header"
+        >
           Battle Math
         </Text>
         <View style={styles.pickerContainer}>
@@ -201,6 +226,7 @@ function App() {
             selectedValue={mode}
             onValueChange={handleModePicker}
             nativeID="operation-selector"
+            accessibilityLabel="Select math operation"
           >
             <Picker.Item label="Addition(+)" value="addition" />
             <Picker.Item label="Subtraction(-)" value="subtraction" />
@@ -213,6 +239,7 @@ function App() {
             style={styles.picker}
             onValueChange={handleDifficultyPicker}
             nativeID="difficulty-selector"
+            accessibilityLabel="Select difficulty level"
           >
             <Picker.Item label="Easy" value="easy" />
             <Picker.Item label="Medium" value="medium" />
@@ -224,6 +251,7 @@ function App() {
             style={styles.picker}
             onValueChange={handleModeType}
             nativeID="modeType-selector"
+            accessibilityLabel="Select number mode"
           >
             <Picker.Item label="Whole Number" value="wholeNumber" />
             <Picker.Item label="Decimals" value="decimal" />
@@ -231,12 +259,24 @@ function App() {
           </Picker>
         </View>
 
+        <View
+          style={styles.enemyCount}
+          accessibilityLiveRegion="polite"
+          accessibilityRole="text"
+        >
+          <Text
+            style={[styles.enemyCountText, { color: activeTheme.textColor }]}
+          >
+            {`Enemies: ${numOfEnemies}`}
+          </Text>
+        </View>
         <View style={styles.battlefield}>
           <View style={styles.container}>
-            <View nativeID="hero">
+            <View nativeID="hero" accessibilityLabel="Your hero character">
               <Image
                 source={require('./assets/images/hero.png')}
                 style={{ width: 100, height: 200 }}
+                accessibilityLabel="Hero"
               />
             </View>
           </View>
@@ -246,6 +286,7 @@ function App() {
                 <Image
                   source={require('./assets/images/orc.png')}
                   style={{ width: 100, height: 200 }}
+                  accessibilityLabel={`Enemy ${i + 1}`}
                 />
               </View>
             ))}
@@ -253,12 +294,17 @@ function App() {
         </View>
         {won ? (
           <View>
-            <Text style={{ color: activeTheme.textColor }}>Victory!</Text>
+            <Text
+              style={{ color: activeTheme.textColor, fontSize: 32 }}
+              accessibilityRole="text"
+            >
+              Victory!
+            </Text>
             <Button
               onPress={handleRestart}
               title="Restart"
               color={activeTheme.buttonColor}
-              accessibilityLabel="Click this button to play again."
+              accessibilityLabel="Play again"
             />
           </View>
         ) : (
@@ -288,23 +334,34 @@ function App() {
               </Text>
               <TextInput
                 nativeID="answer-input"
-                style={styles.input}
+                style={[styles.input, highContrast && highContrastStyles.input]}
                 onChangeText={handleAnswerChange}
                 onSubmitEditing={handleSubmit}
+                onKeyPress={handleKeyDown as any}
                 value={answer}
                 ref={submitInputRef}
+                accessibilityLabel="Enter your answer"
               />
             </View>
             <TouchableOpacity
               style={[
                 styles.button,
                 { backgroundColor: activeTheme.buttonColor },
+                highContrast && highContrastStyles.button,
               ]}
               testID="submit"
               onPress={handleSubmit}
-              accessibilityLabel="Learn more about this purple button"
+              accessibilityLabel="Submit answer"
+              accessibilityRole="button"
             >
-              <Text style={styles.buttonText}>Submit</Text>
+              <Text
+                style={[
+                  styles.buttonText,
+                  highContrast && highContrastStyles.buttonText,
+                ]}
+              >
+                Submit
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -315,10 +372,35 @@ function App() {
             accessibilityLabel={
               soundEnabled ? 'Mute sound effects' : 'Unmute sound effects'
             }
+            accessibilityRole="button"
             testID="sound-toggle"
           >
-            <Text style={styles.soundToggleText}>
+            <Text
+              style={[
+                styles.soundToggleText,
+                highContrast && highContrastStyles.settingsButton,
+              ]}
+            >
               {soundEnabled ? 'SFX On' : 'SFX Off'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleHighContrastToggle}
+            accessibilityLabel={
+              highContrast
+                ? 'Disable high contrast mode'
+                : 'Enable high contrast mode'
+            }
+            accessibilityRole="button"
+            testID="high-contrast-toggle"
+          >
+            <Text
+              style={[
+                styles.soundToggleText,
+                highContrast && highContrastStyles.settingsButton,
+              ]}
+            >
+              {highContrast ? 'High Contrast On' : 'High Contrast Off'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -444,9 +526,59 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 6,
   },
+  enemyCount: {
+    paddingVertical: 4,
+  },
+  enemyCountText: {
+    fontSize: 20,
+    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontWeight: 'bold',
+  },
+  msgTextErrorHC: {
+    color: '#ff6b6b',
+    fontSize: 25,
+    fontWeight: 'bold',
+  },
+  msgTextSuccessHC: {
+    color: '#69ff69',
+    fontSize: 25,
+    fontWeight: 'bold',
+  },
 });
 
-const themes = {
+const highContrastStyles = StyleSheet.create({
+  input: {
+    borderColor: '#fff',
+    borderWidth: 3,
+    backgroundColor: '#000',
+    color: '#fff',
+  },
+  button: {
+    borderColor: '#fff',
+    borderWidth: 3,
+  },
+  buttonText: {
+    color: '#000',
+    fontWeight: 'bold',
+  },
+  settingsButton: {
+    borderColor: '#fff',
+    borderWidth: 2,
+    backgroundColor: '#000',
+    color: '#fff',
+  },
+});
+
+const themes: Record<
+  string,
+  {
+    backgroundColor: string;
+    heroColor: string;
+    enemyColor: string;
+    buttonColor: string;
+    textColor: string;
+  }
+> = {
   addition: {
     backgroundColor: 'darkslateblue',
     heroColor: 'rgba(23, 190, 187, 1)',
@@ -474,6 +606,13 @@ const themes = {
     enemyColor: 'rgba(228, 87, 46, 1)',
     buttonColor: 'rgba(255, 201, 20, 1)',
     textColor: '#000',
+  },
+  highContrast: {
+    backgroundColor: '#000',
+    heroColor: '#fff',
+    enemyColor: '#fff',
+    buttonColor: '#fff',
+    textColor: '#fff',
   },
 };
 

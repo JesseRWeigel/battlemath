@@ -22,6 +22,7 @@ export const TYPES = {
   SET_MODE_TYPES: 8,
   RESTORE_STATE: 9,
   SET_SOUND_ENABLED: 10,
+  SET_HIGH_CONTRAST: 11,
 } as const;
 
 const OPERATORS = {
@@ -61,6 +62,7 @@ export type AppState = {
   modeType: keyof typeof MODE_TYPES;
   isStoredState: boolean;
   soundEnabled: boolean;
+  highContrast: boolean;
 };
 
 export const initialState: AppState = {
@@ -76,6 +78,7 @@ export const initialState: AppState = {
   modeType: 'wholeNumber',
   isStoredState: true,
   soundEnabled: true,
+  highContrast: false,
 };
 
 export const reducer: Reducer<AppState, ActionType> = (state, action) => {
@@ -280,6 +283,13 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
       return {
         ...state,
         soundEnabled: action.payload as boolean,
+      };
+    }
+
+    case TYPES.SET_HIGH_CONTRAST: {
+      return {
+        ...state,
+        highContrast: action.payload as boolean,
       };
     }
 
