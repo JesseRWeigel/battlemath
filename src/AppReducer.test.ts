@@ -4,6 +4,7 @@ import {
   TYPES,
   randomNumberGenerator,
   calculatePoints,
+  calculateStars,
   getAdaptiveDifficulty,
   getStreakMilestone,
   AppState,
@@ -1050,5 +1051,109 @@ describe('streak system', () => {
     const result = reducer(state, { type: TYPES.RESTART });
     expect(result.streak).toBe(0);
     expect(result.maxStreak).toBe(12);
+  });
+});
+
+describe('calculateStars', () => {
+  it('returns 3 stars for 90%+ accuracy and <10s avg time', () => {
+    // 9 correct out of 10, avg 5s each
+    expect(calculateStars(9, 10, 45000)).toBe(3);
+  });
+
+  it('returns 2 stars for 70%+ accuracy', () => {
+    // 7 correct out of 10, avg 12s each (over 10s so not 3 stars)
+    expect(calculateStars(7, 10, 84000)).toBe(2);
+  });
+
+  it('returns 2 stars for 90%+ accuracy but slow avg time', () => {
+    // 9 correct out of 10, avg 15s each
+    expect(calculateStars(9, 10, 135000)).toBe(2);
+  });
+
+  it('returns 1 star for below 70% accuracy', () => {
+    // 2 correct out of 5
+    expect(calculateStars(2, 5, 10000)).toBe(1);
+  });
+
+  it('returns 0 for no attempts', () => {
+    expect(calculateStars(0, 0, 0)).toBe(0);
+  });
+});
+
+describe('star rating tracking', () => {
+  it('CHECK_ANSWER increments totalAttempts on correct answer', () => {
+    const now = Date.now();
+    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    const state = makeState({
+      val1: 2,
+      val2: 3,
+      operator: '+',
+      mode: 'addition',
+      answer: '5',
+      numOfEnemies: 3,
+      modeType: 'wholeNumber',
+      questionStartTime: now,
+      totalAttempts: 0,
+      correctAttempts: 0,
+      totalAnswerTime: 0,
+    });
+    const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+    expect(result.totalAttempts).toBe(1);
+    expect(result.correctAttempts).toBe(1);
+    expect(result.totalAnswerTime).toBe(3000);
+    jest.restoreAllMocks();
+  });
+
+  it('CHECK_ANSWER increments totalAttempts on wrong answer', () => {
+    const state = makeState({
+      val1: 2,
+      val2: 3,
+      operator: '+',
+      mode: 'addition',
+      answer: '999',
+      numOfEnemies: 3,
+      modeType: 'wholeNumber',
+      totalAttempts: 5,
+      correctAttempts: 3,
+    });
+    const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+    expect(result.totalAttempts).toBe(6);
+    expect(result.correctAttempts).toBe(3); // unchanged
+  });
+
+  it('RESTART resets tracking fields', () => {
+    const state = makeState({
+      totalAttempts: 10,
+      correctAttempts: 7,
+      totalAnswerTime: 50000,
+      starsEarned: 2,
+    });
+    const result = reducer(state, { type: TYPES.RESTART });
+    expect(result.totalAttempts).toBe(0);
+    expect(result.correctAttempts).toBe(0);
+    expect(result.totalAnswerTime).toBe(0);
+    expect(result.starsEarned).toBe(0);
+  });
+
+  it('calculates starsEarned on victory', () => {
+    const now = Date.now();
+    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    const state = makeState({
+      val1: 2,
+      val2: 3,
+      operator: '+',
+      mode: 'addition',
+      answer: '5',
+      numOfEnemies: 1,
+      modeType: 'wholeNumber',
+      questionStartTime: now,
+      totalAttempts: 2,
+      correctAttempts: 2,
+      totalAnswerTime: 6000,
+    });
+    const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+    expect(result.won).toBe(true);
+    expect(result.starsEarned).toBe(3); // 3/3 correct, avg 3s
+    jest.restoreAllMocks();
   });
 });

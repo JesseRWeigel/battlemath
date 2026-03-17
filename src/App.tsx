@@ -619,6 +619,31 @@ function App() {
               >
                 Victory!
               </Text>
+              <View style={styles.starsContainer} nativeID="stars-container">
+                {[0, 1, 2].map((i) => (
+                  <Text
+                    key={i}
+                    style={[
+                      styles.star,
+                      i < starsEarned
+                        ? ({
+                            color: '#FFD93D',
+                            animationName: 'starEarned',
+                            animationDuration: '0.5s',
+                            animationDelay: `${i * 0.5}s`,
+                            animationFillMode: 'both',
+                          } as any)
+                        : { color: '#666' },
+                    ]}
+                  >
+                    {i < starsEarned ? '\u2605' : '\u2606'}
+                  </Text>
+                ))}
+              </View>
+              <Text
+                style={styles.victoryStats}
+                accessibilityRole="text"
+              >{`Accuracy: ${totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 0}%`}</Text>
               <Text
                 style={styles.victoryScore}
                 accessibilityRole="text"
@@ -874,6 +899,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: '"Poppins", sans-serif',
     paddingBottom: 8,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 12,
+    paddingVertical: 12,
+  },
+  star: {
+    fontSize: 56,
+    fontFamily: '"Poppins", sans-serif',
+  },
+  victoryStats: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 16,
+    fontFamily: '"Poppins", sans-serif',
+    paddingBottom: 4,
   },
   restartButton: {
     width: '100%',
