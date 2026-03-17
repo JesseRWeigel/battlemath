@@ -24,6 +24,7 @@ export const TYPES = {
   SET_SOUND_ENABLED: 10,
   SET_HIGH_CONTRAST: 11,
   START_TIMER: 12,
+  SET_ADAPTIVE: 13,
 } as const;
 
 const OPERATORS = {
@@ -68,6 +69,11 @@ export type AppState = {
   questionStartTime: number;
   bestScore: number;
   lastPointsEarned: number | null;
+  attempts: number;
+  hintLevel: number;
+  recentResults: boolean[];
+  adaptiveDifficulty: boolean;
+  adaptiveMessage: string | null;
 };
 
 export const initialState: AppState = {
@@ -88,6 +94,11 @@ export const initialState: AppState = {
   questionStartTime: 0,
   bestScore: 0,
   lastPointsEarned: null,
+  attempts: 0,
+  hintLevel: 0,
+  recentResults: [],
+  adaptiveDifficulty: true,
+  adaptiveMessage: null,
 };
 
 /**
@@ -102,6 +113,34 @@ export function calculatePoints(elapsedMs: number): number {
   if (seconds < 20) return 4;
   if (seconds < 25) return 2;
   return 1;
+}
+
+/**
+ * Determine if difficulty should change based on recent results.
+ * Returns the new difficulty string, or null if no change needed.
+ */
+export function getAdaptiveDifficulty(
+  currentDifficulty: string,
+  recentResults: boolean[],
+): string | null {
+  if (recentResults.length < 2) return null;
+
+  const last3 = recentResults.slice(-3);
+  const last2 = recentResults.slice(-2);
+
+  if (last3.length === 3 && last3.every((r) => r)) {
+    if (currentDifficulty === 'easy') return 'medium';
+    if (currentDifficulty === 'medium') return 'hard';
+    return null;
+  }
+
+  if (last2.length === 2 && last2.every((r) => !r)) {
+    if (currentDifficulty === 'hard') return 'medium';
+    if (currentDifficulty === 'medium') return 'easy';
+    return null;
+  }
+
+  return null;
 }
 
 export const reducer: Reducer<AppState, ActionType> = (state, action) => {
@@ -131,7 +170,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
 
     switch (mode) {
       case 'division': {
-        y = modeType.includes('decimal') ? y : Math.floor(y / val1); // keeps x *= y below 10\
+        y = modeType.includes('decimal') ? y : Math.floor(y / val1);
         break;
       }
       case 'subtraction': {
@@ -148,7 +187,6 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
     )
       val2--;
 
-    // In negative mode, randomly negate one of the values
     if (modeType.includes('negative')) {
       if (Math.random() < 0.5) {
         val1 = -val1;
@@ -192,6 +230,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         operator: state.operator,
         bestScore: state.bestScore,
         questionStartTime: Date.now(),
+        adaptiveDifficulty: state.adaptiveDifficulty,
+        recentResults: [],
+        adaptiveMessage: null,
       };
     }
 
@@ -234,9 +275,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         else answer = parseFloat(state?.answer ?? '');
       }
 
-      // example: eval('2 + 4'); Note: eval is safe here because we control the input
       // eslint-disable-next-line no-eval
-
       let expected = eval(`${state.val1} ${state.operator} ${state.val2}`);
       expected = Number.parseFloat(expected.toFixed(2));
 
@@ -244,35 +283,98 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
 
       const isCorrect = answer === expected;
 
-      // Calculate points based on elapsed time
-      const elapsed = Date.now() - state.questionStartTime;
-      const pointsEarned = isCorrect ? calculatePoints(elapsed) : 0;
-      const newScore = state.score + pointsEarned;
-      const newBestScore = Math.max(state.bestScore, newScore);
+      const newRecentResults = [
+        ...state.recentResults.slice(-(5 - 1)),
+        isCorrect,
+      ];
 
-      // Update enemies & won
-      const stateWithEnemies = isCorrect
-        ? reducer(state, { type: TYPES.REMOVE_ENEMY })
-        : reducer(state, { type: TYPES.ADD_ENEMY });
+      let newDifficulty = state.difficulty;
+      let adaptiveMessage: string | null = null;
+      if (state.adaptiveDifficulty) {
+        const suggested = getAdaptiveDifficulty(
+          state.difficulty,
+          newRecentResults,
+        );
+        if (suggested) {
+          const isIncrease =
+            (state.difficulty === 'easy' && suggested === 'medium') ||
+            (state.difficulty === 'medium' && suggested === 'hard');
+          adaptiveMessage = isIncrease
+            ? "Great job! Here's a harder one!"
+            : "Let's practice with easier ones!";
+          newDifficulty = suggested as (typeof state)['difficulty'];
+        }
+      }
 
-      // Update problem
-      const stateWithProblem = reducer(stateWithEnemies, {
-        type: TYPES.NEW_PROBLEM,
-      });
+      if (isCorrect) {
+        const elapsed = Date.now() - state.questionStartTime;
+        const basePoints = calculatePoints(elapsed);
+        const attemptMultiplier =
+          state.attempts === 0 ? 1 : state.attempts === 1 ? 0.5 : 0.25;
+        const pointsEarned = Math.round(basePoints * attemptMultiplier);
+        const newScore = state.score + pointsEarned;
+        const newBestScore = Math.max(state.bestScore, newScore);
+
+        const stateWithEnemies = reducer(
+          { ...state, difficulty: newDifficulty },
+          { type: TYPES.REMOVE_ENEMY },
+        );
+        const stateWithProblem = reducer(stateWithEnemies, {
+          type: TYPES.NEW_PROBLEM,
+        });
+
+        return {
+          ...stateWithProblem,
+          score: newScore,
+          bestScore: newBestScore,
+          lastPointsEarned: pointsEarned,
+          questionStartTime: Date.now(),
+          attempts: 0,
+          hintLevel: 0,
+          recentResults: newRecentResults,
+          difficulty: newDifficulty,
+          adaptiveMessage,
+        };
+      }
+
+      const newAttempts = state.attempts + 1;
+
+      if (newAttempts >= 3) {
+        const stateWithEnemies = reducer(
+          { ...state, difficulty: newDifficulty },
+          { type: TYPES.ADD_ENEMY },
+        );
+        const stateWithProblem = reducer(stateWithEnemies, {
+          type: TYPES.NEW_PROBLEM,
+        });
+
+        return {
+          ...stateWithProblem,
+          score: state.score,
+          bestScore: state.bestScore,
+          lastPointsEarned: 0,
+          questionStartTime: Date.now(),
+          attempts: newAttempts,
+          hintLevel: 3,
+          recentResults: newRecentResults,
+          difficulty: newDifficulty,
+          adaptiveMessage,
+        };
+      }
 
       return {
-        ...stateWithProblem,
-        score: newScore,
-        bestScore: newBestScore,
-        lastPointsEarned: pointsEarned,
-        questionStartTime: Date.now(),
+        ...state,
+        answer: '',
+        attempts: newAttempts,
+        hintLevel: newAttempts,
+        lastPointsEarned: null,
+        recentResults: newRecentResults,
       };
     }
 
     case TYPES.NEW_PROBLEM: {
       let val = randomNumber();
 
-      // if problem is the same, retry
       if (val[0] === state.val1 && val[1] === state.val2) {
         return reducer(state, { type: TYPES.NEW_PROBLEM });
       }
@@ -283,6 +385,8 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         val2: val[1],
         answer: '',
         questionStartTime: state.questionStartTime || Date.now(),
+        attempts: 0,
+        hintLevel: 0,
       };
     }
 
@@ -333,6 +437,14 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
       return {
         ...state,
         highContrast: action.payload as boolean,
+      };
+    }
+
+    case TYPES.SET_ADAPTIVE: {
+      return {
+        ...state,
+        adaptiveDifficulty: action.payload as boolean,
+        adaptiveMessage: null,
       };
     }
 
