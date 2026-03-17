@@ -5,6 +5,7 @@ import {
   randomNumberGenerator,
   calculatePoints,
   getAdaptiveDifficulty,
+  getStreakMilestone,
   AppState,
   ActionType,
 } from './AppReducer';
@@ -939,5 +940,115 @@ describe('calculatePoints', () => {
     expect(calculatePoints(25000)).toBe(1);
     expect(calculatePoints(30000)).toBe(1);
     expect(calculatePoints(100000)).toBe(1);
+  });
+});
+
+describe('getStreakMilestone', () => {
+  it('returns milestone at 3', () => {
+    const m = getStreakMilestone(3);
+    expect(m).toEqual({ label: 'Nice!', bonus: 2 });
+  });
+
+  it('returns milestone at 5', () => {
+    expect(getStreakMilestone(5)).toEqual({ label: 'On Fire!', bonus: 5 });
+  });
+
+  it('returns milestone at 10', () => {
+    expect(getStreakMilestone(10)).toEqual({
+      label: 'Unstoppable!',
+      bonus: 10,
+    });
+  });
+
+  it('returns milestone at 15', () => {
+    expect(getStreakMilestone(15)).toEqual({ label: 'LEGENDARY!', bonus: 15 });
+  });
+
+  it('returns null for non-milestone streaks', () => {
+    expect(getStreakMilestone(1)).toBeNull();
+    expect(getStreakMilestone(2)).toBeNull();
+    expect(getStreakMilestone(4)).toBeNull();
+    expect(getStreakMilestone(7)).toBeNull();
+    expect(getStreakMilestone(20)).toBeNull();
+  });
+});
+
+describe('streak system', () => {
+  it('CHECK_ANSWER correct increments streak', () => {
+    const now = Date.now();
+    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    const state: AppState = {
+      ...initialState,
+      val1: 2,
+      val2: 3,
+      operator: '+' as const,
+      answer: '5',
+      numOfEnemies: 3,
+      previousNumOfEnemies: 3,
+      questionStartTime: now,
+      streak: 0,
+      maxStreak: 0,
+      streakBonus: 0,
+    };
+    const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+    expect(result.streak).toBe(1);
+    jest.restoreAllMocks();
+  });
+
+  it('CHECK_ANSWER correct at milestone 3 awards bonus', () => {
+    const now = Date.now();
+    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    const state: AppState = {
+      ...initialState,
+      val1: 2,
+      val2: 3,
+      operator: '+' as const,
+      answer: '5',
+      numOfEnemies: 3,
+      previousNumOfEnemies: 3,
+      questionStartTime: now,
+      streak: 2,
+      maxStreak: 2,
+      streakBonus: 0,
+    };
+    const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+    expect(result.streak).toBe(3);
+    expect(result.streakBonus).toBe(2); // Nice! milestone
+    jest.restoreAllMocks();
+  });
+
+  it('CHECK_ANSWER wrong after 3 attempts resets streak', () => {
+    const now = Date.now();
+    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    const state: AppState = {
+      ...initialState,
+      val1: 2,
+      val2: 3,
+      operator: '+' as const,
+      answer: '99',
+      numOfEnemies: 3,
+      previousNumOfEnemies: 3,
+      questionStartTime: now,
+      streak: 5,
+      maxStreak: 5,
+      streakBonus: 0,
+      attempts: 2,
+      hintLevel: 2,
+    };
+    const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+    expect(result.streak).toBe(0);
+    expect(result.streakBonus).toBe(0);
+    jest.restoreAllMocks();
+  });
+
+  it('RESTART resets streak but preserves maxStreak', () => {
+    const state: AppState = {
+      ...initialState,
+      streak: 8,
+      maxStreak: 12,
+    };
+    const result = reducer(state, { type: TYPES.RESTART });
+    expect(result.streak).toBe(0);
+    expect(result.maxStreak).toBe(12);
   });
 });

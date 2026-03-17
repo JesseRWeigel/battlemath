@@ -14,7 +14,7 @@ import {
   Image,
 } from 'react-native';
 import confetti from 'canvas-confetti';
-import { reducer, initialState, TYPES } from './AppReducer';
+import { reducer, initialState, TYPES, getStreakMilestone } from './AppReducer';
 import { useMsgAfterSubmit } from './hooks';
 import HeroSvg from './components/HeroSvg';
 import bgSound from './assets/music/background-music.mp3';
@@ -116,9 +116,13 @@ function App() {
       bestScore,
       lastPointsEarned,
       hintLevel,
+      streak,
+      maxStreak,
+      streakBonus,
     },
     dispatch,
   ] = useReducer(reducer, initialState);
+  const [streakLabel, setStreakLabel] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(30);
   const [showPoints, setShowPoints] = useState(false);
   const pointsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -314,6 +318,37 @@ function App() {
       if (pointsTimeoutRef.current) clearTimeout(pointsTimeoutRef.current);
     };
   }, [lastPointsEarned, val1, val2]);
+  // Streak milestone popup
+  useEffect(() => {
+    if (streak < 3) {
+      setStreakLabel(null);
+      return;
+    }
+    const milestone = getStreakMilestone(streak);
+    if (milestone) {
+      setStreakLabel(`${milestone.label} +${milestone.bonus}`);
+      const timer = setTimeout(() => setStreakLabel(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [streak]);
+
+  const streakGlowStyle =
+    streak >= 10
+      ? ({
+          boxShadow: '0 0 20px rgba(255, 50, 0, 0.6)',
+          animationName: 'fireGlow',
+          animationDuration: '1.5s',
+          animationIterationCount: 'infinite',
+        } as any)
+      : streak >= 5
+        ? ({
+            boxShadow: '0 0 12px rgba(255, 100, 0, 0.4)',
+            animationName: 'fireGlow',
+            animationDuration: '2s',
+            animationIterationCount: 'infinite',
+          } as any)
+        : undefined;
+
   const heroAnimStyle: Record<string, React.CSSProperties> = {
     idle: {
       animationName: 'heroIdle',
@@ -379,7 +414,10 @@ function App() {
                 testID="modeType-selector"
               />
             </View>
-            <View style={styles.scoreTimerRow} accessibilityLiveRegion="polite">
+            <View
+              style={[styles.scoreTimerRow, streakGlowStyle]}
+              accessibilityLiveRegion="polite"
+            >
               <Text
                 style={[styles.timerText, { color: timerColor }]}
                 testID="timer"
@@ -405,6 +443,33 @@ function App() {
                   ]}
                   testID="points-earned"
                 >{`+${lastPointsEarned}`}</Text>
+              )}
+              {streak >= 3 && (
+                <Text
+                  style={[
+                    styles.streakText,
+                    streak >= 10
+                      ? styles.streakLegendary
+                      : streak >= 5
+                        ? styles.streakFire
+                        : undefined,
+                  ]}
+                  testID="streak-counter"
+                >{`\uD83D\uDD25 \u00D7${streak}`}</Text>
+              )}
+              {streakLabel && (
+                <Text
+                  style={[
+                    styles.streakMilestone,
+                    {
+                      animationName: 'victoryBounce',
+                      animationDuration: '0.5s',
+                      animationFillMode: 'forwards',
+                    } as any,
+                  ]}
+                >
+                  {streakLabel}
+                </Text>
               )}
             </View>
             <View
@@ -535,6 +600,12 @@ function App() {
                 style={styles.victoryBest}
                 accessibilityRole="text"
               >{`Best Score: ${bestScore}`}</Text>
+              {maxStreak >= 3 && (
+                <Text
+                  style={styles.victoryBest}
+                  accessibilityRole="text"
+                >{`Best Streak: \uD83D\uDD25 \u00D7${maxStreak}`}</Text>
+              )}
               <TouchableOpacity
                 onPress={handleRestart}
                 style={[
@@ -852,6 +923,35 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     fontFamily: '"Poppins", sans-serif',
+  },
+  streakText: {
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+    fontFamily: '"Poppins", sans-serif',
+    color: '#FFD93D',
+  },
+  streakFire: {
+    fontSize: 22,
+    color: '#FF8C00',
+    textShadowColor: 'rgba(255, 100, 0, 0.6)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
+  },
+  streakLegendary: {
+    fontSize: 24,
+    color: '#FF4500',
+    textShadowColor: 'rgba(255, 50, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 12,
+  },
+  streakMilestone: {
+    fontSize: 20,
+    fontWeight: 'bold' as const,
+    fontFamily: '"Fredoka One", sans-serif',
+    color: '#FFD93D',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   enemyCount: { paddingVertical: 4 },
   enemyCountText: {
