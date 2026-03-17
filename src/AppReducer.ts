@@ -74,6 +74,9 @@ export type AppState = {
   recentResults: boolean[];
   adaptiveDifficulty: boolean;
   adaptiveMessage: string | null;
+  streak: number;
+  maxStreak: number;
+  streakBonus: number;
 };
 
 export const initialState: AppState = {
@@ -99,6 +102,9 @@ export const initialState: AppState = {
   recentResults: [],
   adaptiveDifficulty: true,
   adaptiveMessage: null,
+  streak: 0,
+  maxStreak: 0,
+  streakBonus: 0,
 };
 
 /**
@@ -141,6 +147,23 @@ export function getAdaptiveDifficulty(
   }
 
   return null;
+}
+
+export function getStreakMilestone(
+  streak: number,
+): { label: string; bonus: number } | null {
+  switch (streak) {
+    case 3:
+      return { label: 'Nice!', bonus: 2 };
+    case 5:
+      return { label: 'On Fire!', bonus: 5 };
+    case 10:
+      return { label: 'Unstoppable!', bonus: 10 };
+    case 15:
+      return { label: 'LEGENDARY!', bonus: 15 };
+    default:
+      return null;
+  }
 }
 
 export const reducer: Reducer<AppState, ActionType> = (state, action) => {
@@ -233,6 +256,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         adaptiveDifficulty: state.adaptiveDifficulty,
         recentResults: [],
         adaptiveMessage: null,
+        maxStreak: state.maxStreak,
       };
     }
 
@@ -312,7 +336,13 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         const attemptMultiplier =
           state.attempts === 0 ? 1 : state.attempts === 1 ? 0.5 : 0.25;
         const pointsEarned = Math.round(basePoints * attemptMultiplier);
-        const newScore = state.score + pointsEarned;
+
+        const newStreak = state.streak + 1;
+        const newMaxStreak = Math.max(state.maxStreak, newStreak);
+        const milestone = getStreakMilestone(newStreak);
+        const streakBonus = milestone ? milestone.bonus : 0;
+
+        const newScore = state.score + pointsEarned + streakBonus;
         const newBestScore = Math.max(state.bestScore, newScore);
 
         const stateWithEnemies = reducer(
@@ -334,6 +364,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
           recentResults: newRecentResults,
           difficulty: newDifficulty,
           adaptiveMessage,
+          streak: newStreak,
+          maxStreak: newMaxStreak,
+          streakBonus,
         };
       }
 
@@ -359,6 +392,8 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
           recentResults: newRecentResults,
           difficulty: newDifficulty,
           adaptiveMessage,
+          streak: 0,
+          streakBonus: 0,
         };
       }
 
