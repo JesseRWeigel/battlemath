@@ -210,6 +210,38 @@ describe('reducer', () => {
       expect(Number.isInteger(result.val1)).toBe(true);
       expect(Number.isInteger(result.val2)).toBe(true);
     });
+
+    it('changes mode type to negative', () => {
+      const state = makeState({ modeType: 'wholeNumber' });
+      const result = reducer(state, {
+        type: TYPES.SET_MODE_TYPES,
+        payload: 'negative',
+      });
+
+      expect(result.modeType).toBe('negative');
+    });
+
+    it('generates at least one negative value in negative mode', () => {
+      let sawNegative = false;
+      for (let i = 0; i < 50; i++) {
+        const state = makeState({ modeType: 'negative' });
+        const result = reducer(state, { type: TYPES.NEW_PROBLEM });
+        if (result.val1 < 0 || result.val2 < 0) {
+          sawNegative = true;
+          break;
+        }
+      }
+      expect(sawNegative).toBe(true);
+    });
+
+    it('negative mode produces integers (not decimals)', () => {
+      for (let i = 0; i < 20; i++) {
+        const state = makeState({ modeType: 'negative' });
+        const result = reducer(state, { type: TYPES.NEW_PROBLEM });
+        expect(Number.isInteger(result.val1)).toBe(true);
+        expect(Number.isInteger(result.val2)).toBe(true);
+      }
+    });
   });
 
   describe('ADD_ENEMY', () => {

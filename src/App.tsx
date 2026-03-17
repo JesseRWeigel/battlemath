@@ -68,7 +68,7 @@ function App() {
   // useCallback helps prevent re-rendering via memoization
   const handleAnswerChange = useCallback(
     (value: string) => {
-      if (/^\d+|[.]$/.test(value.toString()) || value === '') {
+      if (/^-?\d*\.?\d*$/.test(value.toString()) || value === '') {
         dispatch({ type: TYPES.SET_ANSWER, payload: value });
       }
     },
@@ -227,6 +227,7 @@ function App() {
           >
             <Picker.Item label="Whole Number" value="wholeNumber" />
             <Picker.Item label="Decimals" value="decimal" />
+            <Picker.Item label="Negatives" value="negative" />
           </Picker>
         </View>
 
@@ -268,7 +269,7 @@ function App() {
                 nativeID="val1"
                 style={[styles.mathText, { color: activeTheme.textColor }]}
               >
-                {val1}
+                {val1 < 0 ? `(${val1})` : val1}
               </Text>
               <Text
                 nativeID="operator"
@@ -280,7 +281,7 @@ function App() {
                 nativeID="val2"
                 style={[styles.mathText, { color: activeTheme.textColor }]}
               >
-                {val2}
+                {val2 < 0 ? `(${val2})` : val2}
               </Text>
               <Text style={[styles.mathText, { color: activeTheme.textColor }]}>
                 =
