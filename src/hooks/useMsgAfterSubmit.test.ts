@@ -17,7 +17,7 @@ describe('useMsgAfterSubmit', () => {
     expect(result.current.isErrorMessage).toBe(false);
   });
 
-  it('shows success message when numOfEnemies decreases (correct answer)', () => {
+  it('shows a success message when numOfEnemies decreases (correct answer)', () => {
     const { result, rerender } = renderHook(
       ({ vars, stored }) => useMsgAfterSubmit(vars, stored),
       { initialProps: { vars: [3, 3] as [number, number], stored: false } },
@@ -25,11 +25,12 @@ describe('useMsgAfterSubmit', () => {
 
     rerender({ vars: [3, 2], stored: false });
 
-    expect(result.current.msg).toBe(MESSAGES.ANSWER_SUBMIT.SUCCESS);
+    // Success is now a random pick from the array
+    expect(MESSAGES.ANSWER_SUBMIT.SUCCESS).toContain(result.current.msg);
     expect(result.current.isErrorMessage).toBe(false);
   });
 
-  it('shows error message when numOfEnemies increases (wrong answer)', () => {
+  it('does not show error message when numOfEnemies increases (hints handle this now)', () => {
     const { result, rerender } = renderHook(
       ({ vars, stored }) => useMsgAfterSubmit(vars, stored),
       { initialProps: { vars: [3, 3] as [number, number], stored: false } },
@@ -37,8 +38,9 @@ describe('useMsgAfterSubmit', () => {
 
     rerender({ vars: [3, 4], stored: false });
 
-    expect(result.current.msg).toBe(MESSAGES.ANSWER_SUBMIT.ERROR);
-    expect(result.current.isErrorMessage).toBe(true);
+    // Hook no longer handles wrong answers — progressive hints do
+    expect(result.current.msg).toBe('');
+    expect(result.current.isErrorMessage).toBe(false);
   });
 
   it('does not show a message when isStoredState is true', () => {
@@ -53,25 +55,6 @@ describe('useMsgAfterSubmit', () => {
     expect(result.current.isErrorMessage).toBe(false);
   });
 
-  it('uses custom messages when provided', () => {
-    const custom = { successMsg: 'Nice!', errorMsg: 'Oops!' };
-    const { result, rerender } = renderHook(
-      ({ vars, stored }) => useMsgAfterSubmit(vars, stored, custom),
-      { initialProps: { vars: [3, 3] as [number, number], stored: false } },
-    );
-
-    rerender({ vars: [3, 2], stored: false });
-    expect(result.current.msg).toBe('Nice!');
-
-    // Let timer clear before next assertion
-    act(() => {
-      jest.advanceTimersByTime(1500);
-    });
-
-    rerender({ vars: [3, 4], stored: false });
-    expect(result.current.msg).toBe('Oops!');
-  });
-
   it('auto-clears the message after 1500ms', () => {
     const { result, rerender } = renderHook(
       ({ vars, stored }) => useMsgAfterSubmit(vars, stored),
@@ -79,7 +62,7 @@ describe('useMsgAfterSubmit', () => {
     );
 
     rerender({ vars: [3, 2], stored: false });
-    expect(result.current.msg).toBe(MESSAGES.ANSWER_SUBMIT.SUCCESS);
+    expect(MESSAGES.ANSWER_SUBMIT.SUCCESS).toContain(result.current.msg);
 
     act(() => {
       jest.advanceTimersByTime(1500);
