@@ -59,7 +59,13 @@ const BackgroundSound = ({ url }: BackgroundSoundProps) => {
   return (
     <>
       {isReady && (
-        <Button onPress={handleToggerPress} title={isPlaying ? '🔊' : '🔇'} />
+        <Button
+          onPress={handleToggerPress}
+          title={isPlaying ? '🔊' : '🔇'}
+          accessibilityLabel={
+            isPlaying ? 'Pause background music' : 'Play background music'
+          }
+        />
       )}
       <audio ref={audioRef} onCanPlayThrough={handleCanPlayThrough}>
         <source src={url} type="audio/mpeg" />
