@@ -52,6 +52,21 @@ yarn start
 npm run build
 ```
 
+### Scoring System
+
+Each question starts a 30-second countdown timer. Faster correct answers earn more points:
+
+| Speed | Points |
+| --- | --- |
+| Under 5 seconds | 10 |
+| Under 10 seconds | 8 |
+| Under 15 seconds | 6 |
+| Under 20 seconds | 4 |
+| Under 25 seconds | 2 |
+| 25 seconds or more | 1 |
+
+Wrong answers earn 0 points. Your total score accumulates across all questions, and your best score for the session is tracked. The timer changes color as time runs low (green to yellow to red) to keep things exciting!
+
 ### Roadmap
 
 - [x] Simple UI with Addition, Subtraction, Multiplication, Division questions
@@ -60,4 +75,4 @@ npm run build
 - [x] Character art for hero and enemies
 - [x] Difficulty selection (Easy, Medium, Hard)
 - [x] Mode types (Whole Number, Decimals, Negatives)
-- [ ] Point System
+- [x] Point System
