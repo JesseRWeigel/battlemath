@@ -24,6 +24,22 @@ import HeroSvg from './components/HeroSvg';
 import bgSound from './assets/music/background-music.mp3';
 import BackgroundSound from './components/BackgroundSound';
 import { playCorrectSound, playIncorrectSound } from './utils/SoundEffects';
+
+function displayOperator(op: string): string {
+  switch (op) {
+    case '+':
+      return '+';
+    case '-':
+      return '\u2212'; // proper minus U+2212
+    case '*':
+      return '\u00D7'; // multiplication U+00D7
+    case '/':
+      return '\u00F7'; // division U+00F7
+    default:
+      return op;
+  }
+}
+
 function App() {
   const [
     {
@@ -267,10 +283,10 @@ function App() {
             nativeID="operation-selector"
             accessibilityLabel="Select math operation"
           >
-            <Picker.Item label="Addition(+)" value="addition" />
-            <Picker.Item label="Subtraction(-)" value="subtraction" />
-            <Picker.Item label="Multiplication(*)" value="multiplication" />
-            <Picker.Item label="Division(/)" value="division" />
+            <Picker.Item label="Addition (+)" value="addition" />
+            <Picker.Item label="Subtraction (−)" value="subtraction" />
+            <Picker.Item label="Multiplication (×)" value="multiplication" />
+            <Picker.Item label="Division (÷)" value="division" />
           </Picker>
 
           <Picker
@@ -367,7 +383,11 @@ function App() {
         {won ? (
           <View style={{ alignItems: 'center' }}>
             <Text
-              style={{ color: activeTheme.textColor, fontSize: 32 }}
+              style={{
+                color: activeTheme.textColor,
+                fontSize: 32,
+                fontFamily: '"Fredoka One", "Quicksand", sans-serif',
+              }}
               accessibilityRole="text"
             >
               Victory!
@@ -376,7 +396,7 @@ function App() {
               style={{
                 color: activeTheme.textColor,
                 fontSize: 24,
-                fontFamily: '"Comic Sans MS", cursive, sans-serif',
+                fontFamily: '"Poppins", sans-serif',
                 paddingVertical: 8,
               }}
               accessibilityRole="text"
@@ -404,7 +424,7 @@ function App() {
                 nativeID="operator"
                 style={[styles.mathText, { color: activeTheme.textColor }]}
               >
-                {operator}
+                {displayOperator(operator)}
               </Text>
               <Text
                 nativeID="val2"
@@ -511,7 +531,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Fredoka One", "Quicksand", sans-serif',
   },
   pickerContainer: {
     flexDirection: 'row',
@@ -520,7 +540,7 @@ const styles = StyleSheet.create({
     height: 40,
     width: 150,
     borderRadius: 8,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Quicksand", sans-serif',
     textAlign: 'center',
     marginLeft: 10,
   },
@@ -556,7 +576,8 @@ const styles = StyleSheet.create({
   },
   mathText: {
     fontSize: 40,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Poppins", sans-serif',
+    fontWeight: '700',
   },
   input: {
     height: 60,
@@ -567,7 +588,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 40,
     borderRadius: 8,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Poppins", sans-serif',
   },
   button: {
     height: 60,
@@ -580,19 +601,23 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 40,
+    fontFamily: '"Quicksand", sans-serif',
+    fontWeight: '700',
   },
   msgTextError: {
     color: 'red',
     fontSize: 25,
+    fontFamily: '"Quicksand", sans-serif',
   },
   msgTextSuccess: {
     color: 'green',
     fontSize: 25,
+    fontFamily: '"Quicksand", sans-serif',
   },
   submitMsgWrapper: {
     paddingBottom: 15,
     fontSize: 40,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Quicksand", sans-serif',
   },
   soundControls: {
     flexDirection: 'row',
@@ -603,7 +628,7 @@ const styles = StyleSheet.create({
   soundToggleText: {
     color: '#fff',
     fontSize: 16,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Quicksand", sans-serif',
     backgroundColor: 'rgba(0,0,0,0.4)',
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -619,40 +644,42 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    fontFamily: '"Comic Sans MS", cursive, sans-serif',
+    fontFamily: '"Poppins", sans-serif',
   },
   scoreText: {
     fontSize: 22,
     fontWeight: 'bold',
-    fontFamily: '"Comic Sans MS", cursive, sans-serif',
+    fontFamily: '"Poppins", sans-serif',
   },
   bestScoreText: {
     fontSize: 16,
-    fontFamily: '"Comic Sans MS", cursive, sans-serif',
+    fontFamily: '"Poppins", sans-serif',
     opacity: 0.8,
   },
   pointsEarned: {
     fontSize: 22,
     fontWeight: 'bold',
-    fontFamily: '"Comic Sans MS", cursive, sans-serif',
+    fontFamily: '"Poppins", sans-serif',
   },
   enemyCount: {
     paddingVertical: 4,
   },
   enemyCountText: {
     fontSize: 20,
-    fontFamily: `"Comic Sans MS", cursive, sans-serif`,
+    fontFamily: '"Quicksand", sans-serif',
     fontWeight: 'bold',
   },
   msgTextErrorHC: {
     color: '#ff6b6b',
     fontSize: 25,
     fontWeight: 'bold',
+    fontFamily: '"Quicksand", sans-serif',
   },
   msgTextSuccessHC: {
     color: '#69ff69',
     fontSize: 25,
     fontWeight: 'bold',
+    fontFamily: '"Quicksand", sans-serif',
   },
 });
 
@@ -683,44 +710,38 @@ const themes: Record<
   string,
   {
     backgroundColor: string;
-    heroColor: string;
-    enemyColor: string;
+    gradient: string;
     buttonColor: string;
     textColor: string;
   }
 > = {
   addition: {
-    backgroundColor: 'darkslateblue',
-    heroColor: 'rgba(23, 190, 187, 1)',
-    enemyColor: 'rgba(228, 87, 46, 1)',
+    backgroundColor: '#FF8C00',
+    gradient: 'linear-gradient(135deg, #FFD93D 0%, #FF8C00 100%)',
     buttonColor: 'rgba(255, 201, 20, 1)',
     textColor: '#fff',
   },
   subtraction: {
-    backgroundColor: 'deepskyblue',
-    heroColor: 'rgba(23, 190, 187, 1)',
-    enemyColor: 'rgba(228, 87, 46, 1)',
+    backgroundColor: '#1565C0',
+    gradient: 'linear-gradient(135deg, #4FC3F7 0%, #1565C0 100%)',
     buttonColor: 'rgba(255, 201, 20, 1)',
-    textColor: '#000',
+    textColor: '#fff',
   },
   multiplication: {
-    backgroundColor: 'darkslategrey',
-    heroColor: 'rgba(23, 190, 187, 1)',
-    enemyColor: 'rgba(228, 87, 46, 1)',
+    backgroundColor: '#37474F',
+    gradient: 'linear-gradient(135deg, #78909C 0%, #37474F 100%)',
     buttonColor: 'rgba(255, 201, 20, 1)',
     textColor: '#fff',
   },
   division: {
-    backgroundColor: 'turquoise',
-    heroColor: 'rgba(23, 190, 187, 1)',
-    enemyColor: 'rgba(228, 87, 46, 1)',
+    backgroundColor: '#00695C',
+    gradient: 'linear-gradient(135deg, #4DB6AC 0%, #00695C 100%)',
     buttonColor: 'rgba(255, 201, 20, 1)',
-    textColor: '#000',
+    textColor: '#fff',
   },
   highContrast: {
     backgroundColor: '#000',
-    heroColor: '#fff',
-    enemyColor: '#fff',
+    gradient: 'linear-gradient(135deg, #000000 0%, #1a1a2e 100%)',
     buttonColor: '#fff',
     textColor: '#fff',
   },
