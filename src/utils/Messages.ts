@@ -3,4 +3,4 @@ export const MESSAGES = {
     ERROR: 'You got that wrong :(',
     SUCCESS: 'You got that RIGHT :)',
   },
-}
+};

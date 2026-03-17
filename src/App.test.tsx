@@ -1,9 +1,9 @@
-import App from './App'
+import App from './App';
 
-import { render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react';
 
 it('renders without crashing', () => {
-  render(<App />)
+  render(<App />);
 
-  expect(screen.getByText(/Battle Math/)).toBeInTheDocument()
-})
+  expect(screen.getByText(/Battle Math/)).toBeInTheDocument();
+});

@@ -1,4 +1,4 @@
-import { SVGProps } from 'react'
+import { SVGProps } from 'react';
 
 function HeroSvg(props: SVGProps<any>) {
   return (
@@ -36,7 +36,7 @@ function HeroSvg(props: SVGProps<any>) {
         d="M209.533 218.467l5.78-5.78a15.998 15.998 0 0111.314-4.686h34.745c4.243 0 8.313 1.686 11.314 4.686l5.78 5.78a16.002 16.002 0 0013.298 4.563l30.237-3.78c8.946-1.118 16.549-7.12 19.605-15.602C351.068 177.389 355.648 144 355.648 144H132.352s4.58 33.389 14.041 59.647c3.056 8.482 10.659 14.484 19.605 15.602l30.237 3.78a15.998 15.998 0 0013.298-4.562z"
       />
     </svg>
-  )
+  );
 }
 
-export default HeroSvg
+export default HeroSvg;
