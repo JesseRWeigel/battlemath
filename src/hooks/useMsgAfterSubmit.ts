@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { MESSAGES } from '../utils';
+import { getRandomSuccessMessage } from '../utils';
 
 const submitMsgInitiaState = { isErrorMessage: false, msg: '' };
 
 export const useMsgAfterSubmit = (
   variablesToLookFor: [number, number],
   isStoredState: boolean,
-  messages?: Record<string, string>,
 ) => {
   const [submitMsg, setSubmitMsg] = useState(submitMsgInitiaState);
   const setMsg = (submitMessage: string, isErrorMessage = false) => {
@@ -15,21 +14,11 @@ export const useMsgAfterSubmit = (
   };
 
   const [previousNumOfEnemies, numOfEnemies] = variablesToLookFor;
-  const {
-    successMsg = MESSAGES.ANSWER_SUBMIT.SUCCESS,
-    errorMsg = MESSAGES.ANSWER_SUBMIT.ERROR,
-  } = messages ?? {};
 
   useEffect(() => {
     if (!isStoredState) {
-      // when after submit the current number of enimies is higher than before
       if (previousNumOfEnemies - numOfEnemies > 0) {
-        setMsg(successMsg);
-      }
-
-      // when after submit the current number of enimies is lower than before
-      if (previousNumOfEnemies - numOfEnemies < 0) {
-        setMsg(errorMsg, true);
+        setMsg(getRandomSuccessMessage());
       }
     }
   }, variablesToLookFor);
