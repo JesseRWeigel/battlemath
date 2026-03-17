@@ -14,7 +14,6 @@ import {
   TouchableOpacity,
   // @ts-ignore
   Picker,
-  ImageBackground,
   Image,
 } from 'react-native';
 import { reducer, initialState, TYPES } from './AppReducer';
@@ -261,102 +260,142 @@ function App() {
     timeLeft > 15 ? '#4caf50' : timeLeft > 5 ? '#ff9800' : '#f44336';
 
   return (
+    // @ts-ignore backgroundImage & transition are valid on web via react-native-web
     <View
-      style={[styles.root, { backgroundColor: activeTheme.backgroundColor }]}
+      style={[
+        styles.root,
+        {
+          backgroundColor: activeTheme.backgroundColor,
+          backgroundImage: activeTheme.gradient,
+          transition: 'background-image 0.5s ease',
+        },
+      ]}
     >
-      <ImageBackground
-        source={require('./assets/images/bg.jpg')}
-        style={styles.image}
-        resizeMode="cover"
-      >
+      <View style={styles.content}>
         <Text
           style={[styles.title, { color: activeTheme.textColor }]}
           accessibilityRole="header"
         >
           Battle Math
         </Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            style={styles.picker}
-            selectedValue={mode}
-            onValueChange={handleModePicker}
-            nativeID="operation-selector"
-            accessibilityLabel="Select math operation"
-          >
-            <Picker.Item label="Addition (+)" value="addition" />
-            <Picker.Item label="Subtraction (−)" value="subtraction" />
-            <Picker.Item label="Multiplication (×)" value="multiplication" />
-            <Picker.Item label="Division (÷)" value="division" />
-          </Picker>
-
-          <Picker
-            selectedValue={difficulty}
-            style={styles.picker}
-            onValueChange={handleDifficultyPicker}
-            nativeID="difficulty-selector"
-            accessibilityLabel="Select difficulty level"
-          >
-            <Picker.Item label="Easy" value="easy" />
-            <Picker.Item label="Medium" value="medium" />
-            <Picker.Item label="Hard" value="hard" />
-          </Picker>
-
-          <Picker
-            selectedValue={modeType}
-            style={styles.picker}
-            onValueChange={handleModeType}
-            nativeID="modeType-selector"
-            accessibilityLabel="Select number mode"
-          >
-            <Picker.Item label="Whole Number" value="wholeNumber" />
-            <Picker.Item label="Decimals" value="decimal" />
-            <Picker.Item label="Negatives" value="negative" />
-          </Picker>
-        </View>
-
-        <View style={styles.scoreTimerRow} accessibilityLiveRegion="polite">
-          <Text
-            style={[styles.timerText, { color: timerColor }]}
-            testID="timer"
-          >
-            {`\u23F1 ${timeLeft}s`}
-          </Text>
-          <Text
-            style={[styles.scoreText, { color: activeTheme.textColor }]}
-            testID="score"
-          >
-            {`Score: ${score}`}
-          </Text>
-          <Text
-            style={[styles.bestScoreText, { color: activeTheme.textColor }]}
-            testID="best-score"
-          >
-            {`Best: ${bestScore}`}
-          </Text>
-          {showPoints && lastPointsEarned !== null && (
-            <Text
-              style={[
-                styles.pointsEarned,
-                {
-                  color: lastPointsEarned > 0 ? '#4caf50' : '#f44336',
-                },
-              ]}
-              testID="points-earned"
+        <View style={styles.cardPanel}>
+          <View style={styles.pickerContainer}>
+            <Picker
+              style={styles.picker}
+              selectedValue={mode}
+              onValueChange={handleModePicker}
+              nativeID="operation-selector"
+              accessibilityLabel="Select math operation"
             >
-              {`+${lastPointsEarned}`}
+              <Picker.Item label="Addition (+)" value="addition" />
+              <Picker.Item label="Subtraction (−)" value="subtraction" />
+              <Picker.Item label="Multiplication (×)" value="multiplication" />
+              <Picker.Item label="Division (÷)" value="division" />
+            </Picker>
+
+            <Picker
+              selectedValue={difficulty}
+              style={styles.picker}
+              onValueChange={handleDifficultyPicker}
+              nativeID="difficulty-selector"
+              accessibilityLabel="Select difficulty level"
+            >
+              <Picker.Item label="Easy" value="easy" />
+              <Picker.Item label="Medium" value="medium" />
+              <Picker.Item label="Hard" value="hard" />
+            </Picker>
+
+            <Picker
+              selectedValue={modeType}
+              style={styles.picker}
+              onValueChange={handleModeType}
+              nativeID="modeType-selector"
+              accessibilityLabel="Select number mode"
+            >
+              <Picker.Item label="Whole Number" value="wholeNumber" />
+              <Picker.Item label="Decimals" value="decimal" />
+              <Picker.Item label="Negatives" value="negative" />
+            </Picker>
+          </View>
+
+          <View style={styles.scoreTimerRow} accessibilityLiveRegion="polite">
+            <Text
+              style={[styles.timerText, { color: timerColor }]}
+              testID="timer"
+            >
+              {`\u23F1 ${timeLeft}s`}
             </Text>
-          )}
-        </View>
-        <View
-          style={styles.enemyCount}
-          accessibilityLiveRegion="polite"
-          accessibilityRole="text"
-        >
-          <Text
-            style={[styles.enemyCountText, { color: activeTheme.textColor }]}
+            <Text style={[styles.scoreText, { color: '#fff' }]} testID="score">
+              {`Score: ${score}`}
+            </Text>
+            <Text
+              style={[styles.bestScoreText, { color: '#fff' }]}
+              testID="best-score"
+            >
+              {`Best: ${bestScore}`}
+            </Text>
+            {showPoints && lastPointsEarned !== null && (
+              <Text
+                style={[
+                  styles.pointsEarned,
+                  {
+                    color: lastPointsEarned > 0 ? '#4caf50' : '#f44336',
+                  },
+                ]}
+                testID="points-earned"
+              >
+                {`+${lastPointsEarned}`}
+              </Text>
+            )}
+          </View>
+          <View
+            style={styles.enemyCount}
+            accessibilityLiveRegion="polite"
+            accessibilityRole="text"
           >
-            {`Enemies: ${numOfEnemies}`}
-          </Text>
+            <Text style={[styles.enemyCountText, { color: '#fff' }]}>
+              {`Enemies: ${numOfEnemies}`}
+            </Text>
+          </View>
+          <View style={styles.soundControls}>
+            <BackgroundSound url={bgSound} />
+            <TouchableOpacity
+              onPress={handleSoundToggle}
+              accessibilityLabel={
+                soundEnabled ? 'Mute sound effects' : 'Unmute sound effects'
+              }
+              accessibilityRole="button"
+              testID="sound-toggle"
+            >
+              <Text
+                style={[
+                  styles.soundToggleText,
+                  highContrast && highContrastStyles.settingsButton,
+                ]}
+              >
+                {soundEnabled ? 'SFX On' : 'SFX Off'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleHighContrastToggle}
+              accessibilityLabel={
+                highContrast
+                  ? 'Disable high contrast mode'
+                  : 'Enable high contrast mode'
+              }
+              accessibilityRole="button"
+              testID="high-contrast-toggle"
+            >
+              <Text
+                style={[
+                  styles.soundToggleText,
+                  highContrast && highContrastStyles.settingsButton,
+                ]}
+              >
+                {highContrast ? 'High Contrast On' : 'High Contrast Off'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={styles.battlefield}>
           <View style={styles.container}>
@@ -381,10 +420,10 @@ function App() {
           </View>
         </View>
         {won ? (
-          <View style={{ alignItems: 'center' }}>
+          <View style={[styles.cardPanel, { alignItems: 'center' }]}>
             <Text
               style={{
-                color: activeTheme.textColor,
+                color: '#fff',
                 fontSize: 32,
                 fontFamily: '"Fredoka One", "Quicksand", sans-serif',
               }}
@@ -394,7 +433,7 @@ function App() {
             </Text>
             <Text
               style={{
-                color: activeTheme.textColor,
+                color: '#fff',
                 fontSize: 24,
                 fontFamily: '"Poppins", sans-serif',
                 paddingVertical: 8,
@@ -411,30 +450,28 @@ function App() {
             />
           </View>
         ) : (
-          <View style={styles.mathContainer}>
+          <View style={[styles.mathContainer, styles.cardPanel]}>
             {submitMessageBlock}
             <View style={styles.mathRow}>
               <Text
                 nativeID="val1"
-                style={[styles.mathText, { color: activeTheme.textColor }]}
+                style={[styles.mathText, { color: '#fff' }]}
               >
                 {val1 < 0 ? `(${val1})` : val1}
               </Text>
               <Text
                 nativeID="operator"
-                style={[styles.mathText, { color: activeTheme.textColor }]}
+                style={[styles.mathText, { color: '#fff' }]}
               >
                 {displayOperator(operator)}
               </Text>
               <Text
                 nativeID="val2"
-                style={[styles.mathText, { color: activeTheme.textColor }]}
+                style={[styles.mathText, { color: '#fff' }]}
               >
                 {val2 < 0 ? `(${val2})` : val2}
               </Text>
-              <Text style={[styles.mathText, { color: activeTheme.textColor }]}>
-                =
-              </Text>
+              <Text style={[styles.mathText, { color: '#fff' }]}>=</Text>
               <TextInput
                 nativeID="answer-input"
                 style={[styles.input, highContrast && highContrastStyles.input]}
@@ -468,46 +505,7 @@ function App() {
             </TouchableOpacity>
           </View>
         )}
-        <View style={styles.soundControls}>
-          <BackgroundSound url={bgSound} />
-          <TouchableOpacity
-            onPress={handleSoundToggle}
-            accessibilityLabel={
-              soundEnabled ? 'Mute sound effects' : 'Unmute sound effects'
-            }
-            accessibilityRole="button"
-            testID="sound-toggle"
-          >
-            <Text
-              style={[
-                styles.soundToggleText,
-                highContrast && highContrastStyles.settingsButton,
-              ]}
-            >
-              {soundEnabled ? 'SFX On' : 'SFX Off'}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleHighContrastToggle}
-            accessibilityLabel={
-              highContrast
-                ? 'Disable high contrast mode'
-                : 'Enable high contrast mode'
-            }
-            accessibilityRole="button"
-            testID="high-contrast-toggle"
-          >
-            <Text
-              style={[
-                styles.soundToggleText,
-                highContrast && highContrastStyles.settingsButton,
-              ]}
-            >
-              {highContrast ? 'High Contrast On' : 'High Contrast Off'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ImageBackground>
+      </View>
     </View>
   );
 }
@@ -522,7 +520,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  image: {
+  content: {
     width: '100%',
     flex: 1,
     justifyContent: 'center',
@@ -532,6 +530,16 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontFamily: '"Fredoka One", "Quicksand", sans-serif',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  cardPanel: {
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 16,
+    marginVertical: 8,
   },
   pickerContainer: {
     flexDirection: 'row',
@@ -554,17 +562,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'space-evenly',
-  },
-  character: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  hero: {
-    backgroundColor: 'blue',
-  },
-  enemy: {
-    backgroundColor: 'red',
   },
   mathContainer: {
     paddingVertical: 16,
