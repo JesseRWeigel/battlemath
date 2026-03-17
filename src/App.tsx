@@ -130,6 +130,7 @@ function App() {
     dispatch,
   ] = useReducer(reducer, initialState);
   const [streakLabel, setStreakLabel] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
   const [showPoints, setShowPoints] = useState(false);
   const pointsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -244,7 +245,9 @@ function App() {
   }, [dispatch]);
   const handleSubmit = useCallback(() => {
     dispatch({ type: TYPES.CHECK_ANSWER });
-    if (submitInputRef.current) submitInputRef.current.focus();
+    setTimeout(() => {
+      if (submitInputRef.current) submitInputRef.current.focus();
+    }, 50);
   }, [dispatch]);
   const activeTheme = highContrast ? themes.highContrast : themes[mode];
   useEffect(() => {
@@ -327,7 +330,7 @@ function App() {
     return () => clearInterval(interval);
   }, [val1, val2, won]);
   useEffect(() => {
-    if (lastPointsEarned === null) return;
+    if (lastPointsEarned == null) return;
     setShowPoints(true);
     if (pointsTimeoutRef.current) clearTimeout(pointsTimeoutRef.current);
     pointsTimeoutRef.current = setTimeout(() => setShowPoints(false), 1500);
@@ -402,142 +405,25 @@ function App() {
       {showTutorial && <Tutorial onDismiss={handleDismissTutorial} />}
       <View style={styles.gameContainer}>
         <View style={styles.content}>
-          <Text
-            style={[styles.title, { color: activeTheme.textColor }]}
-            accessibilityRole="header"
-          >
-            Battle Math
-          </Text>
-          <View style={styles.cardPanel}>
-            <View style={styles.pickerContainer}>
-              <SegmentedButtonGroup
-                options={OPERATIONS}
-                selectedValue={mode}
-                onSelect={handleModePicker}
-                accessibilityLabel="Select math operation"
-                testID="operation-selector"
-              />
-              <SegmentedButtonGroup
-                options={DIFFICULTIES}
-                selectedValue={difficulty}
-                onSelect={handleDifficultyPicker}
-                accessibilityLabel="Select difficulty level"
-                testID="difficulty-selector"
-              />
-              <SegmentedButtonGroup
-                options={MODE_TYPES}
-                selectedValue={modeType}
-                onSelect={handleModeType}
-                accessibilityLabel="Select number mode"
-                testID="modeType-selector"
-              />
-            </View>
-            <View
-              style={[styles.scoreTimerRow, streakGlowStyle]}
-              accessibilityLiveRegion="polite"
+          {/* === TOP BAR: Title + Score + Settings gear === */}
+          <View style={styles.topBar}>
+            <Text
+              style={[styles.title, { color: activeTheme.textColor }]}
+              accessibilityRole="header"
             >
-              <Text
-                style={[styles.timerText, { color: timerColor }]}
-                testID="timer"
-              >{`\u23F1 ${timeLeft}s`}</Text>
-              <Text
-                style={[styles.scoreText, { color: '#fff' }]}
-                testID="score"
-              >{`Score: ${score}`}</Text>
-              <Text
-                style={[styles.bestScoreText, { color: '#fff' }]}
-                testID="best-score"
-              >{`Best: ${bestScore}`}</Text>
-              {showPoints && lastPointsEarned !== null && (
-                <Text
-                  style={[
-                    styles.pointsEarned,
-                    {
-                      color: lastPointsEarned > 0 ? '#4caf50' : '#f44336',
-                      animationName: 'floatUp',
-                      animationDuration: '1.5s',
-                      animationFillMode: 'forwards',
-                    } as any,
-                  ]}
-                  testID="points-earned"
-                >{`+${lastPointsEarned}`}</Text>
-              )}
-              {streak >= 3 && (
-                <Text
-                  style={[
-                    styles.streakText,
-                    streak >= 10
-                      ? styles.streakLegendary
-                      : streak >= 5
-                        ? styles.streakFire
-                        : undefined,
-                  ]}
-                  testID="streak-counter"
-                >{`\uD83D\uDD25 \u00D7${streak}`}</Text>
-              )}
-              {streakLabel && (
-                <Text
-                  style={[
-                    styles.streakMilestone,
-                    {
-                      animationName: 'victoryBounce',
-                      animationDuration: '0.5s',
-                      animationFillMode: 'forwards',
-                    } as any,
-                  ]}
-                >
-                  {streakLabel}
-                </Text>
-              )}
-            </View>
-            <View
-              style={styles.enemyCount}
-              accessibilityLiveRegion="polite"
-              accessibilityRole="text"
-            >
-              <Text
-                style={[styles.enemyCountText, { color: '#fff' }]}
-              >{`Enemies: ${numOfEnemies}`}</Text>
-            </View>
-            <View style={styles.soundControls}>
-              <BackgroundSound url={bgSound} />
+              Battle Math
+            </Text>
+            <View style={styles.topBarRight}>
               <TouchableOpacity
-                onPress={handleSoundToggle}
-                style={styles.touchTarget}
+                onPress={() => setShowSettings(!showSettings)}
+                style={styles.gearButton}
                 accessibilityLabel={
-                  soundEnabled ? 'Mute sound effects' : 'Unmute sound effects'
+                  showSettings ? 'Hide settings' : 'Show settings'
                 }
                 accessibilityRole="button"
-                testID="sound-toggle"
+                testID="settings-toggle"
               >
-                <Text
-                  style={[
-                    styles.soundToggleText,
-                    highContrast && highContrastStyles.settingsButton,
-                  ]}
-                >
-                  {soundEnabled ? 'SFX On' : 'SFX Off'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleHighContrastToggle}
-                style={styles.touchTarget}
-                accessibilityLabel={
-                  highContrast
-                    ? 'Disable high contrast mode'
-                    : 'Enable high contrast mode'
-                }
-                accessibilityRole="button"
-                testID="high-contrast-toggle"
-              >
-                <Text
-                  style={[
-                    styles.soundToggleText,
-                    highContrast && highContrastStyles.settingsButton,
-                  ]}
-                >
-                  {highContrast ? 'High Contrast On' : 'High Contrast Off'}
-                </Text>
+                <Text style={styles.gearButtonText}>{'\u2699'}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleShowTutorial}
@@ -550,6 +436,136 @@ function App() {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* === SCORE BAR === */}
+          <View
+            style={[styles.scoreBar, styles.cardPanel, streakGlowStyle]}
+            accessibilityLiveRegion="polite"
+          >
+            <Text
+              style={[styles.timerText, { color: timerColor }]}
+              testID="timer"
+            >{`\u23F1 ${timeLeft}s`}</Text>
+            <Text
+              style={[styles.scoreText, { color: '#fff' }]}
+              testID="score"
+            >{`Score: ${score}`}</Text>
+            <Text
+              style={[styles.bestScoreText, { color: '#fff' }]}
+              testID="best-score"
+            >{`Best: ${bestScore}`}</Text>
+            {showPoints && lastPointsEarned != null && (
+              <Text
+                style={[
+                  styles.pointsEarned,
+                  {
+                    color: lastPointsEarned > 0 ? '#4caf50' : '#f44336',
+                    animationName: 'floatUp',
+                    animationDuration: '1.5s',
+                    animationFillMode: 'forwards',
+                  } as any,
+                ]}
+                testID="points-earned"
+              >{`+${lastPointsEarned}`}</Text>
+            )}
+            {streak >= 3 && (
+              <Text
+                style={[
+                  styles.streakText,
+                  streak >= 10
+                    ? styles.streakLegendary
+                    : streak >= 5
+                      ? styles.streakFire
+                      : undefined,
+                ]}
+                testID="streak-counter"
+              >{`\uD83D\uDD25 \u00D7${streak}`}</Text>
+            )}
+            {streakLabel && (
+              <Text
+                style={[
+                  styles.streakMilestone,
+                  {
+                    animationName: 'victoryBounce',
+                    animationDuration: '0.5s',
+                    animationFillMode: 'forwards',
+                  } as any,
+                ]}
+              >
+                {streakLabel}
+              </Text>
+            )}
+          </View>
+
+          {/* === COLLAPSIBLE SETTINGS === */}
+          {showSettings && (
+            <View style={[styles.cardPanel, styles.settingsPanel]}>
+              <View style={styles.pickerContainer}>
+                <SegmentedButtonGroup
+                  options={OPERATIONS}
+                  selectedValue={mode}
+                  onSelect={handleModePicker}
+                  accessibilityLabel="Select math operation"
+                  testID="operation-selector"
+                />
+                <SegmentedButtonGroup
+                  options={DIFFICULTIES}
+                  selectedValue={difficulty}
+                  onSelect={handleDifficultyPicker}
+                  accessibilityLabel="Select difficulty level"
+                  testID="difficulty-selector"
+                />
+                <SegmentedButtonGroup
+                  options={MODE_TYPES}
+                  selectedValue={modeType}
+                  onSelect={handleModeType}
+                  accessibilityLabel="Select number mode"
+                  testID="modeType-selector"
+                />
+              </View>
+              <View style={styles.soundControls}>
+                <BackgroundSound url={bgSound} />
+                <TouchableOpacity
+                  onPress={handleSoundToggle}
+                  style={styles.touchTarget}
+                  accessibilityLabel={
+                    soundEnabled ? 'Mute sound effects' : 'Unmute sound effects'
+                  }
+                  accessibilityRole="button"
+                  testID="sound-toggle"
+                >
+                  <Text
+                    style={[
+                      styles.soundToggleText,
+                      highContrast && highContrastStyles.settingsButton,
+                    ]}
+                  >
+                    {soundEnabled ? 'SFX On' : 'SFX Off'}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleHighContrastToggle}
+                  style={styles.touchTarget}
+                  accessibilityLabel={
+                    highContrast
+                      ? 'Disable high contrast mode'
+                      : 'Enable high contrast mode'
+                  }
+                  accessibilityRole="button"
+                  testID="high-contrast-toggle"
+                >
+                  <Text
+                    style={[
+                      styles.soundToggleText,
+                      highContrast && highContrastStyles.settingsButton,
+                    ]}
+                  >
+                    {highContrast ? 'HC' : 'HC'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
           <View style={styles.battlefield}>
             <View style={styles.heroContainer}>
               <View nativeID="hero" accessibilityLabel="Your hero character">
@@ -774,12 +790,51 @@ const styles = StyleSheet.create({
   content: {
     width: '100%',
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 16,
+    justifyContent: 'flex-start' as const,
+    alignItems: 'center' as const,
+    paddingVertical: 8,
+  },
+  topBar: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
+    width: '100%',
+    paddingHorizontal: 4,
+    marginBottom: 4,
+  },
+  topBarRight: {
+    flexDirection: 'row' as const,
+    gap: 8,
+  },
+  gearButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  gearButtonText: {
+    fontSize: 22,
+    color: '#fff',
+  },
+  scoreBar: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    gap: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 4,
+    width: '100%',
+  },
+  settingsPanel: {
+    marginBottom: 4,
+    width: '100%',
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: '"Fredoka One", "Quicksand", sans-serif',
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 2 },
@@ -821,10 +876,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   battlefield: {
-    flex: 1,
-    flexDirection: 'row',
+    flexDirection: 'row' as const,
     width: '100%',
-    paddingVertical: 8,
+    paddingVertical: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    gap: 8,
   },
   heroContainer: {
     alignItems: 'center',
