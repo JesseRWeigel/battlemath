@@ -16,7 +16,15 @@ The game will consists of difficulties ranging from easy to hard
 | Medium | Contains digits ranging from 10-99 |
 | Hard | Contains digits ranging from 100-999 |
 
-The standard gameplay will consists of an answer of a whole number. However, if the children wanted to add more complicated calculations, they can choose to change the mode a "Decimal", which is rounded to two decimal places.
+The standard gameplay will consist of whole number answers. Players can also select a **Mode Type** to change the structure of the questions:
+
+| Mode Type | Description |
+| --- | --- |
+| Whole Number | Standard integers (default) |
+| Decimals | Numbers with up to two decimal places |
+| Negatives | Introduces negative numbers into problems |
+
+These mode types combine with the difficulty and operator settings, giving children a wide range of practice scenarios.
 
 ### Built With
 
@@ -46,8 +54,10 @@ npm run build
 
 ### Roadmap
 
-- [x] Simple UI with Additions, Substract, Multiplication, Divide questions.
-- [x] Background music
+- [x] Simple UI with Addition, Subtraction, Multiplication, Division questions
+- [x] Background music and sound effects
 - [x] Deploy to github pages
+- [x] Character art for hero and enemies
+- [x] Difficulty selection (Easy, Medium, Hard)
+- [x] Mode types (Whole Number, Decimals, Negatives)
 - [ ] Point System
-- [x] Character Arts enemies
