@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "BattleMath",
+  "name": "Battle Math - Math Game for Kids",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,6 +10,7 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#FFD93D",
+  "background_color": "#FF8C00",
+  "description": "A fun math game for kids! Defeat enemies by solving math problems."
 }

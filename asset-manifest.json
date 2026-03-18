@@ -1,7 +1,10 @@
 {
   "files": {
-    "main.js": "/battlemath/static/js/main.a479fc73.js",
-    "static/media/background-music.mp3": "/battlemath/static/media/background-music.3d51c88e31e5663422f1.mp3",
+    "main.js": "/battlemath/static/js/main.55c11559.js",
+    "static/media/music_addition.mp3": "/battlemath/static/media/music_addition.0c91597a30f77d029ae8.mp3",
+    "static/media/music_division.mp3": "/battlemath/static/media/music_division.1028707b41cc4eefa166.mp3",
+    "static/media/music_multiplication.mp3": "/battlemath/static/media/music_multiplication.5041a6790201e42c49a0.mp3",
+    "static/media/music_subtraction.mp3": "/battlemath/static/media/music_subtraction.3faf34538903aa4ee7c7.mp3",
     "static/media/victory_fanfare.mp3": "/battlemath/static/media/victory_fanfare.d41ed587dc49dee1ea98.mp3",
     "static/media/orc.png": "/battlemath/static/media/orc.a509f3c097b8b3980c61.png",
     "static/media/hero.png": "/battlemath/static/media/hero.32e725365304a31a6899.png",
@@ -13,6 +16,7 @@
     "static/media/enemy_multiplication.png": "/battlemath/static/media/enemy_multiplication.5cd5da1e1f5bbf704315.png",
     "static/media/enemy_division.png": "/battlemath/static/media/enemy_division.4c07ec7454d4af02291c.png",
     "static/media/bg_division.jpg": "/battlemath/static/media/bg_division.24c3778cae80a6fdff9e.jpg",
+    "service-worker.js": "/battlemath/service-worker.js",
     "static/media/hero_hurt.png": "/battlemath/static/media/hero_hurt.c7ba177535c090bfdca6.png",
     "static/media/star_earned.mp3": "/battlemath/static/media/star_earned.592313494a5cfd18f187.mp3",
     "static/media/bg_addition.jpg": "/battlemath/static/media/bg_addition.d8e8a5b522b0ecd33bdd.jpg",
@@ -23,9 +27,9 @@
     "static/media/wrong.mp3": "/battlemath/static/media/wrong.85c73b30060ea82a6d27.mp3",
     "static/media/enemy_subtraction.png": "/battlemath/static/media/enemy_subtraction.405d188b8db86bc341b8.png",
     "index.html": "/battlemath/index.html",
-    "main.a479fc73.js.map": "/battlemath/static/js/main.a479fc73.js.map"
+    "main.55c11559.js.map": "/battlemath/static/js/main.55c11559.js.map"
   },
   "entrypoints": [
-    "static/js/main.a479fc73.js"
+    "static/js/main.55c11559.js"
   ]
 }
