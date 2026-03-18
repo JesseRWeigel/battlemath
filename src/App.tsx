@@ -27,13 +27,6 @@ import musicSubtraction from './assets/music/music_subtraction.mp3';
 import musicMultiplication from './assets/music/music_multiplication.mp3';
 import musicDivision from './assets/music/music_division.mp3';
 import BackgroundSound from './components/BackgroundSound';
-
-const musicTracks: Record<string, string> = {
-  addition: musicAddition,
-  subtraction: musicSubtraction,
-  multiplication: musicMultiplication,
-  division: musicDivision,
-};
 import {
   playCorrectSound,
   playIncorrectSound,
@@ -47,6 +40,13 @@ import {
   getTodayKey,
   saveDailyResult,
 } from './utils/DailyChallenge';
+
+const musicTracks: Record<string, string> = {
+  addition: musicAddition,
+  subtraction: musicSubtraction,
+  multiplication: musicMultiplication,
+  division: musicDivision,
+};
 
 // Character sprites
 const heroImages = {
