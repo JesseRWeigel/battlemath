@@ -37,6 +37,12 @@ const bgImages: Record<string, string> = {
   division: require('./assets/images/backgrounds/bg_division.jpg'),
 };
 
+// Preload all backgrounds on page load so switching is instant
+Object.values(bgImages).forEach((src) => {
+  const img = new window.Image();
+  img.src = src;
+});
+
 const enemyImages: Record<string, any> = {
   addition: require('./assets/images/characters/enemy_addition.png'),
   subtraction: require('./assets/images/characters/enemy_subtraction.png'),
