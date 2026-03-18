@@ -22,8 +22,18 @@ import { getTranslations, Locale } from './i18n';
 import NumberPad from './components/NumberPad';
 import LevelSelect from './components/LevelSelect';
 import { Level } from './levels';
-import bgSound from './assets/music/background-music.mp3';
+import musicAddition from './assets/music/music_addition.mp3';
+import musicSubtraction from './assets/music/music_subtraction.mp3';
+import musicMultiplication from './assets/music/music_multiplication.mp3';
+import musicDivision from './assets/music/music_division.mp3';
 import BackgroundSound from './components/BackgroundSound';
+
+const musicTracks: Record<string, string> = {
+  addition: musicAddition,
+  subtraction: musicSubtraction,
+  multiplication: musicMultiplication,
+  division: musicDivision,
+};
 import {
   playCorrectSound,
   playIncorrectSound,
@@ -686,7 +696,9 @@ function App() {
                 />
               </View>
               <View style={styles.soundControls}>
-                <BackgroundSound url={bgSound} />
+                <BackgroundSound
+                  url={musicTracks[mode] || musicTracks.addition}
+                />
                 <TouchableOpacity
                   onPress={handleSoundToggle}
                   style={styles.touchTarget}
