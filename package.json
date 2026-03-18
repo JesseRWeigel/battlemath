@@ -51,6 +51,7 @@
     "prettier": "^3.8.1",
     "typescript": "^4.4.2",
     "vite": "^8.0.0",
+    "vite-plugin-pwa": "^1.2.0",
     "vitest": "^4.1.0"
   },
   "browserslist": {

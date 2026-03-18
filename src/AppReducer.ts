@@ -436,7 +436,8 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
 
       let newDifficulty = state.difficulty;
       let adaptiveMessage: string | null = null;
-      if (state.adaptiveDifficulty) {
+      // Don't auto-adjust difficulty during structured levels
+      if (state.adaptiveDifficulty && !state.currentLevel) {
         const suggested = getAdaptiveDifficulty(
           state.difficulty,
           newRecentResults,

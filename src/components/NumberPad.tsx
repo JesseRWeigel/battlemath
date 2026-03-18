@@ -8,6 +8,7 @@ interface NumberPadProps {
   showMinus?: boolean;
   showDecimal?: boolean;
   buttonColor?: string;
+  compact?: boolean;
 }
 
 function NumberPad({
@@ -17,6 +18,7 @@ function NumberPad({
   showMinus = false,
   showDecimal = false,
   buttonColor = 'rgba(255, 201, 20, 1)',
+  compact = false,
 }: NumberPadProps) {
   const handleDigit = (digit: string) => {
     onChange(value + digit);
@@ -41,13 +43,22 @@ function NumberPad({
   };
 
   const needsExtraRow = showMinus || showDecimal;
+  const btnStyle = compact
+    ? [padStyles.button, padStyles.buttonCompact]
+    : [padStyles.button];
+  const txtStyle = compact
+    ? [padStyles.digitText, padStyles.digitTextCompact]
+    : [padStyles.digitText];
 
   return (
-    <View style={padStyles.container} testID="number-pad">
+    <View
+      style={[padStyles.container, compact && { paddingTop: 2 }]}
+      testID="number-pad"
+    >
       {/* Row 1 */}
       <View style={padStyles.row}>
         <TouchableOpacity
-          style={padStyles.button}
+          style={btnStyle}
           onPress={() => handleDigit('1')}
           activeOpacity={0.7}
           accessibilityLabel="1"
@@ -56,7 +67,7 @@ function NumberPad({
           <Text style={padStyles.digitText}>1</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={padStyles.button}
+          style={btnStyle}
           onPress={() => handleDigit('2')}
           activeOpacity={0.7}
           accessibilityLabel="2"
@@ -65,7 +76,7 @@ function NumberPad({
           <Text style={padStyles.digitText}>2</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={padStyles.button}
+          style={btnStyle}
           onPress={() => handleDigit('3')}
           activeOpacity={0.7}
           accessibilityLabel="3"
@@ -77,7 +88,7 @@ function NumberPad({
       {/* Row 2 */}
       <View style={padStyles.row}>
         <TouchableOpacity
-          style={padStyles.button}
+          style={btnStyle}
           onPress={() => handleDigit('4')}
           activeOpacity={0.7}
           accessibilityLabel="4"
@@ -86,7 +97,7 @@ function NumberPad({
           <Text style={padStyles.digitText}>4</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={padStyles.button}
+          style={btnStyle}
           onPress={() => handleDigit('5')}
           activeOpacity={0.7}
           accessibilityLabel="5"
@@ -95,7 +106,7 @@ function NumberPad({
           <Text style={padStyles.digitText}>5</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={padStyles.button}
+          style={btnStyle}
           onPress={() => handleDigit('6')}
           activeOpacity={0.7}
           accessibilityLabel="6"
@@ -107,7 +118,7 @@ function NumberPad({
       {/* Row 3 */}
       <View style={padStyles.row}>
         <TouchableOpacity
-          style={padStyles.button}
+          style={btnStyle}
           onPress={() => handleDigit('7')}
           activeOpacity={0.7}
           accessibilityLabel="7"
@@ -116,7 +127,7 @@ function NumberPad({
           <Text style={padStyles.digitText}>7</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={padStyles.button}
+          style={btnStyle}
           onPress={() => handleDigit('8')}
           activeOpacity={0.7}
           accessibilityLabel="8"
@@ -125,7 +136,7 @@ function NumberPad({
           <Text style={padStyles.digitText}>8</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={padStyles.button}
+          style={btnStyle}
           onPress={() => handleDigit('9')}
           activeOpacity={0.7}
           accessibilityLabel="9"
@@ -140,48 +151,52 @@ function NumberPad({
           <View style={padStyles.row}>
             {showMinus && (
               <TouchableOpacity
-                style={padStyles.button}
+                style={btnStyle}
                 onPress={handleMinus}
                 activeOpacity={0.7}
                 accessibilityLabel="Minus sign"
                 accessibilityRole="button"
               >
-                <Text style={padStyles.digitText}>{'\u2212'}</Text>
+                <Text style={txtStyle}>{'\u2212'}</Text>
               </TouchableOpacity>
             )}
             {showDecimal && (
               <TouchableOpacity
-                style={padStyles.button}
+                style={btnStyle}
                 onPress={handleDecimal}
                 activeOpacity={0.7}
                 accessibilityLabel="Decimal point"
                 accessibilityRole="button"
               >
-                <Text style={padStyles.digitText}>.</Text>
+                <Text style={txtStyle}>.</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity
-              style={padStyles.button}
+              style={btnStyle}
               onPress={() => handleDigit('0')}
               activeOpacity={0.7}
               accessibilityLabel="0"
               accessibilityRole="button"
             >
-              <Text style={padStyles.digitText}>0</Text>
+              <Text style={txtStyle}>0</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={padStyles.button}
+              style={btnStyle}
               onPress={handleBackspace}
               activeOpacity={0.7}
               accessibilityLabel="Backspace"
               accessibilityRole="button"
             >
-              <Text style={padStyles.digitText}>{'\u2190'}</Text>
+              <Text style={txtStyle}>{'\u2190'}</Text>
             </TouchableOpacity>
           </View>
           <View style={padStyles.row}>
             <TouchableOpacity
-              style={[padStyles.submitButton, { backgroundColor: buttonColor }]}
+              style={[
+                padStyles.submitButton,
+                compact && padStyles.buttonCompact,
+                { backgroundColor: buttonColor },
+              ]}
               onPress={onSubmit}
               activeOpacity={0.7}
               accessibilityLabel="Submit answer"
@@ -194,31 +209,31 @@ function NumberPad({
       ) : (
         <View style={padStyles.row}>
           <TouchableOpacity
-            style={padStyles.button}
+            style={btnStyle}
             onPress={handleBackspace}
             activeOpacity={0.7}
             accessibilityLabel="Backspace"
             accessibilityRole="button"
           >
-            <Text style={padStyles.digitText}>{'\u2190'}</Text>
+            <Text style={txtStyle}>{'\u2190'}</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={padStyles.button}
+            style={btnStyle}
             onPress={() => handleDigit('0')}
             activeOpacity={0.7}
             accessibilityLabel="0"
             accessibilityRole="button"
           >
-            <Text style={padStyles.digitText}>0</Text>
+            <Text style={txtStyle}>0</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[padStyles.button, { backgroundColor: buttonColor }]}
+            style={[...btnStyle, { backgroundColor: buttonColor }]}
             onPress={onSubmit}
             activeOpacity={0.7}
             accessibilityLabel="Submit answer"
             accessibilityRole="button"
           >
-            <Text style={padStyles.digitText}>{'\u2713'}</Text>
+            <Text style={txtStyle}>{'\u2713'}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -247,11 +262,20 @@ const padStyles = StyleSheet.create({
     justifyContent: 'center',
     flex: 1,
   },
+  buttonCompact: {
+    minWidth: 48,
+    minHeight: 44,
+    margin: 2,
+    borderRadius: 10,
+  },
   digitText: {
     fontSize: 24,
     color: '#fff',
     fontFamily: '"Poppins", sans-serif',
     fontWeight: '600',
+  },
+  digitTextCompact: {
+    fontSize: 20,
   },
   submitButton: {
     minHeight: 60,
@@ -260,6 +284,11 @@ const padStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
+  },
+  submitButtonCompact: {
+    minHeight: 44,
+    margin: 2,
+    borderRadius: 10,
   },
   submitText: {
     fontSize: 20,
