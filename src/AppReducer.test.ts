@@ -1353,3 +1353,128 @@ describe('answer mode', () => {
     expect(result.choices).toEqual([]);
   });
 });
+
+describe('Boss battles', () => {
+  const bossLevel = LEVELS.find((l) => l.isBoss)!;
+
+  it('SELECT_LEVEL with boss level sets isBossLevel, bossHP, bossMaxHP', () => {
+    const state = makeState();
+    const result = reducer(state, {
+      type: TYPES.SELECT_LEVEL,
+      payload: bossLevel,
+    });
+
+    expect(result.isBossLevel).toBe(true);
+    expect(result.bossHP).toBe(5);
+    expect(result.bossMaxHP).toBe(5);
+    expect(result.numOfEnemies).toBe(1);
+  });
+
+  it('SELECT_LEVEL with non-boss level does not set boss fields', () => {
+    const normalLevel = LEVELS.find((l) => !l.isBoss)!;
+    const state = makeState();
+    const result = reducer(state, {
+      type: TYPES.SELECT_LEVEL,
+      payload: normalLevel,
+    });
+
+    expect(result.isBossLevel).toBe(false);
+    expect(result.bossHP).toBe(0);
+    expect(result.bossMaxHP).toBe(0);
+    expect(result.numOfEnemies).toBe(normalLevel.enemyCount);
+  });
+
+  it('CHECK_ANSWER correct on boss decrements bossHP but keeps enemy', () => {
+    const now = Date.now();
+    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    const state = makeState({
+      val1: 2,
+      val2: 3,
+      operator: '+',
+      mode: 'addition',
+      answer: '5',
+      numOfEnemies: 1,
+      previousNumOfEnemies: 1,
+      modeType: 'wholeNumber',
+      questionStartTime: now,
+      isBossLevel: true,
+      bossHP: 5,
+      bossMaxHP: 5,
+    });
+    const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+
+    expect(result.bossHP).toBe(4);
+    expect(result.numOfEnemies).toBe(1);
+    expect(result.won).toBe(false);
+    expect(result.isBossLevel).toBe(true);
+    jest.restoreAllMocks();
+  });
+
+  it('CHECK_ANSWER correct when bossHP reaches 0 triggers won', () => {
+    const now = Date.now();
+    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    const state = makeState({
+      val1: 2,
+      val2: 3,
+      operator: '+',
+      mode: 'addition',
+      answer: '5',
+      numOfEnemies: 1,
+      previousNumOfEnemies: 1,
+      modeType: 'wholeNumber',
+      questionStartTime: now,
+      isBossLevel: true,
+      bossHP: 1,
+      bossMaxHP: 5,
+    });
+    const result = reducer(state, { type: TYPES.CHECK_ANSWER });
+
+    expect(result.bossHP).toBe(0);
+    expect(result.numOfEnemies).toBe(0);
+    expect(result.won).toBe(true);
+    jest.restoreAllMocks();
+  });
+
+  it('boss points are 3x multiplied', () => {
+    const now = Date.now();
+    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+
+    // Normal level: should get 10 points (under 5s, first attempt)
+    const normalState = makeState({
+      val1: 2,
+      val2: 3,
+      operator: '+',
+      mode: 'addition',
+      answer: '5',
+      numOfEnemies: 3,
+      previousNumOfEnemies: 3,
+      modeType: 'wholeNumber',
+      questionStartTime: now,
+      isBossLevel: false,
+      bossHP: 0,
+      bossMaxHP: 0,
+    });
+    const normalResult = reducer(normalState, { type: TYPES.CHECK_ANSWER });
+
+    // Boss level: should get 30 points (10 * 3x)
+    const bossState = makeState({
+      val1: 2,
+      val2: 3,
+      operator: '+',
+      mode: 'addition',
+      answer: '5',
+      numOfEnemies: 1,
+      previousNumOfEnemies: 1,
+      modeType: 'wholeNumber',
+      questionStartTime: now,
+      isBossLevel: true,
+      bossHP: 5,
+      bossMaxHP: 5,
+    });
+    const bossResult = reducer(bossState, { type: TYPES.CHECK_ANSWER });
+
+    expect(normalResult.lastPointsEarned).toBe(10);
+    expect(bossResult.lastPointsEarned).toBe(30);
+    jest.restoreAllMocks();
+  });
+});

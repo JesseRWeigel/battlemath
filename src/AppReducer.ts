@@ -104,6 +104,9 @@ export type AppState = {
   dailyProblems: DailyProblem[];
   dailyProblemIndex: number;
   locale: Locale;
+  isBossLevel: boolean;
+  bossHP: number;
+  bossMaxHP: number;
 };
 
 export function calculateStars(
@@ -161,6 +164,9 @@ export const initialState: AppState = {
   dailyProblems: [],
   dailyProblemIndex: 0,
   locale: 'en' as Locale,
+  isBossLevel: false,
+  bossHP: 0,
+  bossMaxHP: 0,
 };
 
 /**
@@ -361,11 +367,18 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         locale: state.locale,
         gameScreen: 'playing',
         numOfEnemies: state.currentLevel
-          ? state.currentLevel.enemyCount
+          ? state.currentLevel.isBoss
+            ? 1
+            : state.currentLevel.enemyCount
           : initialState.numOfEnemies,
         previousNumOfEnemies: state.currentLevel
-          ? state.currentLevel.enemyCount
+          ? state.currentLevel.isBoss
+            ? 1
+            : state.currentLevel.enemyCount
           : initialState.numOfEnemies,
+        isBossLevel: state.currentLevel?.isBoss === true,
+        bossHP: state.currentLevel?.isBoss ? 5 : 0,
+        bossMaxHP: state.currentLevel?.isBoss ? 5 : 0,
       };
     }
 
@@ -447,7 +460,10 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         const basePoints = calculatePoints(elapsed);
         const attemptMultiplier =
           state.attempts === 0 ? 1 : state.attempts === 1 ? 0.5 : 0.25;
-        const pointsEarned = Math.round(basePoints * attemptMultiplier);
+        const bossMultiplier = state.isBossLevel ? 3 : 1;
+        const pointsEarned = Math.round(
+          basePoints * attemptMultiplier * bossMultiplier,
+        );
 
         const newStreak = state.streak + 1;
         const newMaxStreak = Math.max(state.maxStreak, newStreak);
@@ -459,6 +475,55 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
 
         const newCorrectAttempts = state.correctAttempts + 1;
         const newTotalAnswerTime = state.totalAnswerTime + elapsed;
+
+        // Boss levels: decrement HP instead of removing enemy immediately
+        if (state.isBossLevel) {
+          const newBossHP = state.bossHP - 1;
+          const bossDefeated = newBossHP <= 0;
+
+          const stateForProblem = {
+            ...state,
+            difficulty: newDifficulty,
+            numOfEnemies: bossDefeated ? 0 : 1,
+            previousNumOfEnemies: 1,
+            won: bossDefeated,
+            bossHP: newBossHP,
+          };
+          const stateWithProblem = bossDefeated
+            ? stateForProblem
+            : reducer(stateForProblem, { type: TYPES.NEW_PROBLEM });
+
+          const starsEarned = bossDefeated
+            ? calculateStars(
+                newCorrectAttempts,
+                newTotalAttempts,
+                newTotalAnswerTime,
+              )
+            : state.starsEarned;
+
+          return {
+            ...stateWithProblem,
+            score: newScore,
+            bestScore: newBestScore,
+            lastPointsEarned: pointsEarned,
+            questionStartTime: Date.now(),
+            attempts: 0,
+            hintLevel: 0,
+            recentResults: newRecentResults,
+            difficulty: newDifficulty,
+            adaptiveMessage,
+            streak: newStreak,
+            maxStreak: newMaxStreak,
+            streakBonus,
+            totalAttempts: newTotalAttempts,
+            correctAttempts: newCorrectAttempts,
+            totalAnswerTime: newTotalAnswerTime,
+            starsEarned,
+            isBossLevel: state.isBossLevel,
+            bossHP: newBossHP,
+            bossMaxHP: state.bossMaxHP,
+          };
+        }
 
         const stateWithEnemies = reducer(
           { ...state, difficulty: newDifficulty },
@@ -685,6 +750,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         state.answerMode === 'choose'
           ? generateChoices(computeAnswer(val[0], op, val[1]))
           : [];
+      const isBoss = level.isBoss === true;
       return {
         ...initialState,
         mode,
@@ -693,8 +759,8 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         operator: op,
         val1: val[0],
         val2: val[1],
-        numOfEnemies: level.enemyCount,
-        previousNumOfEnemies: level.enemyCount,
+        numOfEnemies: isBoss ? 1 : level.enemyCount,
+        previousNumOfEnemies: isBoss ? 1 : level.enemyCount,
         currentLevel: level,
         levelProgress: state.levelProgress,
         gameScreen: 'playing',
@@ -706,6 +772,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         choices,
         hasSeenTutorial: state.hasSeenTutorial,
         locale: state.locale,
+        isBossLevel: isBoss,
+        bossHP: isBoss ? 5 : 0,
+        bossMaxHP: isBoss ? 5 : 0,
       };
     }
 
