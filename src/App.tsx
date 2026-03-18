@@ -18,6 +18,7 @@ import { reducer, initialState, TYPES, getStreakMilestone } from './AppReducer';
 import { useMsgAfterSubmit } from './hooks';
 import HeroSvg from './components/HeroSvg';
 import Tutorial from './components/Tutorial';
+import NumberPad from './components/NumberPad';
 import bgSound from './assets/music/background-music.mp3';
 import BackgroundSound from './components/BackgroundSound';
 import {
@@ -174,6 +175,7 @@ function App() {
   const [defeatingEnemy, setDefeatingEnemy] = useState(false);
   const [heroAnim, setHeroAnim] = useState<'idle' | 'attack' | 'hurt'>('idle');
   const [newEnemyIndex, setNewEnemyIndex] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
   const prevHintLevelRef = useRef(0);
   let submitInputRef = useRef<TextInput>(null);
   const variablesToLookFor: [number, number] = [
@@ -184,6 +186,11 @@ function App() {
     variablesToLookFor,
     isStoredState,
   );
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 600);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   useEffect(() => {
     if (isStoredState) return;
     if (numOfEnemies < previousNumOfEnemies) {
@@ -795,42 +802,69 @@ function App() {
                   {val2 < 0 ? `(${val2})` : val2}
                 </Text>
                 <Text style={[styles.mathText, { color: '#fff' }]}>=</Text>
-                <TextInput
-                  nativeID="answer-input"
-                  style={[
-                    styles.input,
-                    highContrast && highContrastStyles.input,
-                  ]}
-                  onChangeText={handleAnswerChange}
-                  onSubmitEditing={handleSubmit}
-                  onKeyPress={handleKeyDown as any}
-                  value={answer}
-                  ref={submitInputRef}
-                  accessibilityLabel="Enter your answer"
-                />
-              </View>
-              <View style={styles.submitRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.button,
-                    { backgroundColor: activeTheme.buttonColor },
-                    highContrast && highContrastStyles.button,
-                  ]}
-                  testID="submit"
-                  onPress={handleSubmit}
-                  accessibilityLabel="Submit answer"
-                  accessibilityRole="button"
-                >
+                {isMobile ? (
                   <Text
+                    nativeID="answer-input"
                     style={[
-                      styles.buttonText,
-                      highContrast && highContrastStyles.buttonText,
+                      styles.input,
+                      highContrast && highContrastStyles.input,
+                      { lineHeight: 56 },
                     ]}
+                    accessibilityLabel="Current answer"
                   >
-                    Submit
+                    {answer || ' '}
                   </Text>
-                </TouchableOpacity>
+                ) : (
+                  <TextInput
+                    nativeID="answer-input"
+                    style={[
+                      styles.input,
+                      highContrast && highContrastStyles.input,
+                    ]}
+                    onChangeText={handleAnswerChange}
+                    onSubmitEditing={handleSubmit}
+                    onKeyPress={handleKeyDown as any}
+                    value={answer}
+                    ref={submitInputRef}
+                    accessibilityLabel="Enter your answer"
+                  />
+                )}
               </View>
+              {isMobile ? (
+                <View style={styles.submitRow}>
+                  <NumberPad
+                    value={answer}
+                    onChange={handleAnswerChange}
+                    onSubmit={handleSubmit}
+                    showMinus={modeType === 'negative'}
+                    showDecimal={modeType === 'decimals'}
+                    buttonColor={activeTheme.buttonColor}
+                  />
+                </View>
+              ) : (
+                <View style={styles.submitRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.button,
+                      { backgroundColor: activeTheme.buttonColor },
+                      highContrast && highContrastStyles.button,
+                    ]}
+                    testID="submit"
+                    onPress={handleSubmit}
+                    accessibilityLabel="Submit answer"
+                    accessibilityRole="button"
+                  >
+                    <Text
+                      style={[
+                        styles.buttonText,
+                        highContrast && highContrastStyles.buttonText,
+                      ]}
+                    >
+                      Submit
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           )}
         </View>
