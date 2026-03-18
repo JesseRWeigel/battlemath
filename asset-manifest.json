@@ -1,25 +1,25 @@
 {
   "files": {
-    "main.js": "/battlemath/static/js/main.40aecee9.js",
+    "main.js": "/battlemath/static/js/main.41ecefe5.js",
     "static/media/background-music.mp3": "/battlemath/static/media/background-music.3d51c88e31e5663422f1.mp3",
     "static/media/orc.png": "/battlemath/static/media/orc.a509f3c097b8b3980c61.png",
-    "static/media/bg_subtraction.jpg": "/battlemath/static/media/bg_subtraction.b5194219922322f77113.jpg",
-    "static/media/bg_multiplication.jpg": "/battlemath/static/media/bg_multiplication.3e7e9f9b3c0e72f77144.jpg",
-    "static/media/bg_division.jpg": "/battlemath/static/media/bg_division.a04f9a64cab7b984714f.jpg",
-    "static/media/bg_addition.jpg": "/battlemath/static/media/bg_addition.6857dd1daaa8658d1d4d.jpg",
     "static/media/hero.png": "/battlemath/static/media/hero.32e725365304a31a6899.png",
-    "static/media/enemy_multiplication.png": "/battlemath/static/media/enemy_multiplication.f2a7a7135ad58598e0b5.png",
-    "static/media/enemy_division.png": "/battlemath/static/media/enemy_division.f93b3d7d3088e6b2d696.png",
-    "static/media/hero_hurt.png": "/battlemath/static/media/hero_hurt.a5b486ac1e92038f9004.png",
-    "static/media/hero_attack.png": "/battlemath/static/media/hero_attack.e339986471c3fb820589.png",
-    "static/media/hero_idle.png": "/battlemath/static/media/hero_idle.035d513317b39ff5c072.png",
-    "static/media/enemy_addition.png": "/battlemath/static/media/enemy_addition.3a5f46ea1fe9c4f31a6a.png",
-    "static/media/hero_victory.png": "/battlemath/static/media/hero_victory.832bcf42becd300d777b.png",
-    "static/media/enemy_subtraction.png": "/battlemath/static/media/enemy_subtraction.80d6118dfbfc7530bd16.png",
+    "static/media/bg_subtraction.jpg": "/battlemath/static/media/bg_subtraction.a11656d9da8a671216fd.jpg",
+    "static/media/bg_multiplication.jpg": "/battlemath/static/media/bg_multiplication.3cee50464231ddfbb4aa.jpg",
+    "static/media/enemy_multiplication.png": "/battlemath/static/media/enemy_multiplication.5cd5da1e1f5bbf704315.png",
+    "static/media/enemy_division.png": "/battlemath/static/media/enemy_division.4c07ec7454d4af02291c.png",
+    "static/media/bg_division.jpg": "/battlemath/static/media/bg_division.24c3778cae80a6fdff9e.jpg",
+    "static/media/hero_hurt.png": "/battlemath/static/media/hero_hurt.c7ba177535c090bfdca6.png",
+    "static/media/bg_addition.jpg": "/battlemath/static/media/bg_addition.d8e8a5b522b0ecd33bdd.jpg",
+    "static/media/hero_attack.png": "/battlemath/static/media/hero_attack.e060cd7757ef74b0d81c.png",
+    "static/media/hero_idle.png": "/battlemath/static/media/hero_idle.6a0a4e4b75a338107173.png",
+    "static/media/enemy_addition.png": "/battlemath/static/media/enemy_addition.b174bad469a884afddd4.png",
+    "static/media/hero_victory.png": "/battlemath/static/media/hero_victory.78e0b38fbf0bf785974c.png",
+    "static/media/enemy_subtraction.png": "/battlemath/static/media/enemy_subtraction.405d188b8db86bc341b8.png",
     "index.html": "/battlemath/index.html",
-    "main.40aecee9.js.map": "/battlemath/static/js/main.40aecee9.js.map"
+    "main.41ecefe5.js.map": "/battlemath/static/js/main.41ecefe5.js.map"
   },
   "entrypoints": [
-    "static/js/main.40aecee9.js"
+    "static/js/main.41ecefe5.js"
   ]
 }
