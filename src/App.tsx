@@ -41,6 +41,24 @@ import {
   saveDailyResult,
 } from './utils/DailyChallenge';
 
+// Character sprite imports
+import heroIdle from './assets/images/characters/hero_idle.png';
+import heroAttack from './assets/images/characters/hero_attack.png';
+import heroVictory from './assets/images/characters/hero_victory.png';
+import heroHurt from './assets/images/characters/hero_hurt.png';
+
+// Background imports
+import bgAddition from './assets/images/backgrounds/bg_addition.jpg';
+import bgSubtraction from './assets/images/backgrounds/bg_subtraction.jpg';
+import bgMultiplication from './assets/images/backgrounds/bg_multiplication.jpg';
+import bgDivision from './assets/images/backgrounds/bg_division.jpg';
+
+// Enemy sprite imports
+import enemyAddition from './assets/images/characters/enemy_addition.png';
+import enemySubtraction from './assets/images/characters/enemy_subtraction.png';
+import enemyMultiplication from './assets/images/characters/enemy_multiplication.png';
+import enemyDivision from './assets/images/characters/enemy_division.png';
+
 const musicTracks: Record<string, string> = {
   addition: musicAddition,
   subtraction: musicSubtraction,
@@ -50,17 +68,17 @@ const musicTracks: Record<string, string> = {
 
 // Character sprites
 const heroImages = {
-  idle: require('./assets/images/characters/hero_idle.png'),
-  attack: require('./assets/images/characters/hero_attack.png'),
-  victory: require('./assets/images/characters/hero_victory.png'),
-  hurt: require('./assets/images/characters/hero_hurt.png'),
+  idle: heroIdle,
+  attack: heroAttack,
+  victory: heroVictory,
+  hurt: heroHurt,
 };
 
 const bgImages: Record<string, string> = {
-  addition: require('./assets/images/backgrounds/bg_addition.jpg'),
-  subtraction: require('./assets/images/backgrounds/bg_subtraction.jpg'),
-  multiplication: require('./assets/images/backgrounds/bg_multiplication.jpg'),
-  division: require('./assets/images/backgrounds/bg_division.jpg'),
+  addition: bgAddition,
+  subtraction: bgSubtraction,
+  multiplication: bgMultiplication,
+  division: bgDivision,
 };
 
 // Preload all backgrounds on page load so switching is instant
@@ -70,10 +88,10 @@ Object.values(bgImages).forEach((src) => {
 });
 
 const enemyImages: Record<string, any> = {
-  addition: require('./assets/images/characters/enemy_addition.png'),
-  subtraction: require('./assets/images/characters/enemy_subtraction.png'),
-  multiplication: require('./assets/images/characters/enemy_multiplication.png'),
-  division: require('./assets/images/characters/enemy_division.png'),
+  addition: enemyAddition,
+  subtraction: enemySubtraction,
+  multiplication: enemyMultiplication,
+  division: enemyDivision,
 };
 
 function displayOperator(op: string): string {

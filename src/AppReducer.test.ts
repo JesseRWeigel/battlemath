@@ -527,7 +527,7 @@ describe('reducer', () => {
 
     it('auto-adjusts difficulty up after 3 correct with adaptive on', () => {
       const startTime = 1700000000000;
-      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      vi.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
       const state = makeState({
         val1: 2,
         val2: 3,
@@ -545,12 +545,12 @@ describe('reducer', () => {
 
       expect(result.difficulty).toBe('medium');
       expect(result.adaptiveMessage).toBe("Great job! Here's a harder one!");
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('auto-adjusts difficulty down after 2 wrong with adaptive on', () => {
       const startTime = 1700000000000;
-      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      vi.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
       const state = makeState({
         val1: 2,
         val2: 3,
@@ -569,12 +569,12 @@ describe('reducer', () => {
 
       expect(result.difficulty).toBe('medium');
       expect(result.adaptiveMessage).toBe("Let's practice with easier ones!");
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('does not auto-adjust when adaptive is off', () => {
       const startTime = 1700000000000;
-      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      vi.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
       const state = makeState({
         val1: 2,
         val2: 3,
@@ -592,7 +592,7 @@ describe('reducer', () => {
 
       expect(result.difficulty).toBe('easy');
       expect(result.adaptiveMessage).toBeNull();
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('wrong attempt 1: increments attempts/hintLevel, enemy count unchanged', () => {
@@ -656,7 +656,7 @@ describe('reducer', () => {
 
     it('correct on attempt 2: removes enemy, awards 50% points', () => {
       const startTime = 1700000000000;
-      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      vi.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
       const state = makeState({
         val1: 3,
         val2: 4,
@@ -678,7 +678,7 @@ describe('reducer', () => {
       expect(result.hintLevel).toBe(0);
       // 10 base points * 0.5 = 5
       expect(result.score).toBe(5);
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
   });
 
@@ -775,18 +775,18 @@ describe('reducer', () => {
   describe('START_TIMER', () => {
     it('sets questionStartTime to current time', () => {
       const now = 1700000000000;
-      jest.spyOn(Date, 'now').mockReturnValue(now);
+      vi.spyOn(Date, 'now').mockReturnValue(now);
       const state = makeState({ questionStartTime: 0 });
       const result = reducer(state, { type: TYPES.START_TIMER });
       expect(result.questionStartTime).toBe(now);
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
   });
 
   describe('CHECK_ANSWER with scoring', () => {
     it('awards 10 points for a correct answer under 5 seconds', () => {
       const startTime = 1700000000000;
-      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      vi.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
       const state = makeState({
         val1: 2,
         val2: 3,
@@ -802,12 +802,12 @@ describe('reducer', () => {
       const result = reducer(state, { type: TYPES.CHECK_ANSWER });
       expect(result.score).toBe(10);
       expect(result.lastPointsEarned).toBe(10);
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('awards 8 points for a correct answer under 10 seconds', () => {
       const startTime = 1700000000000;
-      jest.spyOn(Date, 'now').mockReturnValue(startTime + 7000);
+      vi.spyOn(Date, 'now').mockReturnValue(startTime + 7000);
       const state = makeState({
         val1: 2,
         val2: 3,
@@ -822,12 +822,12 @@ describe('reducer', () => {
       });
       const result = reducer(state, { type: TYPES.CHECK_ANSWER });
       expect(result.score).toBe(8);
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('awards 0 points for a wrong answer', () => {
       const startTime = 1700000000000;
-      jest.spyOn(Date, 'now').mockReturnValue(startTime + 2000);
+      vi.spyOn(Date, 'now').mockReturnValue(startTime + 2000);
       const state = makeState({
         val1: 2,
         val2: 3,
@@ -844,12 +844,12 @@ describe('reducer', () => {
       const result = reducer(state, { type: TYPES.CHECK_ANSWER });
       expect(result.score).toBe(5);
       expect(result.lastPointsEarned).toBe(0);
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('accumulates score across multiple correct answers', () => {
       const startTime = 1700000000000;
-      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      vi.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
       const state = makeState({
         val1: 2,
         val2: 3,
@@ -864,12 +864,12 @@ describe('reducer', () => {
       });
       const result = reducer(state, { type: TYPES.CHECK_ANSWER });
       expect(result.score).toBe(30);
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('updates bestScore when score exceeds it', () => {
       const startTime = 1700000000000;
-      jest.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
+      vi.spyOn(Date, 'now').mockReturnValue(startTime + 3000);
       const state = makeState({
         val1: 2,
         val2: 3,
@@ -885,7 +885,7 @@ describe('reducer', () => {
       const result = reducer(state, { type: TYPES.CHECK_ANSWER });
       expect(result.score).toBe(60);
       expect(result.bestScore).toBe(60);
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
   });
 
@@ -979,7 +979,7 @@ describe('getStreakMilestone', () => {
 describe('streak system', () => {
   it('CHECK_ANSWER correct increments streak', () => {
     const now = Date.now();
-    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    vi.spyOn(Date, 'now').mockReturnValue(now + 3000);
     const state: AppState = {
       ...initialState,
       val1: 2,
@@ -995,12 +995,12 @@ describe('streak system', () => {
     };
     const result = reducer(state, { type: TYPES.CHECK_ANSWER });
     expect(result.streak).toBe(1);
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('CHECK_ANSWER correct at milestone 3 awards bonus', () => {
     const now = Date.now();
-    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    vi.spyOn(Date, 'now').mockReturnValue(now + 3000);
     const state: AppState = {
       ...initialState,
       val1: 2,
@@ -1017,12 +1017,12 @@ describe('streak system', () => {
     const result = reducer(state, { type: TYPES.CHECK_ANSWER });
     expect(result.streak).toBe(3);
     expect(result.streakBonus).toBe(2); // Nice! milestone
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('CHECK_ANSWER wrong after 3 attempts resets streak', () => {
     const now = Date.now();
-    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    vi.spyOn(Date, 'now').mockReturnValue(now + 3000);
     const state: AppState = {
       ...initialState,
       val1: 2,
@@ -1041,7 +1041,7 @@ describe('streak system', () => {
     const result = reducer(state, { type: TYPES.CHECK_ANSWER });
     expect(result.streak).toBe(0);
     expect(result.streakBonus).toBe(0);
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('RESTART resets streak but preserves maxStreak', () => {
@@ -1085,7 +1085,7 @@ describe('calculateStars', () => {
 describe('star rating tracking', () => {
   it('CHECK_ANSWER increments totalAttempts on correct answer', () => {
     const now = Date.now();
-    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    vi.spyOn(Date, 'now').mockReturnValue(now + 3000);
     const state = makeState({
       val1: 2,
       val2: 3,
@@ -1103,7 +1103,7 @@ describe('star rating tracking', () => {
     expect(result.totalAttempts).toBe(1);
     expect(result.correctAttempts).toBe(1);
     expect(result.totalAnswerTime).toBe(3000);
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('CHECK_ANSWER increments totalAttempts on wrong answer', () => {
@@ -1139,7 +1139,7 @@ describe('star rating tracking', () => {
 
   it('calculates starsEarned on victory', () => {
     const now = Date.now();
-    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    vi.spyOn(Date, 'now').mockReturnValue(now + 3000);
     const state = makeState({
       val1: 2,
       val2: 3,
@@ -1156,7 +1156,7 @@ describe('star rating tracking', () => {
     const result = reducer(state, { type: TYPES.CHECK_ANSWER });
     expect(result.won).toBe(true);
     expect(result.starsEarned).toBe(3); // 3/3 correct, avg 3s
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 });
 
@@ -1386,7 +1386,7 @@ describe('Boss battles', () => {
 
   it('CHECK_ANSWER correct on boss decrements bossHP but keeps enemy', () => {
     const now = Date.now();
-    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    vi.spyOn(Date, 'now').mockReturnValue(now + 3000);
     const state = makeState({
       val1: 2,
       val2: 3,
@@ -1407,12 +1407,12 @@ describe('Boss battles', () => {
     expect(result.numOfEnemies).toBe(1);
     expect(result.won).toBe(false);
     expect(result.isBossLevel).toBe(true);
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('CHECK_ANSWER correct when bossHP reaches 0 triggers won', () => {
     const now = Date.now();
-    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    vi.spyOn(Date, 'now').mockReturnValue(now + 3000);
     const state = makeState({
       val1: 2,
       val2: 3,
@@ -1432,12 +1432,12 @@ describe('Boss battles', () => {
     expect(result.bossHP).toBe(0);
     expect(result.numOfEnemies).toBe(0);
     expect(result.won).toBe(true);
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('boss points are 3x multiplied', () => {
     const now = Date.now();
-    jest.spyOn(Date, 'now').mockReturnValue(now + 3000);
+    vi.spyOn(Date, 'now').mockReturnValue(now + 3000);
 
     // Normal level: should get 10 points (under 5s, first attempt)
     const normalState = makeState({
@@ -1475,6 +1475,6 @@ describe('Boss battles', () => {
 
     expect(normalResult.lastPointsEarned).toBe(10);
     expect(bossResult.lastPointsEarned).toBe(30);
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 });

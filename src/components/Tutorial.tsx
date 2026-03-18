@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import { Translations } from '../i18n';
+import heroImage from '../assets/images/hero.png';
+import orcImage from '../assets/images/orc.png';
 
 type TutorialProps = {
   onDismiss: () => void;
@@ -93,14 +95,14 @@ export default function Tutorial({ onDismiss, t }: TutorialProps) {
 
         {slide.image === 'hero' && (
           <Image
-            source={require('../assets/images/hero.png')}
+            source={heroImage}
             style={styles.slideImage}
             accessibilityLabel="Hero character"
           />
         )}
         {slide.image === 'orc' && (
           <Image
-            source={require('../assets/images/orc.png')}
+            source={orcImage}
             style={styles.slideImage}
             accessibilityLabel="Enemy character"
           />
