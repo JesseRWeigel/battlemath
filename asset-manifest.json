@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.js": "/battlemath/static/js/main.5f3fa884.js",
+    "main.js": "/battlemath/static/js/main.40aecee9.js",
     "static/media/background-music.mp3": "/battlemath/static/media/background-music.3d51c88e31e5663422f1.mp3",
     "static/media/orc.png": "/battlemath/static/media/orc.a509f3c097b8b3980c61.png",
     "static/media/bg_subtraction.jpg": "/battlemath/static/media/bg_subtraction.b5194219922322f77113.jpg",
@@ -13,13 +13,13 @@
     "static/media/hero_hurt.png": "/battlemath/static/media/hero_hurt.a5b486ac1e92038f9004.png",
     "static/media/hero_attack.png": "/battlemath/static/media/hero_attack.e339986471c3fb820589.png",
     "static/media/hero_idle.png": "/battlemath/static/media/hero_idle.035d513317b39ff5c072.png",
-    "static/media/enemy_addition.png": "/battlemath/static/media/enemy_addition.2a501bbe1b200b59ad79.png",
+    "static/media/enemy_addition.png": "/battlemath/static/media/enemy_addition.3a5f46ea1fe9c4f31a6a.png",
     "static/media/hero_victory.png": "/battlemath/static/media/hero_victory.832bcf42becd300d777b.png",
     "static/media/enemy_subtraction.png": "/battlemath/static/media/enemy_subtraction.80d6118dfbfc7530bd16.png",
     "index.html": "/battlemath/index.html",
-    "main.5f3fa884.js.map": "/battlemath/static/js/main.5f3fa884.js.map"
+    "main.40aecee9.js.map": "/battlemath/static/js/main.40aecee9.js.map"
   },
   "entrypoints": [
-    "static/js/main.5f3fa884.js"
+    "static/js/main.40aecee9.js"
   ]
 }
