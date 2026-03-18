@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import { Translations } from '../i18n';
 
 type TutorialProps = {
   onDismiss: () => void;
+  t?: Translations;
 };
 
-const SLIDES = [
+const DEFAULT_SLIDES = [
   {
     heading: 'Welcome, Warrior!',
     image: 'hero',
@@ -33,10 +35,38 @@ const SLIDES = [
   },
 ];
 
-export default function Tutorial({ onDismiss }: TutorialProps) {
+function getSlides(t?: Translations) {
+  if (!t) return DEFAULT_SLIDES;
+  return [
+    {
+      heading: t.welcomeTitle,
+      image: 'hero',
+      body: [t.welcomeText],
+      buttonLabel: t.next,
+    },
+    {
+      heading: t.howToPlayTitle,
+      image: null,
+      sample: '7 \u00D7 8 = ?',
+      body: t.howToPlayText,
+      buttonLabel: t.next,
+    },
+    {
+      heading: t.readyTitle,
+      image: 'orc',
+      body: t.readyText,
+      buttonLabel: t.start,
+    },
+  ];
+}
+
+export default function Tutorial({ onDismiss, t }: TutorialProps) {
+  const SLIDES = getSlides(t);
   const [slideIndex, setSlideIndex] = useState(0);
   const slide = SLIDES[slideIndex];
   const isLast = slideIndex === SLIDES.length - 1;
+
+  const skipLabel = t ? t.skip : 'Skip';
 
   const handleNext = () => {
     if (isLast) {
@@ -51,11 +81,11 @@ export default function Tutorial({ onDismiss }: TutorialProps) {
       <TouchableOpacity
         style={styles.skipButton}
         onPress={onDismiss}
-        accessibilityLabel="Skip tutorial"
+        accessibilityLabel={skipLabel}
         accessibilityRole="button"
         testID="tutorial-skip"
       >
-        <Text style={styles.skipText}>Skip</Text>
+        <Text style={styles.skipText}>{skipLabel}</Text>
       </TouchableOpacity>
 
       <View style={styles.card}>

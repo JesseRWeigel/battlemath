@@ -1,11 +1,19 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Level, LevelProgress, LEVELS, isLevelUnlocked } from '../levels';
+import { Translations } from '../i18n';
+import {
+  getTodayKey,
+  getDailyHistory,
+  getDailyStreak,
+} from '../utils/DailyChallenge';
 
 interface LevelSelectProps {
   progress: Record<number, LevelProgress>;
   onSelectLevel: (level: Level) => void;
   onFreePlay: () => void;
+  onDailyChallenge: () => void;
+  t?: Translations;
 }
 
 const WORLD_COLORS: Record<string, string> = {
@@ -58,16 +66,65 @@ function StarDisplay({ count }: { count: number }) {
   );
 }
 
+function DailyChallengeCard({ onPlay }: { onPlay: () => void }) {
+  const todayKey = getTodayKey();
+  const history = getDailyHistory();
+  const todayResult = history[todayKey];
+  const streak = getDailyStreak();
+  const completedToday = todayResult?.completed ?? false;
+
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
+
+  return (
+    <View style={styles.dailyCard}>
+      <Text style={styles.dailyTitle}>Daily Challenge</Text>
+      <Text style={styles.dailyDate}>{dateStr}</Text>
+      {streak > 0 && (
+        <Text style={styles.dailyStreak}>
+          {'\uD83D\uDD25'} {streak} day streak
+        </Text>
+      )}
+      {completedToday ? (
+        <View style={styles.dailyCompleted}>
+          <Text style={styles.dailyCompletedText}>Completed {'\u2713'}</Text>
+          <Text style={styles.dailyScore}>
+            Score: {todayResult.score} | Accuracy: {todayResult.accuracy}%
+          </Text>
+        </View>
+      ) : (
+        <TouchableOpacity
+          style={styles.dailyPlayButton}
+          onPress={onPlay}
+          accessibilityLabel="Play today's daily challenge"
+          accessibilityRole="button"
+          testID="daily-challenge-button"
+        >
+          <Text style={styles.dailyPlayText}>Play Today's Challenge</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}
+
 export default function LevelSelect({
   progress,
   onSelectLevel,
   onFreePlay,
+  onDailyChallenge,
+  t,
 }: LevelSelectProps) {
   const worlds = getWorlds();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Select a Level</Text>
+      <Text style={styles.title}>{t ? t.selectLevel : 'Select a Level'}</Text>
+
+      <DailyChallengeCard onPlay={onDailyChallenge} />
 
       {worlds.map((w) => (
         <View key={w.world} style={styles.worldSection}>
@@ -140,7 +197,7 @@ export default function LevelSelect({
         accessibilityRole="button"
         testID="free-play-button"
       >
-        <Text style={styles.freePlayText}>Free Play</Text>
+        <Text style={styles.freePlayText}>{t ? t.freePlay : 'Free Play'}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -240,6 +297,69 @@ const styles = StyleSheet.create({
   },
   freePlayText: {
     fontSize: 20,
+    fontFamily: '"Quicksand", sans-serif',
+    fontWeight: '700' as const,
+    color: '#fff',
+  },
+  dailyCard: {
+    width: '100%',
+    backgroundColor: 'rgba(255, 152, 0, 0.85)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    alignItems: 'center' as const,
+  },
+  dailyTitle: {
+    fontSize: 22,
+    fontFamily: '"Fredoka One", "Quicksand", sans-serif',
+    color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  dailyDate: {
+    fontSize: 14,
+    fontFamily: '"Quicksand", sans-serif',
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 2,
+  },
+  dailyStreak: {
+    fontSize: 16,
+    fontFamily: '"Quicksand", sans-serif',
+    fontWeight: '700' as const,
+    color: '#fff',
+    marginTop: 4,
+  },
+  dailyCompleted: {
+    marginTop: 8,
+    alignItems: 'center' as const,
+  },
+  dailyCompletedText: {
+    fontSize: 18,
+    fontFamily: '"Quicksand", sans-serif',
+    fontWeight: '700' as const,
+    color: 'rgba(255,255,255,0.7)',
+  },
+  dailyScore: {
+    fontSize: 13,
+    fontFamily: '"Quicksand", sans-serif',
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 2,
+  },
+  dailyPlayButton: {
+    marginTop: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    minHeight: 44,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  dailyPlayText: {
+    fontSize: 18,
     fontFamily: '"Quicksand", sans-serif',
     fontWeight: '700' as const,
     color: '#fff',

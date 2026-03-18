@@ -1,3 +1,12 @@
+import { Translations } from '../i18n';
+
+function interpolate(
+  template: string,
+  vars: Record<string, string | number>,
+): string {
+  return template.replace(/\{(\w+)\}/g, (_, key) => String(vars[key] ?? ''));
+}
+
 const encourageMessages = [
   'Almost! Give it another try!',
   'Not quite \u2014 you\u2019ve got this!',
@@ -11,11 +20,11 @@ export function generateHint(
   val2: number,
   operator: string,
   hintLevel: number,
+  t?: Translations,
 ): string {
   if (hintLevel === 1) {
-    return encourageMessages[
-      Math.floor(Math.random() * encourageMessages.length)
-    ];
+    const msgs = t ? t.hintEncourage : encourageMessages;
+    return msgs[Math.floor(Math.random() * msgs.length)];
   }
 
   let answer: number;
@@ -39,6 +48,21 @@ export function generateHint(
   if (hintLevel === 2) {
     const low = Math.floor(answer * 0.8);
     const high = Math.ceil(answer * 1.2);
+    if (t) {
+      const vars = { val1, val2, low, high };
+      switch (operator) {
+        case '+':
+          return interpolate(t.hintAddition, vars);
+        case '-':
+          return interpolate(t.hintSubtraction, vars);
+        case '*':
+          return interpolate(t.hintMultiplication, vars);
+        case '/':
+          return interpolate(t.hintDivision, vars);
+        default:
+          return interpolate(t.hintRange, vars);
+      }
+    }
     switch (operator) {
       case '+':
         return `Try counting up from ${val1} by ${val2}. The answer is between ${low} and ${high}.`;
@@ -55,7 +79,10 @@ export function generateHint(
 
   if (hintLevel === 3) {
     const displayAnswer = Number.isInteger(answer) ? answer : answer.toFixed(2);
-    return `The answer is ${displayAnswer}. Let's try another one!`;
+    if (t) {
+      return interpolate(t.hintAnswer, { answer: displayAnswer });
+    }
+    return `The answer is ${displayAnswer}. Let\'s try another one!`;
   }
 
   return '';
