@@ -1,25 +1,31 @@
 {
   "files": {
-    "main.js": "/battlemath/static/js/main.41ecefe5.js",
+    "main.js": "/battlemath/static/js/main.8050bf31.js",
     "static/media/background-music.mp3": "/battlemath/static/media/background-music.3d51c88e31e5663422f1.mp3",
+    "static/media/victory_fanfare.mp3": "/battlemath/static/media/victory_fanfare.d41ed587dc49dee1ea98.mp3",
     "static/media/orc.png": "/battlemath/static/media/orc.a509f3c097b8b3980c61.png",
     "static/media/hero.png": "/battlemath/static/media/hero.32e725365304a31a6899.png",
+    "static/media/correct.mp3": "/battlemath/static/media/correct.039dcf1fdf32744788a5.mp3",
+    "static/media/streak_milestone.mp3": "/battlemath/static/media/streak_milestone.cb1b2e7904da19aa7793.mp3",
     "static/media/bg_subtraction.jpg": "/battlemath/static/media/bg_subtraction.a11656d9da8a671216fd.jpg",
     "static/media/bg_multiplication.jpg": "/battlemath/static/media/bg_multiplication.3cee50464231ddfbb4aa.jpg",
+    "static/media/enemy_defeat.mp3": "/battlemath/static/media/enemy_defeat.094c2132c476144bab2b.mp3",
     "static/media/enemy_multiplication.png": "/battlemath/static/media/enemy_multiplication.5cd5da1e1f5bbf704315.png",
     "static/media/enemy_division.png": "/battlemath/static/media/enemy_division.4c07ec7454d4af02291c.png",
     "static/media/bg_division.jpg": "/battlemath/static/media/bg_division.24c3778cae80a6fdff9e.jpg",
     "static/media/hero_hurt.png": "/battlemath/static/media/hero_hurt.c7ba177535c090bfdca6.png",
+    "static/media/star_earned.mp3": "/battlemath/static/media/star_earned.592313494a5cfd18f187.mp3",
     "static/media/bg_addition.jpg": "/battlemath/static/media/bg_addition.d8e8a5b522b0ecd33bdd.jpg",
     "static/media/hero_attack.png": "/battlemath/static/media/hero_attack.e060cd7757ef74b0d81c.png",
     "static/media/hero_idle.png": "/battlemath/static/media/hero_idle.6a0a4e4b75a338107173.png",
     "static/media/enemy_addition.png": "/battlemath/static/media/enemy_addition.b174bad469a884afddd4.png",
     "static/media/hero_victory.png": "/battlemath/static/media/hero_victory.78e0b38fbf0bf785974c.png",
+    "static/media/wrong.mp3": "/battlemath/static/media/wrong.85c73b30060ea82a6d27.mp3",
     "static/media/enemy_subtraction.png": "/battlemath/static/media/enemy_subtraction.405d188b8db86bc341b8.png",
     "index.html": "/battlemath/index.html",
-    "main.41ecefe5.js.map": "/battlemath/static/js/main.41ecefe5.js.map"
+    "main.8050bf31.js.map": "/battlemath/static/js/main.8050bf31.js.map"
   },
   "entrypoints": [
-    "static/js/main.41ecefe5.js"
+    "static/js/main.8050bf31.js"
   ]
 }
