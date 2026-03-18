@@ -27,6 +27,7 @@ export const TYPES = {
   SET_ADAPTIVE: 13,
   DISMISS_TUTORIAL: 14,
   SHOW_TUTORIAL: 15,
+  SET_ANSWER_MODE: 16,
 } as const;
 
 const OPERATORS = {
@@ -85,6 +86,8 @@ export type AppState = {
   correctAttempts: number;
   totalAnswerTime: number;
   starsEarned: number;
+  answerMode: 'type' | 'choose';
+  choices: number[];
 };
 
 export function calculateStars(
@@ -133,6 +136,8 @@ export const initialState: AppState = {
   correctAttempts: 0,
   totalAnswerTime: 0,
   starsEarned: 0,
+  answerMode: 'type',
+  choices: [],
 };
 
 /**
@@ -192,6 +197,44 @@ export function getStreakMilestone(
     default:
       return null;
   }
+}
+
+export function computeAnswer(
+  val1: number,
+  operator: string,
+  val2: number,
+): number {
+  let result: number;
+  switch (operator) {
+    case '+':
+      result = val1 + val2;
+      break;
+    case '-':
+      result = val1 - val2;
+      break;
+    case '*':
+      result = val1 * val2;
+      break;
+    case '/':
+      result = val1 / val2;
+      break;
+    default:
+      result = val1 + val2;
+  }
+  return Number.parseFloat(result.toFixed(2));
+}
+
+export function generateChoices(correctAnswer: number): number[] {
+  const choices = [correctAnswer];
+  const range = Math.max(Math.abs(correctAnswer) * 0.3, 3);
+  while (choices.length < 4) {
+    const offset = Math.floor(Math.random() * range * 2) - range;
+    const distractor = Math.round(correctAnswer + offset);
+    if (distractor !== correctAnswer && !choices.includes(distractor)) {
+      choices.push(distractor);
+    }
+  }
+  return choices.sort(() => Math.random() - 0.5);
 }
 
 export const reducer: Reducer<AppState, ActionType> = (state, action) => {
@@ -285,6 +328,11 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         recentResults: [],
         adaptiveMessage: null,
         maxStreak: state.maxStreak,
+        answerMode: state.answerMode,
+        choices:
+          state.answerMode === 'choose'
+            ? generateChoices(computeAnswer(val[0], state.operator, val[1]))
+            : [],
       };
     }
 
@@ -471,6 +519,10 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         questionStartTime: state.questionStartTime || Date.now(),
         attempts: 0,
         hintLevel: 0,
+        choices:
+          state.answerMode === 'choose'
+            ? generateChoices(computeAnswer(val[0], state.operator, val[1]))
+            : [],
       };
     }
 
@@ -544,6 +596,21 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
       return {
         ...state,
         showTutorial: true,
+      };
+    }
+
+    case TYPES.SET_ANSWER_MODE: {
+      const answerMode = action.payload as 'type' | 'choose';
+      const choices =
+        answerMode === 'choose'
+          ? generateChoices(
+              computeAnswer(state.val1, state.operator, state.val2),
+            )
+          : [];
+      return {
+        ...state,
+        answerMode,
+        choices,
       };
     }
 
