@@ -1,5 +1,7 @@
 import { Reducer } from 'react';
 import { Level, LevelProgress } from './levels';
+import { DailyProblem } from './utils/DailyChallenge';
+import { Locale } from './i18n';
 
 export function randomNumberGenerator(
   min: number,
@@ -33,6 +35,8 @@ export const TYPES = {
   COMPLETE_LEVEL: 18,
   BACK_TO_LEVELS: 19,
   PLAY_FREE: 20,
+  SET_LOCALE: 21,
+  START_DAILY_CHALLENGE: 21,
 } as const;
 
 const OPERATORS = {
@@ -96,6 +100,10 @@ export type AppState = {
   currentLevel: Level | null;
   levelProgress: Record<number, LevelProgress>;
   gameScreen: 'levelSelect' | 'playing' | 'victory';
+  isDailyChallenge: boolean;
+  dailyProblems: DailyProblem[];
+  dailyProblemIndex: number;
+  locale: Locale;
 };
 
 export function calculateStars(
@@ -107,9 +115,9 @@ export function calculateStars(
   const accuracy = correctAttempts / totalAttempts;
   const avgTime = totalAnswerTime / correctAttempts;
 
-  if (accuracy >= 0.9 && avgTime < 10000) return 3; // 90%+ acc, <10s avg
-  if (accuracy >= 0.7) return 2; // 70%+ accuracy
-  return 1; // completed
+  if (accuracy >= 0.9 && avgTime < 10000) return 3;
+  if (accuracy >= 0.7) return 2;
+  return 1;
 }
 
 export const initialState: AppState = {
@@ -149,6 +157,10 @@ export const initialState: AppState = {
   currentLevel: null,
   levelProgress: {},
   gameScreen: 'levelSelect',
+  isDailyChallenge: false,
+  dailyProblems: [],
+  dailyProblemIndex: 0,
+  locale: 'en' as Locale,
 };
 
 /**
@@ -346,6 +358,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
             : [],
         currentLevel: state.currentLevel,
         levelProgress: state.levelProgress,
+        locale: state.locale,
         gameScreen: 'playing',
         numOfEnemies: state.currentLevel
           ? state.currentLevel.enemyCount
@@ -525,6 +538,33 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
     }
 
     case TYPES.NEW_PROBLEM: {
+      // Daily challenge: use the next pre-generated problem
+      if (state.isDailyChallenge && state.dailyProblems.length > 0) {
+        const nextIndex = state.dailyProblemIndex + 1;
+        if (nextIndex < state.dailyProblems.length) {
+          const p = state.dailyProblems[nextIndex];
+          const op = p.operator as (typeof OPERATORS)[keyof typeof OPERATORS];
+          return {
+            ...state,
+            val1: p.val1,
+            val2: p.val2,
+            operator: op,
+            mode: p.mode as keyof typeof OPERATORS,
+            difficulty: p.difficulty as keyof typeof DIFFICULTIES,
+            answer: '',
+            questionStartTime: state.questionStartTime || Date.now(),
+            attempts: 0,
+            hintLevel: 0,
+            dailyProblemIndex: nextIndex,
+            choices:
+              state.answerMode === 'choose'
+                ? generateChoices(computeAnswer(p.val1, op, p.val2))
+                : [],
+          };
+        }
+        return { ...state, answer: '', attempts: 0, hintLevel: 0 };
+      }
+
       let val = randomNumber();
 
       if (val[0] === state.val1 && val[1] === state.val2) {
@@ -665,6 +705,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         bestScore: state.bestScore,
         choices,
         hasSeenTutorial: state.hasSeenTutorial,
+        locale: state.locale,
       };
     }
 
@@ -703,6 +744,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         currentLevel: null,
         gameScreen: 'levelSelect',
         won: false,
+        isDailyChallenge: false,
+        dailyProblems: [],
+        dailyProblemIndex: 0,
       };
     }
 
@@ -730,6 +774,44 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         bestScore: state.bestScore,
         choices,
         hasSeenTutorial: state.hasSeenTutorial,
+        locale: state.locale,
+      };
+    }
+
+    case TYPES.START_DAILY_CHALLENGE: {
+      const problems = action.payload as DailyProblem[];
+      const first = problems[0];
+      const op = first.operator as (typeof OPERATORS)[keyof typeof OPERATORS];
+      const dcMode = first.mode as keyof typeof OPERATORS;
+      const dcDifficulty = first.difficulty as keyof typeof DIFFICULTIES;
+      const dcChoices =
+        state.answerMode === 'choose'
+          ? generateChoices(computeAnswer(first.val1, op, first.val2))
+          : [];
+      return {
+        ...initialState,
+        mode: dcMode,
+        difficulty: dcDifficulty,
+        modeType: state.modeType,
+        operator: op,
+        val1: first.val1,
+        val2: first.val2,
+        numOfEnemies: 10,
+        previousNumOfEnemies: 10,
+        currentLevel: null,
+        levelProgress: state.levelProgress,
+        gameScreen: 'playing',
+        questionStartTime: Date.now(),
+        soundEnabled: state.soundEnabled,
+        highContrast: state.highContrast,
+        answerMode: state.answerMode,
+        bestScore: state.bestScore,
+        choices: dcChoices,
+        hasSeenTutorial: state.hasSeenTutorial,
+        locale: state.locale,
+        isDailyChallenge: true,
+        dailyProblems: problems,
+        dailyProblemIndex: 0,
       };
     }
 
@@ -751,6 +833,13 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
       return {
         ...state,
         questionStartTime: Date.now(),
+      };
+    }
+
+    case TYPES.SET_LOCALE: {
+      return {
+        ...state,
+        locale: action.payload as Locale,
       };
     }
 

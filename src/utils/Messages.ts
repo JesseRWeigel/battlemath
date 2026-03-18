@@ -1,3 +1,5 @@
+import { Translations } from '../i18n';
+
 export const MESSAGES = {
   ANSWER_SUBMIT: {
     ERROR: 'You got that wrong :(',
@@ -11,7 +13,7 @@ export const MESSAGES = {
   },
 };
 
-export function getRandomSuccessMessage(): string {
-  const messages = MESSAGES.ANSWER_SUBMIT.SUCCESS;
+export function getRandomSuccessMessage(t?: Translations): string {
+  const messages = t ? t.successMessages : MESSAGES.ANSWER_SUBMIT.SUCCESS;
   return messages[Math.floor(Math.random() * messages.length)];
 }
