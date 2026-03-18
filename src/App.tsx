@@ -180,6 +180,9 @@ function App() {
       gameScreen,
       locale,
       isDailyChallenge,
+      isBossLevel,
+      bossHP,
+      bossMaxHP,
     },
     dispatch,
   ] = useReducer(reducer, initialState);
@@ -441,12 +444,12 @@ function App() {
   useEffect(() => {
     if (won) return;
     dispatch({ type: TYPES.START_TIMER });
-    setTimeLeft(30);
+    setTimeLeft(isBossLevel ? 20 : 30);
     const interval = setInterval(() => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(interval);
-  }, [val1, val2, won]);
+  }, [val1, val2, won, isBossLevel]);
   useEffect(() => {
     if (lastPointsEarned == null) return;
     setShowPoints(true);
@@ -759,44 +762,94 @@ function App() {
                   </View>
                 </View>
                 <View style={styles.enemiesContainer}>
-                  {[...Array(numOfEnemies)].map((_, i) => (
-                    <View
-                      testID="enemies"
-                      key={i}
-                      style={
-                        defeatingEnemy && i === numOfEnemies - 1
-                          ? ({
-                              animationName: 'enemyDefeat',
-                              animationDuration: '0.5s',
-                              animationFillMode: 'forwards',
-                            } as any)
-                          : undefined
-                      }
-                    >
-                      <Image
-                        source={enemyImages[mode] || enemyImages.addition}
-                        style={[
-                          styles.characterImage,
-                          defeatingEnemy && i === numOfEnemies - 1
-                            ? undefined
-                            : newEnemyIndex === i
-                              ? ({
-                                  animationName: 'enemyEntrance',
-                                  animationDuration: '0.5s',
-                                  animationFillMode: 'forwards',
-                                } as any)
+                  {isBossLevel ? (
+                    <View testID="enemies" style={{ alignItems: 'center' }}>
+                      <View
+                        style={
+                          defeatingEnemy && bossHP <= 0
+                            ? ({
+                                animationName: 'enemyDefeat',
+                                animationDuration: '0.5s',
+                                animationFillMode: 'forwards',
+                              } as any)
+                            : undefined
+                        }
+                      >
+                        <Image
+                          source={enemyImages[mode] || enemyImages.addition}
+                          style={[
+                            styles.bossImage,
+                            {
+                              boxShadow:
+                                '0 0 30px rgba(255, 80, 0, 0.7), 0 0 60px rgba(255, 0, 0, 0.4)',
+                            } as any,
+                            defeatingEnemy && bossHP <= 0
+                              ? undefined
                               : ({
-                                  animationName: 'enemySway',
-                                  animationDuration: '1.5s',
-                                  animationIterationCount: 'infinite',
-                                  animationTimingFunction: 'ease-in-out',
-                                  animationDelay: `${i * 0.3}s`,
+                                  animationName: 'bossEntrance',
+                                  animationDuration: '0.8s',
+                                  animationFillMode: 'forwards',
+                                  animationIterationCount:
+                                    numOfEnemies > 0 ? 1 : undefined,
                                 } as any),
-                        ]}
-                        accessibilityLabel={`Enemy ${i + 1}`}
-                      />
+                          ]}
+                          accessibilityLabel="Boss Enemy"
+                        />
+                      </View>
+                      <View style={styles.bossHPBar}>
+                        <View
+                          style={[
+                            styles.bossHPFill,
+                            {
+                              width: `${(bossHP / bossMaxHP) * 100}%`,
+                            },
+                          ]}
+                        />
+                        <Text
+                          style={styles.bossHPText}
+                        >{`${bossHP} / ${bossMaxHP}`}</Text>
+                      </View>
                     </View>
-                  ))}
+                  ) : (
+                    [...Array(numOfEnemies)].map((_, i) => (
+                      <View
+                        testID="enemies"
+                        key={i}
+                        style={
+                          defeatingEnemy && i === numOfEnemies - 1
+                            ? ({
+                                animationName: 'enemyDefeat',
+                                animationDuration: '0.5s',
+                                animationFillMode: 'forwards',
+                              } as any)
+                            : undefined
+                        }
+                      >
+                        <Image
+                          source={enemyImages[mode] || enemyImages.addition}
+                          style={[
+                            styles.characterImage,
+                            defeatingEnemy && i === numOfEnemies - 1
+                              ? undefined
+                              : newEnemyIndex === i
+                                ? ({
+                                    animationName: 'enemyEntrance',
+                                    animationDuration: '0.5s',
+                                    animationFillMode: 'forwards',
+                                  } as any)
+                                : ({
+                                    animationName: 'enemySway',
+                                    animationDuration: '1.5s',
+                                    animationIterationCount: 'infinite',
+                                    animationTimingFunction: 'ease-in-out',
+                                    animationDelay: `${i * 0.3}s`,
+                                  } as any),
+                          ]}
+                          accessibilityLabel={`Enemy ${i + 1}`}
+                        />
+                      </View>
+                    ))
+                  )}
                 </View>
               </View>
               {/* === ATTEMPT HEARTS === */}
@@ -1433,6 +1486,37 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: '"Quicksand", sans-serif',
     fontWeight: '600' as const,
+  },
+  bossHPBar: {
+    width: '80%',
+    maxWidth: 200,
+    height: 20,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 10,
+    overflow: 'hidden' as any,
+    alignSelf: 'center' as const,
+    marginTop: 4,
+    position: 'relative' as const,
+  },
+  bossHPFill: {
+    height: '100%',
+    backgroundColor: '#f44336',
+    borderRadius: 10,
+  },
+  bossHPText: {
+    position: 'absolute' as const,
+    width: '100%',
+    textAlign: 'center' as const,
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold' as const,
+    fontFamily: '"Poppins", sans-serif',
+    lineHeight: 20,
+  },
+  bossImage: {
+    width: 180,
+    height: 180,
+    resizeMode: 'contain' as any,
   },
   enemyCount: { paddingVertical: 4 },
   enemyCountText: {
