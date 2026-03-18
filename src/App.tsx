@@ -18,6 +18,7 @@ import { reducer, initialState, TYPES, getStreakMilestone } from './AppReducer';
 import { useMsgAfterSubmit } from './hooks';
 import HeroSvg from './components/HeroSvg';
 import Tutorial from './components/Tutorial';
+import { getTranslations, Locale } from './i18n';
 import NumberPad from './components/NumberPad';
 import LevelSelect from './components/LevelSelect';
 import { Level } from './levels';
@@ -31,6 +32,11 @@ import {
   playStreakMilestoneSound,
   playStarEarnedSound,
 } from './utils/SoundEffects';
+import {
+  generateDailyProblems,
+  getTodayKey,
+  saveDailyResult,
+} from './utils/DailyChallenge';
 
 // Character sprites
 const heroImages = {
@@ -81,16 +87,8 @@ const OPERATIONS = [
   { label: '\u00D7', value: 'multiplication' },
   { label: '\u00F7', value: 'division' },
 ];
-const DIFFICULTIES = [
-  { label: 'Easy', value: 'easy' },
-  { label: 'Medium', value: 'medium' },
-  { label: 'Hard', value: 'hard' },
-];
-const MODE_TYPES = [
-  { label: 'Whole', value: 'wholeNumber' },
-  { label: 'Decimal', value: 'decimal' },
-  { label: 'Negative', value: 'negative' },
-];
+// DIFFICULTIES moved inside component for i18n
+// MODE_TYPES moved inside component for i18n
 
 function SegmentedButtonGroup({
   options,
@@ -170,9 +168,22 @@ function App() {
       currentLevel,
       levelProgress,
       gameScreen,
+      locale,
+      isDailyChallenge,
     },
     dispatch,
   ] = useReducer(reducer, initialState);
+  const t = getTranslations(locale);
+  const DIFFICULTIES = [
+    { label: t.easy, value: 'easy' },
+    { label: t.medium, value: 'medium' },
+    { label: t.hard, value: 'hard' },
+  ];
+  const MODE_TYPES = [
+    { label: t.whole, value: 'wholeNumber' },
+    { label: t.decimal, value: 'decimal' },
+    { label: t.negative, value: 'negative' },
+  ];
   const [streakLabel, setStreakLabel] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
@@ -242,6 +253,22 @@ function App() {
       dispatch({ type: TYPES.COMPLETE_LEVEL });
     }
   }, [won, currentLevel, gameScreen]);
+
+  // Save daily challenge result on victory
+  useEffect(() => {
+    if (won && isDailyChallenge) {
+      const accuracy =
+        totalAttempts > 0
+          ? Math.round((correctAttempts / totalAttempts) * 100)
+          : 0;
+      saveDailyResult({
+        date: getTodayKey(),
+        score,
+        accuracy,
+        completed: true,
+      });
+    }
+  }, [won, isDailyChallenge, score, correctAttempts, totalAttempts]);
 
   // Victory celebration confetti + fanfare
   useEffect(() => {
@@ -313,6 +340,10 @@ function App() {
   const handleFreePlay = useCallback(() => {
     dispatch({ type: TYPES.PLAY_FREE });
   }, [dispatch]);
+  const handleDailyChallenge = useCallback(() => {
+    const problems = generateDailyProblems();
+    dispatch({ type: TYPES.START_DAILY_CHALLENGE, payload: problems });
+  }, [dispatch]);
   const handleBackToLevels = useCallback(() => {
     dispatch({ type: TYPES.BACK_TO_LEVELS });
   }, [dispatch]);
@@ -364,6 +395,7 @@ function App() {
         previousNumOfEnemies,
         hasSeenTutorial,
         levelProgress,
+        locale,
       }),
     );
   }, [
@@ -379,6 +411,7 @@ function App() {
     previousNumOfEnemies,
     hasSeenTutorial,
     levelProgress,
+    locale,
   ]);
   const submitMsgText = isErrorMessage
     ? highContrast
@@ -482,7 +515,7 @@ function App() {
         } as any,
       ]}
     >
-      {showTutorial && <Tutorial onDismiss={handleDismissTutorial} />}
+      {showTutorial && <Tutorial onDismiss={handleDismissTutorial} t={t} />}
       <View style={styles.gameContainer}>
         <View style={styles.content}>
           {/* === TOP BAR: Title + Score + Settings gear === */}
@@ -491,7 +524,7 @@ function App() {
               style={[styles.title, { color: activeTheme.textColor }]}
               accessibilityRole="header"
             >
-              Battle Math
+              {t.title}
             </Text>
             <View style={styles.topBarRight}>
               {gameScreen !== 'levelSelect' && (
@@ -541,11 +574,11 @@ function App() {
               <Text
                 style={[styles.scoreText, { color: '#fff' }]}
                 testID="score"
-              >{`Score: ${score}`}</Text>
+              >{`${t.score}: ${score}`}</Text>
               <Text
                 style={[styles.bestScoreText, { color: '#fff' }]}
                 testID="best-score"
-              >{`Best: ${bestScore}`}</Text>
+              >{`${t.best}: ${bestScore}`}</Text>
               {showPoints && lastPointsEarned != null && (
                 <Text
                   style={[
@@ -596,6 +629,8 @@ function App() {
               progress={levelProgress}
               onSelectLevel={handleSelectLevel}
               onFreePlay={handleFreePlay}
+              onDailyChallenge={handleDailyChallenge}
+              t={t}
             />
           )}
 
@@ -626,8 +661,8 @@ function App() {
                 />
                 <SegmentedButtonGroup
                   options={[
-                    { label: 'Type', value: 'type' },
-                    { label: 'Choose', value: 'choose' },
+                    { label: t.typeMode, value: 'type' },
+                    { label: t.chooseMode, value: 'choose' },
                   ]}
                   selectedValue={answerMode}
                   onSelect={(v) =>
@@ -635,6 +670,19 @@ function App() {
                   }
                   accessibilityLabel="Select answer mode"
                   testID="answer-mode-selector"
+                />
+                <SegmentedButtonGroup
+                  options={[
+                    { label: 'EN', value: 'en' },
+                    { label: 'ES', value: 'es' },
+                    { label: 'FR', value: 'fr' },
+                  ]}
+                  selectedValue={locale}
+                  onSelect={(v) =>
+                    dispatch({ type: TYPES.SET_LOCALE, payload: v })
+                  }
+                  accessibilityLabel="Select language"
+                  testID="language-selector"
                 />
               </View>
               <View style={styles.soundControls}>
@@ -654,7 +702,7 @@ function App() {
                       highContrast && highContrastStyles.settingsButton,
                     ]}
                   >
-                    {soundEnabled ? 'SFX On' : 'SFX Off'}
+                    {soundEnabled ? t.sfxOn : t.sfxOff}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -777,7 +825,7 @@ function App() {
                     ]}
                     accessibilityRole="text"
                   >
-                    Victory!
+                    {t.victory}
                   </Text>
                   <View
                     style={styles.starsContainer}
@@ -806,20 +854,20 @@ function App() {
                   <Text
                     style={styles.victoryStats}
                     accessibilityRole="text"
-                  >{`Accuracy: ${totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 0}%`}</Text>
+                  >{`${t.accuracy}: ${totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 0}%`}</Text>
                   <Text
                     style={styles.victoryScore}
                     accessibilityRole="text"
-                  >{`Final Score: ${score}`}</Text>
+                  >{`${t.finalScore}: ${score}`}</Text>
                   <Text
                     style={styles.victoryBest}
                     accessibilityRole="text"
-                  >{`Best Score: ${bestScore}`}</Text>
+                  >{`${t.bestScore}: ${bestScore}`}</Text>
                   {maxStreak >= 3 && (
                     <Text
                       style={styles.victoryBest}
                       accessibilityRole="text"
-                    >{`Best Streak: \uD83D\uDD25 \u00D7${maxStreak}`}</Text>
+                    >{`${t.bestStreak}: \uD83D\uDD25 \u00D7${maxStreak}`}</Text>
                   )}
                   <TouchableOpacity
                     onPress={handleRestart}
@@ -835,7 +883,7 @@ function App() {
                     accessibilityLabel="Play again"
                     accessibilityRole="button"
                   >
-                    <Text style={styles.restartButtonText}>Play Again</Text>
+                    <Text style={styles.restartButtonText}>{t.playAgain}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handleBackToLevels}
@@ -844,7 +892,9 @@ function App() {
                     accessibilityRole="button"
                     testID="back-to-levels"
                   >
-                    <Text style={styles.backToLevelsText}>Back to Levels</Text>
+                    <Text style={styles.backToLevelsText}>
+                      {t.backToLevels}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -966,7 +1016,7 @@ function App() {
                             highContrast && highContrastStyles.buttonText,
                           ]}
                         >
-                          Submit
+                          {t.submit}
                         </Text>
                       </TouchableOpacity>
                     </View>
