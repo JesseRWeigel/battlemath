@@ -31,10 +31,6 @@ jobs:
 
       - name: Build
         run: yarn build
-        env:
-          CI: false
 
       - name: Test
-        run: yarn test --watchAll=false
-        env:
-          CI: true
+        run: yarn test

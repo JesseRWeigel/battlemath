@@ -5,31 +5,20 @@
   "license": "MIT",
   "homepage": "https://jesserweigel.github.io/battlemath",
   "dependencies": {
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^13.0.0",
-    "@testing-library/user-event": "^13.2.1",
-    "@types/jest": "^27.0.1",
-    "@types/node": "^16.7.13",
-    "@types/react": "^18.0.0",
-    "@types/react-dom": "^18.0.0",
-    "@types/react-native": "^0.70.4",
     "canvas-confetti": "^1.9.4",
-    "gh-pages": "^4.0.0",
     "react": "^18.2.0",
     "react-art": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-native-svg": "^13.2.0",
-    "react-native-web": "^0.18.9",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.4.2",
-    "web-vitals": "^2.1.0"
+    "react-native-web": "^0.18.9"
   },
   "scripts": {
     "preinstall": "npx only-allow yarn",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build",
     "e2e": "cypress open",
@@ -43,18 +32,26 @@
     ]
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^13.2.1",
     "@types/canvas-confetti": "^1.9.0",
+    "@types/node": "^16.7.13",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@types/react-native": "^0.70.4",
+    "@vitejs/plugin-react": "^6.0.1",
     "cypress": "^10.8.0",
     "eslint-plugin-cypress": "^2.2.1",
+    "gh-pages": "^4.0.0",
     "husky": "^9.1.7",
+    "jsdom": "^29.0.0",
     "lint-staged": "^16.4.0",
-    "prettier": "^3.8.1"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+    "prettier": "^3.8.1",
+    "typescript": "^4.4.2",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.0"
   },
   "browserslist": {
     "production": [

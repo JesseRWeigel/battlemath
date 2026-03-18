@@ -3,11 +3,11 @@ import { useMsgAfterSubmit } from './useMsgAfterSubmit';
 import { MESSAGES } from '../utils/Messages';
 
 beforeEach(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterEach(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 describe('useMsgAfterSubmit', () => {
@@ -65,7 +65,7 @@ describe('useMsgAfterSubmit', () => {
     expect(MESSAGES.ANSWER_SUBMIT.SUCCESS).toContain(result.current.msg);
 
     act(() => {
-      jest.advanceTimersByTime(1500);
+      vi.advanceTimersByTime(1500);
     });
 
     expect(result.current.msg).toBe('');
