@@ -152,6 +152,7 @@ function App() {
       bestScore,
       lastPointsEarned,
       hintLevel,
+      attempts,
       streak,
       maxStreak,
       streakBonus,
@@ -664,6 +665,31 @@ function App() {
               ))}
             </View>
           </View>
+          {/* === ATTEMPT HEARTS === */}
+          {!won && (
+            <View style={styles.heartsContainer} testID="hearts-container">
+              {[0, 1, 2].map((i) => (
+                <Text
+                  key={i}
+                  style={[
+                    styles.heart,
+                    i < 3 - attempts ? styles.heartFull : styles.heartEmpty,
+                    i === 3 - attempts && attempts > 0 && hintLevel > 0
+                      ? ({
+                          animationName: 'heartBreak',
+                          animationDuration: '0.5s',
+                        } as any)
+                      : undefined,
+                  ]}
+                  accessibilityLabel={
+                    i < 3 - attempts ? 'Heart full' : 'Heart empty'
+                  }
+                >
+                  {i < 3 - attempts ? '\u2764\uFE0F' : '\uD83D\uDDA4'}
+                </Text>
+              ))}
+            </View>
+          )}
           {won ? (
             <View style={[styles.cardPanel, styles.victoryPanel]}>
               <Text
@@ -940,6 +966,21 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
   },
   characterImage: { width: 120, height: 120, resizeMode: 'contain' as any },
+  heartsContainer: {
+    flexDirection: 'row' as const,
+    justifyContent: 'center' as const,
+    gap: 8,
+    paddingVertical: 4,
+  },
+  heart: {
+    fontSize: 28,
+  },
+  heartFull: {
+    opacity: 1,
+  },
+  heartEmpty: {
+    opacity: 0.4,
+  },
   mathContainer: { paddingVertical: 16, alignItems: 'center' },
   mathRow: {
     flexDirection: 'row',
