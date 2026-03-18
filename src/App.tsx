@@ -20,7 +20,14 @@ import HeroSvg from './components/HeroSvg';
 import Tutorial from './components/Tutorial';
 import bgSound from './assets/music/background-music.mp3';
 import BackgroundSound from './components/BackgroundSound';
-import { playCorrectSound, playIncorrectSound } from './utils/SoundEffects';
+import {
+  playCorrectSound,
+  playIncorrectSound,
+  playEnemyDefeatSound,
+  playVictoryFanfare,
+  playStreakMilestoneSound,
+  playStarEarnedSound,
+} from './utils/SoundEffects';
 
 // Character sprites
 const heroImages = {
@@ -179,7 +186,10 @@ function App() {
   useEffect(() => {
     if (isStoredState) return;
     if (numOfEnemies < previousNumOfEnemies) {
-      if (soundEnabled) playCorrectSound();
+      if (soundEnabled) {
+        playCorrectSound();
+        playEnemyDefeatSound();
+      }
       // Correct answer confetti
       setDefeatingEnemy(true);
       setHeroAnim('attack');
@@ -211,9 +221,10 @@ function App() {
     prevHintLevelRef.current = hintLevel;
   }, [hintLevel]);
 
-  // Victory celebration confetti
+  // Victory celebration confetti + fanfare
   useEffect(() => {
     if (!won) return;
+    if (soundEnabled) playVictoryFanfare();
     const end = Date.now() + 3000;
     const interval = setInterval(() => {
       confetti({
@@ -374,6 +385,7 @@ function App() {
     }
     const milestone = getStreakMilestone(streak);
     if (milestone) {
+      if (soundEnabled) playStreakMilestoneSound();
       setStreakLabel(`${milestone.label} +${milestone.bonus}`);
       const timer = setTimeout(() => setStreakLabel(null), 2000);
       return () => clearTimeout(timer);

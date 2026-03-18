@@ -2,7 +2,8 @@
 """Generate sound effects for BattleMath using MusicGen (already cached)."""
 
 import torch
-import torchaudio
+import numpy as np
+from scipy.io import wavfile
 from transformers import AutoProcessor, MusicgenForConditionalGeneration
 from pathlib import Path
 import subprocess
@@ -89,11 +90,16 @@ def main():
                 )
 
             # audio_values shape: [batch, channels, samples]
-            audio = audio_values[0].cpu().float()
+            audio = audio_values[0].cpu().float().numpy()
+            # Normalize to int16 range
+            audio_int16 = (audio / np.max(np.abs(audio)) * 32767).astype(np.int16)
+            # If stereo, transpose to (samples, channels)
+            if audio_int16.ndim == 2:
+                audio_int16 = audio_int16.T
 
             # Save as WAV
             wav_path = OUTPUT_DIR / f"{name}_v{variant}.wav"
-            torchaudio.save(str(wav_path), audio, sample_rate)
+            wavfile.write(str(wav_path), sample_rate, audio_int16)
 
             # Convert to MP3
             mp3_path = OUTPUT_DIR / f"{name}_v{variant}.mp3"
