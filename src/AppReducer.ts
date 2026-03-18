@@ -1,4 +1,5 @@
 import { Reducer } from 'react';
+import { Level, LevelProgress } from './levels';
 
 export function randomNumberGenerator(
   min: number,
@@ -28,6 +29,10 @@ export const TYPES = {
   DISMISS_TUTORIAL: 14,
   SHOW_TUTORIAL: 15,
   SET_ANSWER_MODE: 16,
+  SELECT_LEVEL: 17,
+  COMPLETE_LEVEL: 18,
+  BACK_TO_LEVELS: 19,
+  PLAY_FREE: 20,
 } as const;
 
 const OPERATORS = {
@@ -88,6 +93,9 @@ export type AppState = {
   starsEarned: number;
   answerMode: 'type' | 'choose';
   choices: number[];
+  currentLevel: Level | null;
+  levelProgress: Record<number, LevelProgress>;
+  gameScreen: 'levelSelect' | 'playing' | 'victory';
 };
 
 export function calculateStars(
@@ -138,6 +146,9 @@ export const initialState: AppState = {
   starsEarned: 0,
   answerMode: 'type',
   choices: [],
+  currentLevel: null,
+  levelProgress: {},
+  gameScreen: 'levelSelect',
 };
 
 /**
@@ -333,6 +344,15 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
           state.answerMode === 'choose'
             ? generateChoices(computeAnswer(val[0], state.operator, val[1]))
             : [],
+        currentLevel: state.currentLevel,
+        levelProgress: state.levelProgress,
+        gameScreen: 'playing',
+        numOfEnemies: state.currentLevel
+          ? state.currentLevel.enemyCount
+          : initialState.numOfEnemies,
+        previousNumOfEnemies: state.currentLevel
+          ? state.currentLevel.enemyCount
+          : initialState.numOfEnemies,
       };
     }
 
@@ -614,6 +634,105 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
       };
     }
 
+    case TYPES.SELECT_LEVEL: {
+      const level = action.payload as Level;
+      const op =
+        OPERATORS[level.world as keyof typeof OPERATORS] || OPERATORS.addition;
+      const mode = level.world as keyof typeof OPERATORS;
+      const difficulty = level.difficulty as keyof typeof DIFFICULTIES;
+      let val = randomNumber(difficulty, mode);
+      const choices =
+        state.answerMode === 'choose'
+          ? generateChoices(computeAnswer(val[0], op, val[1]))
+          : [];
+      return {
+        ...initialState,
+        mode,
+        difficulty,
+        modeType: state.modeType,
+        operator: op,
+        val1: val[0],
+        val2: val[1],
+        numOfEnemies: level.enemyCount,
+        previousNumOfEnemies: level.enemyCount,
+        currentLevel: level,
+        levelProgress: state.levelProgress,
+        gameScreen: 'playing',
+        questionStartTime: Date.now(),
+        soundEnabled: state.soundEnabled,
+        highContrast: state.highContrast,
+        answerMode: state.answerMode,
+        bestScore: state.bestScore,
+        choices,
+        hasSeenTutorial: state.hasSeenTutorial,
+      };
+    }
+
+    case TYPES.COMPLETE_LEVEL: {
+      if (!state.currentLevel) return state;
+      const accuracy =
+        state.totalAttempts > 0
+          ? state.correctAttempts / state.totalAttempts
+          : 0;
+      const prevProgress = state.levelProgress[state.currentLevel.id];
+      const newStars = state.starsEarned;
+      const newProgress: LevelProgress = {
+        levelId: state.currentLevel.id,
+        completed: true,
+        stars: Math.max(newStars, prevProgress?.stars ?? 0),
+        bestScore: Math.max(state.score, prevProgress?.bestScore ?? 0),
+        bestAccuracy: Math.max(
+          Math.round(accuracy * 100),
+          prevProgress?.bestAccuracy ?? 0,
+        ),
+      };
+      const updatedProgress = {
+        ...state.levelProgress,
+        [state.currentLevel.id]: newProgress,
+      };
+      return {
+        ...state,
+        levelProgress: updatedProgress,
+        gameScreen: 'victory',
+      };
+    }
+
+    case TYPES.BACK_TO_LEVELS: {
+      return {
+        ...state,
+        currentLevel: null,
+        gameScreen: 'levelSelect',
+        won: false,
+      };
+    }
+
+    case TYPES.PLAY_FREE: {
+      let val = randomNumber();
+      const choices =
+        state.answerMode === 'choose'
+          ? generateChoices(computeAnswer(val[0], state.operator, val[1]))
+          : [];
+      return {
+        ...initialState,
+        mode: state.mode,
+        difficulty: state.difficulty,
+        modeType: state.modeType,
+        operator: state.operator,
+        val1: val[0],
+        val2: val[1],
+        currentLevel: null,
+        levelProgress: state.levelProgress,
+        gameScreen: 'playing',
+        questionStartTime: Date.now(),
+        soundEnabled: state.soundEnabled,
+        highContrast: state.highContrast,
+        answerMode: state.answerMode,
+        bestScore: state.bestScore,
+        choices,
+        hasSeenTutorial: state.hasSeenTutorial,
+      };
+    }
+
     case TYPES.RESTORE_STATE: {
       const storedState = action.payload as Partial<AppState>;
       return {
@@ -622,6 +741,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         isStoredState: true,
         showTutorial: storedState.hasSeenTutorial ? false : true,
         hasSeenTutorial: storedState.hasSeenTutorial ?? false,
+        levelProgress: storedState.levelProgress ?? {},
+        gameScreen: 'levelSelect',
+        currentLevel: null,
       };
     }
 

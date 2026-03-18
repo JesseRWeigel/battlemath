@@ -11,6 +11,7 @@ import {
   AppState,
   ActionType,
 } from './AppReducer';
+import { LEVELS } from './levels';
 
 // Helper to create a state with overrides
 const makeState = (overrides: Partial<AppState> = {}): AppState => ({
@@ -1179,6 +1180,129 @@ describe('generateChoices', () => {
       const unique = new Set(choices);
       expect(unique.size).toBe(4);
     }
+  });
+});
+
+describe('SELECT_LEVEL', () => {
+  it('sets mode, difficulty, and enemyCount from level', () => {
+    const level = LEVELS[0]; // Addition 1, easy, 5 enemies
+    const state = makeState();
+    const result = reducer(state, {
+      type: TYPES.SELECT_LEVEL,
+      payload: level,
+    });
+
+    expect(result.mode).toBe('addition');
+    expect(result.difficulty).toBe('easy');
+    expect(result.numOfEnemies).toBe(5);
+    expect(result.currentLevel).toBe(level);
+    expect(result.gameScreen).toBe('playing');
+    expect(result.operator).toBe('+');
+  });
+
+  it('sets subtraction mode for subtraction level', () => {
+    const level = LEVELS[3]; // Subtraction 1
+    const state = makeState();
+    const result = reducer(state, {
+      type: TYPES.SELECT_LEVEL,
+      payload: level,
+    });
+
+    expect(result.mode).toBe('subtraction');
+    expect(result.operator).toBe('-');
+  });
+
+  it('resets score and attempts', () => {
+    const level = LEVELS[0];
+    const state = makeState({ score: 50, totalAttempts: 10 });
+    const result = reducer(state, {
+      type: TYPES.SELECT_LEVEL,
+      payload: level,
+    });
+
+    expect(result.score).toBe(0);
+    expect(result.totalAttempts).toBe(0);
+    expect(result.won).toBe(false);
+  });
+});
+
+describe('COMPLETE_LEVEL', () => {
+  it('records progress when a level is completed', () => {
+    const level = LEVELS[0];
+    const state = makeState({
+      currentLevel: level,
+      gameScreen: 'playing',
+      won: true,
+      score: 30,
+      totalAttempts: 5,
+      correctAttempts: 5,
+      totalAnswerTime: 20000,
+      starsEarned: 3,
+    });
+    const result = reducer(state, { type: TYPES.COMPLETE_LEVEL });
+
+    expect(result.gameScreen).toBe('victory');
+    expect(result.levelProgress[1]).toBeDefined();
+    expect(result.levelProgress[1].completed).toBe(true);
+    expect(result.levelProgress[1].stars).toBe(3);
+    expect(result.levelProgress[1].bestScore).toBe(30);
+  });
+
+  it('keeps best stars from previous attempt', () => {
+    const level = LEVELS[0];
+    const state = makeState({
+      currentLevel: level,
+      gameScreen: 'playing',
+      won: true,
+      score: 10,
+      totalAttempts: 5,
+      correctAttempts: 3,
+      starsEarned: 1,
+      levelProgress: {
+        1: {
+          levelId: 1,
+          completed: true,
+          stars: 3,
+          bestScore: 50,
+          bestAccuracy: 100,
+        },
+      },
+    });
+    const result = reducer(state, { type: TYPES.COMPLETE_LEVEL });
+
+    expect(result.levelProgress[1].stars).toBe(3); // kept from previous
+    expect(result.levelProgress[1].bestScore).toBe(50); // kept from previous
+  });
+
+  it('does nothing when no current level', () => {
+    const state = makeState({ currentLevel: null });
+    const result = reducer(state, { type: TYPES.COMPLETE_LEVEL });
+    expect(result).toBe(state);
+  });
+});
+
+describe('BACK_TO_LEVELS', () => {
+  it('returns to level select', () => {
+    const state = makeState({
+      gameScreen: 'victory',
+      currentLevel: LEVELS[0],
+      won: true,
+    });
+    const result = reducer(state, { type: TYPES.BACK_TO_LEVELS });
+
+    expect(result.gameScreen).toBe('levelSelect');
+    expect(result.currentLevel).toBeNull();
+    expect(result.won).toBe(false);
+  });
+});
+
+describe('PLAY_FREE', () => {
+  it('sets gameScreen to playing with no level', () => {
+    const state = makeState({ gameScreen: 'levelSelect' });
+    const result = reducer(state, { type: TYPES.PLAY_FREE });
+
+    expect(result.gameScreen).toBe('playing');
+    expect(result.currentLevel).toBeNull();
   });
 });
 
