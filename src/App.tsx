@@ -1278,10 +1278,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center' as const,
     gap: 10,
     paddingVertical: 8,
-    maxWidth: 300,
+    width: 280,
+    alignSelf: 'center' as const,
   },
   choiceButton: {
-    width: '45%' as any,
+    width: 130,
     minHeight: 56,
     borderRadius: 12,
     alignItems: 'center' as const,
