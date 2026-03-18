@@ -163,6 +163,8 @@ function App() {
       correctAttempts,
       totalAnswerTime,
       starsEarned,
+      answerMode,
+      choices,
     },
     dispatch,
   ] = useReducer(reducer, initialState);
@@ -574,6 +576,18 @@ function App() {
                   accessibilityLabel="Select number mode"
                   testID="modeType-selector"
                 />
+                <SegmentedButtonGroup
+                  options={[
+                    { label: 'Type', value: 'type' },
+                    { label: 'Choose', value: 'choose' },
+                  ]}
+                  selectedValue={answerMode}
+                  onSelect={(v) =>
+                    dispatch({ type: TYPES.SET_ANSWER_MODE, payload: v })
+                  }
+                  accessibilityLabel="Select answer mode"
+                  testID="answer-mode-selector"
+                />
               </View>
               <View style={styles.soundControls}>
                 <BackgroundSound url={bgSound} />
@@ -802,35 +816,62 @@ function App() {
                   {val2 < 0 ? `(${val2})` : val2}
                 </Text>
                 <Text style={[styles.mathText, { color: '#fff' }]}>=</Text>
-                {isMobile ? (
-                  <Text
-                    nativeID="answer-input"
-                    style={[
-                      styles.input,
-                      highContrast && highContrastStyles.input,
-                      { lineHeight: 56 },
-                    ]}
-                    accessibilityLabel="Current answer"
-                  >
-                    {answer || ' '}
-                  </Text>
-                ) : (
-                  <TextInput
-                    nativeID="answer-input"
-                    style={[
-                      styles.input,
-                      highContrast && highContrastStyles.input,
-                    ]}
-                    onChangeText={handleAnswerChange}
-                    onSubmitEditing={handleSubmit}
-                    onKeyPress={handleKeyDown as any}
-                    value={answer}
-                    ref={submitInputRef}
-                    accessibilityLabel="Enter your answer"
-                  />
-                )}
+                {answerMode !== 'choose' &&
+                  (isMobile ? (
+                    <Text
+                      nativeID="answer-input"
+                      style={[
+                        styles.input,
+                        highContrast && highContrastStyles.input,
+                        { lineHeight: 56 },
+                      ]}
+                      accessibilityLabel="Current answer"
+                    >
+                      {answer || ' '}
+                    </Text>
+                  ) : (
+                    <TextInput
+                      nativeID="answer-input"
+                      style={[
+                        styles.input,
+                        highContrast && highContrastStyles.input,
+                      ]}
+                      onChangeText={handleAnswerChange}
+                      onSubmitEditing={handleSubmit}
+                      onKeyPress={handleKeyDown as any}
+                      value={answer}
+                      ref={submitInputRef}
+                      accessibilityLabel="Enter your answer"
+                    />
+                  ))}
               </View>
-              {isMobile ? (
+              {answerMode === 'choose' ? (
+                <View style={styles.choiceGrid}>
+                  {choices.map((choice, i) => (
+                    <TouchableOpacity
+                      key={i}
+                      style={[
+                        styles.choiceButton,
+                        { backgroundColor: activeTheme.buttonColor },
+                      ]}
+                      onPress={() => {
+                        dispatch({
+                          type: TYPES.SET_ANSWER,
+                          payload: String(choice),
+                        });
+                        setTimeout(
+                          () => dispatch({ type: TYPES.CHECK_ANSWER }),
+                          100,
+                        );
+                      }}
+                      accessibilityLabel={`Answer ${choice}`}
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.choiceButtonText}>{choice}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : isMobile ? (
                 <View style={styles.submitRow}>
                   <NumberPad
                     value={answer}
@@ -1016,6 +1057,27 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   mathContainer: { paddingVertical: 16, alignItems: 'center' },
+  choiceGrid: {
+    flexDirection: 'row' as const,
+    flexWrap: 'wrap' as const,
+    justifyContent: 'center' as const,
+    gap: 10,
+    paddingVertical: 8,
+    maxWidth: 300,
+  },
+  choiceButton: {
+    width: '45%' as any,
+    minHeight: 56,
+    borderRadius: 12,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  choiceButtonText: {
+    fontSize: 24,
+    fontWeight: 'bold' as const,
+    fontFamily: '"Poppins", sans-serif',
+    color: '#fff',
+  },
   mathRow: {
     flexDirection: 'row',
     justifyContent: 'center',

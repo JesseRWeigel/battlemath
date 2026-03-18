@@ -7,6 +7,7 @@ import {
   calculateStars,
   getAdaptiveDifficulty,
   getStreakMilestone,
+  generateChoices,
   AppState,
   ActionType,
 } from './AppReducer';
@@ -1155,5 +1156,76 @@ describe('star rating tracking', () => {
     expect(result.won).toBe(true);
     expect(result.starsEarned).toBe(3); // 3/3 correct, avg 3s
     jest.restoreAllMocks();
+  });
+});
+
+describe('generateChoices', () => {
+  it('returns exactly 4 numbers', () => {
+    const choices = generateChoices(10);
+    expect(choices).toHaveLength(4);
+  });
+
+  it('includes the correct answer', () => {
+    for (let i = 0; i < 20; i++) {
+      const correct = Math.floor(Math.random() * 100) - 50;
+      const choices = generateChoices(correct);
+      expect(choices).toContain(correct);
+    }
+  });
+
+  it('contains 4 unique values', () => {
+    for (let i = 0; i < 20; i++) {
+      const choices = generateChoices(42);
+      const unique = new Set(choices);
+      expect(unique.size).toBe(4);
+    }
+  });
+});
+
+describe('answer mode', () => {
+  it('SET_ANSWER_MODE changes answerMode to choose', () => {
+    const state = makeState({ answerMode: 'type' });
+    const result = reducer(state, {
+      type: TYPES.SET_ANSWER_MODE,
+      payload: 'choose',
+    });
+    expect(result.answerMode).toBe('choose');
+    expect(result.choices).toHaveLength(4);
+  });
+
+  it('SET_ANSWER_MODE changes answerMode to type', () => {
+    const state = makeState({ answerMode: 'choose', choices: [1, 2, 3, 4] });
+    const result = reducer(state, {
+      type: TYPES.SET_ANSWER_MODE,
+      payload: 'type',
+    });
+    expect(result.answerMode).toBe('type');
+    expect(result.choices).toEqual([]);
+  });
+
+  it('NEW_PROBLEM generates choices when answerMode is choose', () => {
+    const state = makeState({
+      answerMode: 'choose',
+      val1: 2,
+      val2: 3,
+      operator: '+',
+      mode: 'addition',
+    });
+    const result = reducer(state, { type: TYPES.NEW_PROBLEM });
+    expect(result.choices).toHaveLength(4);
+    const correctAnswer = result.val1 + result.val2;
+    expect(result.choices).toContain(correctAnswer);
+  });
+
+  it('NEW_PROBLEM does not generate choices when answerMode is type', () => {
+    const state = makeState({
+      answerMode: 'type',
+      val1: 2,
+      val2: 3,
+      operator: '+',
+      mode: 'addition',
+    });
+    const result = reducer(state, { type: TYPES.NEW_PROBLEM });
+    expect(result.choices).toEqual([]);
   });
 });
