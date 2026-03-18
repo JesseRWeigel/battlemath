@@ -19,6 +19,8 @@ import { useMsgAfterSubmit } from './hooks';
 import HeroSvg from './components/HeroSvg';
 import Tutorial from './components/Tutorial';
 import NumberPad from './components/NumberPad';
+import LevelSelect from './components/LevelSelect';
+import { Level } from './levels';
 import bgSound from './assets/music/background-music.mp3';
 import BackgroundSound from './components/BackgroundSound';
 import {
@@ -165,6 +167,9 @@ function App() {
       starsEarned,
       answerMode,
       choices,
+      currentLevel,
+      levelProgress,
+      gameScreen,
     },
     dispatch,
   ] = useReducer(reducer, initialState);
@@ -231,6 +236,13 @@ function App() {
     prevHintLevelRef.current = hintLevel;
   }, [hintLevel]);
 
+  // Complete level on victory
+  useEffect(() => {
+    if (won && currentLevel && gameScreen === 'playing') {
+      dispatch({ type: TYPES.COMPLETE_LEVEL });
+    }
+  }, [won, currentLevel, gameScreen]);
+
   // Victory celebration confetti + fanfare
   useEffect(() => {
     if (!won) return;
@@ -292,6 +304,18 @@ function App() {
   const handleShowTutorial = useCallback(() => {
     dispatch({ type: TYPES.SHOW_TUTORIAL });
   }, [dispatch]);
+  const handleSelectLevel = useCallback(
+    (level: Level) => {
+      dispatch({ type: TYPES.SELECT_LEVEL, payload: level });
+    },
+    [dispatch],
+  );
+  const handleFreePlay = useCallback(() => {
+    dispatch({ type: TYPES.PLAY_FREE });
+  }, [dispatch]);
+  const handleBackToLevels = useCallback(() => {
+    dispatch({ type: TYPES.BACK_TO_LEVELS });
+  }, [dispatch]);
   const handleSubmit = useCallback(() => {
     dispatch({ type: TYPES.CHECK_ANSWER });
     setTimeout(() => {
@@ -339,6 +363,7 @@ function App() {
         modeType,
         previousNumOfEnemies,
         hasSeenTutorial,
+        levelProgress,
       }),
     );
   }, [
@@ -353,6 +378,7 @@ function App() {
     modeType,
     previousNumOfEnemies,
     hasSeenTutorial,
+    levelProgress,
   ]);
   const submitMsgText = isErrorMessage
     ? highContrast
@@ -468,6 +494,17 @@ function App() {
               Battle Math
             </Text>
             <View style={styles.topBarRight}>
+              {gameScreen !== 'levelSelect' && (
+                <TouchableOpacity
+                  onPress={handleBackToLevels}
+                  style={styles.levelsButton}
+                  accessibilityLabel="Back to level select"
+                  accessibilityRole="button"
+                  testID="levels-button"
+                >
+                  <Text style={styles.levelsButtonText}>{'\u2630'}</Text>
+                </TouchableOpacity>
+              )}
               <TouchableOpacity
                 onPress={() => setShowSettings(!showSettings)}
                 style={styles.gearButton}
@@ -492,67 +529,78 @@ function App() {
           </View>
 
           {/* === SCORE BAR === */}
-          <View
-            style={[styles.scoreBar, styles.cardPanel, streakGlowStyle]}
-            accessibilityLiveRegion="polite"
-          >
-            <Text
-              style={[styles.timerText, { color: timerColor }]}
-              testID="timer"
-            >{`\u23F1 ${timeLeft}s`}</Text>
-            <Text
-              style={[styles.scoreText, { color: '#fff' }]}
-              testID="score"
-            >{`Score: ${score}`}</Text>
-            <Text
-              style={[styles.bestScoreText, { color: '#fff' }]}
-              testID="best-score"
-            >{`Best: ${bestScore}`}</Text>
-            {showPoints && lastPointsEarned != null && (
+          {gameScreen !== 'levelSelect' && (
+            <View
+              style={[styles.scoreBar, styles.cardPanel, streakGlowStyle]}
+              accessibilityLiveRegion="polite"
+            >
               <Text
-                style={[
-                  styles.pointsEarned,
-                  {
-                    color: lastPointsEarned > 0 ? '#4caf50' : '#f44336',
-                    animationName: 'floatUp',
-                    animationDuration: '1.5s',
-                    animationFillMode: 'forwards',
-                  } as any,
-                ]}
-                testID="points-earned"
-              >{`+${lastPointsEarned}`}</Text>
-            )}
-            {streak >= 3 && (
+                style={[styles.timerText, { color: timerColor }]}
+                testID="timer"
+              >{`\u23F1 ${timeLeft}s`}</Text>
               <Text
-                style={[
-                  styles.streakText,
-                  streak >= 10
-                    ? styles.streakLegendary
-                    : streak >= 5
-                      ? styles.streakFire
-                      : undefined,
-                ]}
-                testID="streak-counter"
-              >{`\uD83D\uDD25 \u00D7${streak}`}</Text>
-            )}
-            {streakLabel && (
+                style={[styles.scoreText, { color: '#fff' }]}
+                testID="score"
+              >{`Score: ${score}`}</Text>
               <Text
-                style={[
-                  styles.streakMilestone,
-                  {
-                    animationName: 'victoryBounce',
-                    animationDuration: '0.5s',
-                    animationFillMode: 'forwards',
-                  } as any,
-                ]}
-              >
-                {streakLabel}
-              </Text>
-            )}
-          </View>
+                style={[styles.bestScoreText, { color: '#fff' }]}
+                testID="best-score"
+              >{`Best: ${bestScore}`}</Text>
+              {showPoints && lastPointsEarned != null && (
+                <Text
+                  style={[
+                    styles.pointsEarned,
+                    {
+                      color: lastPointsEarned > 0 ? '#4caf50' : '#f44336',
+                      animationName: 'floatUp',
+                      animationDuration: '1.5s',
+                      animationFillMode: 'forwards',
+                    } as any,
+                  ]}
+                  testID="points-earned"
+                >{`+${lastPointsEarned}`}</Text>
+              )}
+              {streak >= 3 && (
+                <Text
+                  style={[
+                    styles.streakText,
+                    streak >= 10
+                      ? styles.streakLegendary
+                      : streak >= 5
+                        ? styles.streakFire
+                        : undefined,
+                  ]}
+                  testID="streak-counter"
+                >{`\uD83D\uDD25 \u00D7${streak}`}</Text>
+              )}
+              {streakLabel && (
+                <Text
+                  style={[
+                    styles.streakMilestone,
+                    {
+                      animationName: 'victoryBounce',
+                      animationDuration: '0.5s',
+                      animationFillMode: 'forwards',
+                    } as any,
+                  ]}
+                >
+                  {streakLabel}
+                </Text>
+              )}
+            </View>
+          )}
+
+          {/* === LEVEL SELECT SCREEN === */}
+          {gameScreen === 'levelSelect' && (
+            <LevelSelect
+              progress={levelProgress}
+              onSelectLevel={handleSelectLevel}
+              onFreePlay={handleFreePlay}
+            />
+          )}
 
           {/* === COLLAPSIBLE SETTINGS === */}
-          {showSettings && (
+          {gameScreen !== 'levelSelect' && showSettings && (
             <View style={[styles.cardPanel, styles.settingsPanel]}>
               <View style={styles.pickerContainer}>
                 <SegmentedButtonGroup
@@ -632,281 +680,300 @@ function App() {
               </View>
             </View>
           )}
-          <View style={styles.battlefield}>
-            <View style={styles.heroContainer}>
-              <View nativeID="hero" accessibilityLabel="Your hero character">
-                <Image
-                  source={won ? heroImages.victory : heroImages[heroAnim]}
-                  style={[
-                    styles.characterImage,
-                    heroAnimStyle[heroAnim] as any,
-                  ]}
-                  accessibilityLabel="Hero"
-                />
-              </View>
-            </View>
-            <View style={styles.enemiesContainer}>
-              {[...Array(numOfEnemies)].map((_, i) => (
-                <View
-                  testID="enemies"
-                  key={i}
-                  style={
-                    defeatingEnemy && i === numOfEnemies - 1
-                      ? ({
-                          animationName: 'enemyDefeat',
-                          animationDuration: '0.5s',
-                          animationFillMode: 'forwards',
-                        } as any)
-                      : undefined
-                  }
-                >
-                  <Image
-                    source={enemyImages[mode] || enemyImages.addition}
-                    style={[
-                      styles.characterImage,
-                      defeatingEnemy && i === numOfEnemies - 1
-                        ? undefined
-                        : newEnemyIndex === i
+          {gameScreen !== 'levelSelect' && (
+            <>
+              <View style={styles.battlefield}>
+                <View style={styles.heroContainer}>
+                  <View
+                    nativeID="hero"
+                    accessibilityLabel="Your hero character"
+                  >
+                    <Image
+                      source={won ? heroImages.victory : heroImages[heroAnim]}
+                      style={[
+                        styles.characterImage,
+                        heroAnimStyle[heroAnim] as any,
+                      ]}
+                      accessibilityLabel="Hero"
+                    />
+                  </View>
+                </View>
+                <View style={styles.enemiesContainer}>
+                  {[...Array(numOfEnemies)].map((_, i) => (
+                    <View
+                      testID="enemies"
+                      key={i}
+                      style={
+                        defeatingEnemy && i === numOfEnemies - 1
                           ? ({
-                              animationName: 'enemyEntrance',
+                              animationName: 'enemyDefeat',
                               animationDuration: '0.5s',
                               animationFillMode: 'forwards',
                             } as any)
-                          : ({
-                              animationName: 'enemySway',
-                              animationDuration: '1.5s',
-                              animationIterationCount: 'infinite',
-                              animationTimingFunction: 'ease-in-out',
-                              animationDelay: `${i * 0.3}s`,
-                            } as any),
-                    ]}
-                    accessibilityLabel={`Enemy ${i + 1}`}
-                  />
+                          : undefined
+                      }
+                    >
+                      <Image
+                        source={enemyImages[mode] || enemyImages.addition}
+                        style={[
+                          styles.characterImage,
+                          defeatingEnemy && i === numOfEnemies - 1
+                            ? undefined
+                            : newEnemyIndex === i
+                              ? ({
+                                  animationName: 'enemyEntrance',
+                                  animationDuration: '0.5s',
+                                  animationFillMode: 'forwards',
+                                } as any)
+                              : ({
+                                  animationName: 'enemySway',
+                                  animationDuration: '1.5s',
+                                  animationIterationCount: 'infinite',
+                                  animationTimingFunction: 'ease-in-out',
+                                  animationDelay: `${i * 0.3}s`,
+                                } as any),
+                        ]}
+                        accessibilityLabel={`Enemy ${i + 1}`}
+                      />
+                    </View>
+                  ))}
                 </View>
-              ))}
-            </View>
-          </View>
-          {/* === ATTEMPT HEARTS === */}
-          {!won && (
-            <View style={styles.heartsContainer} testID="hearts-container">
-              {[0, 1, 2].map((i) => (
-                <Text
-                  key={i}
+              </View>
+              {/* === ATTEMPT HEARTS === */}
+              {!won && (
+                <View style={styles.heartsContainer} testID="hearts-container">
+                  {[0, 1, 2].map((i) => (
+                    <Text
+                      key={i}
+                      style={[
+                        styles.heart,
+                        i < 3 - attempts ? styles.heartFull : styles.heartEmpty,
+                        i === 3 - attempts && attempts > 0 && hintLevel > 0
+                          ? ({
+                              animationName: 'heartBreak',
+                              animationDuration: '0.5s',
+                            } as any)
+                          : undefined,
+                      ]}
+                      accessibilityLabel={
+                        i < 3 - attempts ? 'Heart full' : 'Heart empty'
+                      }
+                    >
+                      {i < 3 - attempts ? '\u2764\uFE0F' : '\uD83D\uDDA4'}
+                    </Text>
+                  ))}
+                </View>
+              )}
+              {won ? (
+                <View style={[styles.cardPanel, styles.victoryPanel]}>
+                  <Text
+                    style={[
+                      styles.victoryText,
+                      {
+                        animationName: 'victoryBounce',
+                        animationDuration: '0.8s',
+                        animationFillMode: 'forwards',
+                      } as any,
+                    ]}
+                    accessibilityRole="text"
+                  >
+                    Victory!
+                  </Text>
+                  <View
+                    style={styles.starsContainer}
+                    nativeID="stars-container"
+                  >
+                    {[0, 1, 2].map((i) => (
+                      <Text
+                        key={i}
+                        style={[
+                          styles.star,
+                          i < starsEarned
+                            ? ({
+                                color: '#FFD93D',
+                                animationName: 'starEarned',
+                                animationDuration: '0.5s',
+                                animationDelay: `${i * 0.5}s`,
+                                animationFillMode: 'both',
+                              } as any)
+                            : { color: '#666' },
+                        ]}
+                      >
+                        {i < starsEarned ? '\u2605' : '\u2606'}
+                      </Text>
+                    ))}
+                  </View>
+                  <Text
+                    style={styles.victoryStats}
+                    accessibilityRole="text"
+                  >{`Accuracy: ${totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 0}%`}</Text>
+                  <Text
+                    style={styles.victoryScore}
+                    accessibilityRole="text"
+                  >{`Final Score: ${score}`}</Text>
+                  <Text
+                    style={styles.victoryBest}
+                    accessibilityRole="text"
+                  >{`Best Score: ${bestScore}`}</Text>
+                  {maxStreak >= 3 && (
+                    <Text
+                      style={styles.victoryBest}
+                      accessibilityRole="text"
+                    >{`Best Streak: \uD83D\uDD25 \u00D7${maxStreak}`}</Text>
+                  )}
+                  <TouchableOpacity
+                    onPress={handleRestart}
+                    style={[
+                      styles.restartButton,
+                      {
+                        backgroundColor: activeTheme.buttonColor,
+                        animationName: 'pulse',
+                        animationDuration: '1.5s',
+                        animationIterationCount: 'infinite',
+                      } as any,
+                    ]}
+                    accessibilityLabel="Play again"
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.restartButtonText}>Play Again</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleBackToLevels}
+                    style={styles.backToLevelsButton}
+                    accessibilityLabel="Back to level select"
+                    accessibilityRole="button"
+                    testID="back-to-levels"
+                  >
+                    <Text style={styles.backToLevelsText}>Back to Levels</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View
                   style={[
-                    styles.heart,
-                    i < 3 - attempts ? styles.heartFull : styles.heartEmpty,
-                    i === 3 - attempts && attempts > 0 && hintLevel > 0
+                    styles.mathContainer,
+                    styles.cardPanel,
+                    shaking
                       ? ({
-                          animationName: 'heartBreak',
+                          animationName: 'shake',
                           animationDuration: '0.5s',
                         } as any)
                       : undefined,
                   ]}
-                  accessibilityLabel={
-                    i < 3 - attempts ? 'Heart full' : 'Heart empty'
-                  }
                 >
-                  {i < 3 - attempts ? '\u2764\uFE0F' : '\uD83D\uDDA4'}
-                </Text>
-              ))}
-            </View>
-          )}
-          {won ? (
-            <View style={[styles.cardPanel, styles.victoryPanel]}>
-              <Text
-                style={[
-                  styles.victoryText,
-                  {
-                    animationName: 'victoryBounce',
-                    animationDuration: '0.8s',
-                    animationFillMode: 'forwards',
-                  } as any,
-                ]}
-                accessibilityRole="text"
-              >
-                Victory!
-              </Text>
-              <View style={styles.starsContainer} nativeID="stars-container">
-                {[0, 1, 2].map((i) => (
-                  <Text
-                    key={i}
-                    style={[
-                      styles.star,
-                      i < starsEarned
-                        ? ({
-                            color: '#FFD93D',
-                            animationName: 'starEarned',
-                            animationDuration: '0.5s',
-                            animationDelay: `${i * 0.5}s`,
-                            animationFillMode: 'both',
-                          } as any)
-                        : { color: '#666' },
-                    ]}
-                  >
-                    {i < starsEarned ? '\u2605' : '\u2606'}
-                  </Text>
-                ))}
-              </View>
-              <Text
-                style={styles.victoryStats}
-                accessibilityRole="text"
-              >{`Accuracy: ${totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 0}%`}</Text>
-              <Text
-                style={styles.victoryScore}
-                accessibilityRole="text"
-              >{`Final Score: ${score}`}</Text>
-              <Text
-                style={styles.victoryBest}
-                accessibilityRole="text"
-              >{`Best Score: ${bestScore}`}</Text>
-              {maxStreak >= 3 && (
-                <Text
-                  style={styles.victoryBest}
-                  accessibilityRole="text"
-                >{`Best Streak: \uD83D\uDD25 \u00D7${maxStreak}`}</Text>
-              )}
-              <TouchableOpacity
-                onPress={handleRestart}
-                style={[
-                  styles.restartButton,
-                  {
-                    backgroundColor: activeTheme.buttonColor,
-                    animationName: 'pulse',
-                    animationDuration: '1.5s',
-                    animationIterationCount: 'infinite',
-                  } as any,
-                ]}
-                accessibilityLabel="Play again"
-                accessibilityRole="button"
-              >
-                <Text style={styles.restartButtonText}>Play Again</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View
-              style={[
-                styles.mathContainer,
-                styles.cardPanel,
-                shaking
-                  ? ({
-                      animationName: 'shake',
-                      animationDuration: '0.5s',
-                    } as any)
-                  : undefined,
-              ]}
-            >
-              {submitMessageBlock}
-              <View style={styles.mathRow}>
-                <Text
-                  nativeID="val1"
-                  style={[styles.mathText, { color: '#fff' }]}
-                >
-                  {val1 < 0 ? `(${val1})` : val1}
-                </Text>
-                <Text
-                  nativeID="operator"
-                  style={[styles.mathText, { color: '#fff' }]}
-                >
-                  {displayOperator(operator)}
-                </Text>
-                <Text
-                  nativeID="val2"
-                  style={[styles.mathText, { color: '#fff' }]}
-                >
-                  {val2 < 0 ? `(${val2})` : val2}
-                </Text>
-                <Text style={[styles.mathText, { color: '#fff' }]}>=</Text>
-                {answerMode !== 'choose' &&
-                  (isMobile ? (
+                  {submitMessageBlock}
+                  <View style={styles.mathRow}>
                     <Text
-                      nativeID="answer-input"
-                      style={[
-                        styles.input,
-                        highContrast && highContrastStyles.input,
-                        { lineHeight: 56 },
-                      ]}
-                      accessibilityLabel="Current answer"
+                      nativeID="val1"
+                      style={[styles.mathText, { color: '#fff' }]}
                     >
-                      {answer || ' '}
+                      {val1 < 0 ? `(${val1})` : val1}
                     </Text>
+                    <Text
+                      nativeID="operator"
+                      style={[styles.mathText, { color: '#fff' }]}
+                    >
+                      {displayOperator(operator)}
+                    </Text>
+                    <Text
+                      nativeID="val2"
+                      style={[styles.mathText, { color: '#fff' }]}
+                    >
+                      {val2 < 0 ? `(${val2})` : val2}
+                    </Text>
+                    <Text style={[styles.mathText, { color: '#fff' }]}>=</Text>
+                    {answerMode !== 'choose' &&
+                      (isMobile ? (
+                        <Text
+                          nativeID="answer-input"
+                          style={[
+                            styles.input,
+                            highContrast && highContrastStyles.input,
+                            { lineHeight: 56 },
+                          ]}
+                          accessibilityLabel="Current answer"
+                        >
+                          {answer || ' '}
+                        </Text>
+                      ) : (
+                        <TextInput
+                          nativeID="answer-input"
+                          style={[
+                            styles.input,
+                            highContrast && highContrastStyles.input,
+                          ]}
+                          onChangeText={handleAnswerChange}
+                          onSubmitEditing={handleSubmit}
+                          onKeyPress={handleKeyDown as any}
+                          value={answer}
+                          ref={submitInputRef}
+                          accessibilityLabel="Enter your answer"
+                        />
+                      ))}
+                  </View>
+                  {answerMode === 'choose' ? (
+                    <View style={styles.choiceGrid}>
+                      {choices.map((choice, i) => (
+                        <TouchableOpacity
+                          key={i}
+                          style={[
+                            styles.choiceButton,
+                            { backgroundColor: activeTheme.buttonColor },
+                          ]}
+                          onPress={() => {
+                            dispatch({
+                              type: TYPES.SET_ANSWER,
+                              payload: String(choice),
+                            });
+                            setTimeout(
+                              () => dispatch({ type: TYPES.CHECK_ANSWER }),
+                              100,
+                            );
+                          }}
+                          accessibilityLabel={`Answer ${choice}`}
+                          accessibilityRole="button"
+                        >
+                          <Text style={styles.choiceButtonText}>{choice}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  ) : isMobile ? (
+                    <View style={styles.submitRow}>
+                      <NumberPad
+                        value={answer}
+                        onChange={handleAnswerChange}
+                        onSubmit={handleSubmit}
+                        showMinus={modeType === 'negative'}
+                        showDecimal={modeType === 'decimals'}
+                        buttonColor={activeTheme.buttonColor}
+                      />
+                    </View>
                   ) : (
-                    <TextInput
-                      nativeID="answer-input"
-                      style={[
-                        styles.input,
-                        highContrast && highContrastStyles.input,
-                      ]}
-                      onChangeText={handleAnswerChange}
-                      onSubmitEditing={handleSubmit}
-                      onKeyPress={handleKeyDown as any}
-                      value={answer}
-                      ref={submitInputRef}
-                      accessibilityLabel="Enter your answer"
-                    />
-                  ))}
-              </View>
-              {answerMode === 'choose' ? (
-                <View style={styles.choiceGrid}>
-                  {choices.map((choice, i) => (
-                    <TouchableOpacity
-                      key={i}
-                      style={[
-                        styles.choiceButton,
-                        { backgroundColor: activeTheme.buttonColor },
-                      ]}
-                      onPress={() => {
-                        dispatch({
-                          type: TYPES.SET_ANSWER,
-                          payload: String(choice),
-                        });
-                        setTimeout(
-                          () => dispatch({ type: TYPES.CHECK_ANSWER }),
-                          100,
-                        );
-                      }}
-                      accessibilityLabel={`Answer ${choice}`}
-                      accessibilityRole="button"
-                    >
-                      <Text style={styles.choiceButtonText}>{choice}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              ) : isMobile ? (
-                <View style={styles.submitRow}>
-                  <NumberPad
-                    value={answer}
-                    onChange={handleAnswerChange}
-                    onSubmit={handleSubmit}
-                    showMinus={modeType === 'negative'}
-                    showDecimal={modeType === 'decimals'}
-                    buttonColor={activeTheme.buttonColor}
-                  />
-                </View>
-              ) : (
-                <View style={styles.submitRow}>
-                  <TouchableOpacity
-                    style={[
-                      styles.button,
-                      { backgroundColor: activeTheme.buttonColor },
-                      highContrast && highContrastStyles.button,
-                    ]}
-                    testID="submit"
-                    onPress={handleSubmit}
-                    accessibilityLabel="Submit answer"
-                    accessibilityRole="button"
-                  >
-                    <Text
-                      style={[
-                        styles.buttonText,
-                        highContrast && highContrastStyles.buttonText,
-                      ]}
-                    >
-                      Submit
-                    </Text>
-                  </TouchableOpacity>
+                    <View style={styles.submitRow}>
+                      <TouchableOpacity
+                        style={[
+                          styles.button,
+                          { backgroundColor: activeTheme.buttonColor },
+                          highContrast && highContrastStyles.button,
+                        ]}
+                        testID="submit"
+                        onPress={handleSubmit}
+                        accessibilityLabel="Submit answer"
+                        accessibilityRole="button"
+                      >
+                        <Text
+                          style={[
+                            styles.buttonText,
+                            highContrast && highContrastStyles.buttonText,
+                          ]}
+                        >
+                          Submit
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </View>
               )}
-            </View>
+            </>
           )}
         </View>
       </View>
@@ -1274,6 +1341,36 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: '"Quicksand", sans-serif',
     fontWeight: '700',
+  },
+  levelsButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  levelsButtonText: {
+    fontSize: 22,
+    color: '#fff',
+  },
+  backToLevelsButton: {
+    width: '100%',
+    maxWidth: 280,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    marginTop: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  backToLevelsText: {
+    color: '#fff',
+    fontSize: 18,
+    fontFamily: '"Quicksand", sans-serif',
+    fontWeight: '600' as const,
   },
   enemyCount: { paddingVertical: 4 },
   enemyCountText: {
