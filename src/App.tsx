@@ -27,6 +27,7 @@ import musicSubtraction from './assets/music/music_subtraction.mp3';
 import musicMultiplication from './assets/music/music_multiplication.mp3';
 import musicDivision from './assets/music/music_division.mp3';
 import BackgroundSound from './components/BackgroundSound';
+import { generateHint } from './utils/HintGenerator';
 import {
   playCorrectSound,
   playIncorrectSound,
@@ -994,6 +995,20 @@ function App() {
                   ]}
                 >
                   {submitMessageBlock}
+                  {hintLevel > 0 && hintLevel < 3 && (
+                    <View style={styles.hintBubble}>
+                      <Text style={styles.hintText}>
+                        {generateHint(val1, val2, operator, hintLevel)}
+                      </Text>
+                    </View>
+                  )}
+                  {hintLevel === 3 && (
+                    <View style={[styles.hintBubble, styles.hintBubbleAnswer]}>
+                      <Text style={styles.hintText}>
+                        {generateHint(val1, val2, operator, 3)}
+                      </Text>
+                    </View>
+                  )}
                   <View style={styles.mathRow}>
                     <Text
                       nativeID="val1"
@@ -1372,19 +1387,54 @@ const styles = StyleSheet.create({
   },
   touchTarget: { minHeight: 44, justifyContent: 'center' },
   msgTextError: {
-    color: 'red',
-    fontSize: 25,
+    color: '#FFD93D',
+    fontSize: 22,
+    fontWeight: 'bold' as const,
     fontFamily: '"Quicksand", sans-serif',
+    textAlign: 'center' as const,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   msgTextSuccess: {
-    color: 'green',
-    fontSize: 25,
+    color: '#69ff69',
+    fontSize: 22,
+    fontWeight: 'bold' as const,
     fontFamily: '"Quicksand", sans-serif',
+    textAlign: 'center' as const,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   submitMsgWrapper: {
-    paddingBottom: 15,
-    fontSize: 40,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 8,
+    marginBottom: 8,
+    alignSelf: 'center' as const,
+  },
+  hintBubble: {
+    backgroundColor: 'rgba(255, 152, 0, 0.9)',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginBottom: 8,
+    maxWidth: 340,
+    alignSelf: 'center' as const,
+  },
+  hintBubbleAnswer: {
+    backgroundColor: 'rgba(76, 175, 80, 0.9)',
+  },
+  hintText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold' as const,
     fontFamily: '"Quicksand", sans-serif',
+    textAlign: 'center' as const,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   soundControls: {
     flexDirection: 'row',
@@ -1543,16 +1593,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   msgTextErrorHC: {
-    color: '#ff6b6b',
-    fontSize: 25,
-    fontWeight: 'bold',
+    color: '#FFD93D',
+    fontSize: 22,
+    fontWeight: 'bold' as const,
     fontFamily: '"Quicksand", sans-serif',
+    textAlign: 'center' as const,
   },
   msgTextSuccessHC: {
     color: '#69ff69',
-    fontSize: 25,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: 'bold' as const,
     fontFamily: '"Quicksand", sans-serif',
+    textAlign: 'center' as const,
   },
 });
 const highContrastStyles = StyleSheet.create({
