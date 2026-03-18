@@ -22,6 +22,28 @@ import bgSound from './assets/music/background-music.mp3';
 import BackgroundSound from './components/BackgroundSound';
 import { playCorrectSound, playIncorrectSound } from './utils/SoundEffects';
 
+// Character sprites
+const heroImages = {
+  idle: require('./assets/images/characters/hero_idle.png'),
+  attack: require('./assets/images/characters/hero_attack.png'),
+  victory: require('./assets/images/characters/hero_victory.png'),
+  hurt: require('./assets/images/characters/hero_hurt.png'),
+};
+
+const bgImages: Record<string, string> = {
+  addition: require('./assets/images/backgrounds/bg_addition.jpg'),
+  subtraction: require('./assets/images/backgrounds/bg_subtraction.jpg'),
+  multiplication: require('./assets/images/backgrounds/bg_multiplication.jpg'),
+  division: require('./assets/images/backgrounds/bg_division.jpg'),
+};
+
+const enemyImages: Record<string, any> = {
+  addition: require('./assets/images/characters/enemy_addition.png'),
+  subtraction: require('./assets/images/characters/enemy_subtraction.png'),
+  multiplication: require('./assets/images/characters/enemy_multiplication.png'),
+  division: require('./assets/images/characters/enemy_division.png'),
+};
+
 function displayOperator(op: string): string {
   switch (op) {
     case '+':
@@ -397,8 +419,12 @@ function App() {
         styles.root,
         {
           backgroundColor: activeTheme.backgroundColor,
-          backgroundImage: activeTheme.gradient,
-          transition: 'background-image 0.5s ease',
+          backgroundImage: highContrast
+            ? activeTheme.gradient
+            : `url(${bgImages[mode] || bgImages.addition})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          transition: 'background-image 0.3s ease',
         } as any,
       ]}
     >
@@ -570,7 +596,7 @@ function App() {
             <View style={styles.heroContainer}>
               <View nativeID="hero" accessibilityLabel="Your hero character">
                 <Image
-                  source={require('./assets/images/hero.png')}
+                  source={won ? heroImages.victory : heroImages[heroAnim]}
                   style={[
                     styles.characterImage,
                     heroAnimStyle[heroAnim] as any,
@@ -595,7 +621,7 @@ function App() {
                   }
                 >
                   <Image
-                    source={require('./assets/images/orc.png')}
+                    source={enemyImages[mode] || enemyImages.addition}
                     style={[
                       styles.characterImage,
                       defeatingEnemy && i === numOfEnemies - 1
@@ -895,7 +921,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-evenly',
   },
-  characterImage: { width: 80, height: 160, resizeMode: 'contain' as any },
+  characterImage: { width: 120, height: 120, resizeMode: 'contain' as any },
   mathContainer: { paddingVertical: 16, alignItems: 'center' },
   mathRow: {
     flexDirection: 'row',
