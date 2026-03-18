@@ -549,11 +549,16 @@ function App() {
     >
       {showTutorial && <Tutorial onDismiss={handleDismissTutorial} t={t} />}
       <View style={styles.gameContainer}>
+        <BackgroundSound url={musicTracks[mode] || musicTracks.addition} />
         <View style={styles.content}>
           {/* === TOP BAR: Title + Score + Settings gear === */}
           <View style={styles.topBar}>
             <Text
-              style={[styles.title, { color: activeTheme.textColor }]}
+              style={[
+                styles.title,
+                isMobile && { fontSize: 22 },
+                { color: activeTheme.textColor },
+              ]}
               accessibilityRole="header"
             >
               {t.title}
@@ -596,7 +601,17 @@ function App() {
           {/* === SCORE BAR === */}
           {gameScreen !== 'levelSelect' && (
             <View
-              style={[styles.scoreBar, styles.cardPanel, streakGlowStyle]}
+              style={[
+                styles.scoreBar,
+                styles.cardPanel,
+                isMobile && {
+                  paddingVertical: 4,
+                  paddingHorizontal: 8,
+                  padding: 8,
+                  marginVertical: 2,
+                },
+                streakGlowStyle,
+              ]}
               accessibilityLiveRegion="polite"
             >
               <Text
@@ -718,9 +733,6 @@ function App() {
                 />
               </View>
               <View style={styles.soundControls}>
-                <BackgroundSound
-                  url={musicTracks[mode] || musicTracks.addition}
-                />
                 <TouchableOpacity
                   onPress={handleSoundToggle}
                   style={styles.touchTarget}
@@ -764,7 +776,12 @@ function App() {
           )}
           {gameScreen !== 'levelSelect' && (
             <>
-              <View style={styles.battlefield}>
+              <View
+                style={[
+                  styles.battlefield,
+                  isMobile && styles.battlefieldMobile,
+                ]}
+              >
                 <View style={styles.heroContainer}>
                   <View
                     nativeID="hero"
@@ -773,14 +790,26 @@ function App() {
                     <Image
                       source={won ? heroImages.victory : heroImages[heroAnim]}
                       style={[
-                        styles.characterImage,
+                        isMobile
+                          ? styles.characterImageMobile
+                          : styles.characterImage,
                         heroAnimStyle[heroAnim] as any,
                       ]}
                       accessibilityLabel="Hero"
                     />
                   </View>
                 </View>
-                <View style={styles.enemiesContainer}>
+                <View
+                  style={[
+                    styles.enemiesContainer,
+                    isMobile && styles.enemiesContainerMobile,
+                  ]}
+                >
+                  {!isBossLevel && (
+                    <Text style={styles.enemyCountText} testID="enemy-count">
+                      {`Enemies: ${numOfEnemies}`}
+                    </Text>
+                  )}
                   {isBossLevel ? (
                     <View testID="enemies" style={{ alignItems: 'center' }}>
                       <View
@@ -847,7 +876,9 @@ function App() {
                         <Image
                           source={enemyImages[mode] || enemyImages.addition}
                           style={[
-                            styles.characterImage,
+                            isMobile
+                              ? styles.characterImageMobile
+                              : styles.characterImage,
                             defeatingEnemy && i === numOfEnemies - 1
                               ? undefined
                               : newEnemyIndex === i
@@ -873,7 +904,13 @@ function App() {
               </View>
               {/* === ATTEMPT HEARTS === */}
               {!won && (
-                <View style={styles.heartsContainer} testID="hearts-container">
+                <View
+                  style={[
+                    styles.heartsContainer,
+                    isMobile && { paddingVertical: 2, gap: 4 },
+                  ]}
+                  testID="hearts-container"
+                >
                   {[0, 1, 2].map((i) => (
                     <Text
                       key={i}
@@ -986,6 +1023,11 @@ function App() {
                   style={[
                     styles.mathContainer,
                     styles.cardPanel,
+                    isMobile && {
+                      paddingVertical: 8,
+                      padding: 10,
+                      marginVertical: 4,
+                    },
                     shaking
                       ? ({
                           animationName: 'shake',
@@ -1012,23 +1054,43 @@ function App() {
                   <View style={styles.mathRow}>
                     <Text
                       nativeID="val1"
-                      style={[styles.mathText, { color: '#fff' }]}
+                      style={[
+                        styles.mathText,
+                        isMobile && { fontSize: 28 },
+                        { color: '#fff' },
+                      ]}
                     >
                       {val1 < 0 ? `(${val1})` : val1}
                     </Text>
                     <Text
                       nativeID="operator"
-                      style={[styles.mathText, { color: '#fff' }]}
+                      style={[
+                        styles.mathText,
+                        isMobile && { fontSize: 28 },
+                        { color: '#fff' },
+                      ]}
                     >
                       {displayOperator(operator)}
                     </Text>
                     <Text
                       nativeID="val2"
-                      style={[styles.mathText, { color: '#fff' }]}
+                      style={[
+                        styles.mathText,
+                        isMobile && { fontSize: 28 },
+                        { color: '#fff' },
+                      ]}
                     >
                       {val2 < 0 ? `(${val2})` : val2}
                     </Text>
-                    <Text style={[styles.mathText, { color: '#fff' }]}>=</Text>
+                    <Text
+                      style={[
+                        styles.mathText,
+                        isMobile && { fontSize: 28 },
+                        { color: '#fff' },
+                      ]}
+                    >
+                      =
+                    </Text>
                     {answerMode !== 'choose' &&
                       (isMobile ? (
                         <Text
@@ -1036,7 +1098,7 @@ function App() {
                           style={[
                             styles.input,
                             highContrast && highContrastStyles.input,
-                            { lineHeight: 56 },
+                            { lineHeight: 40, height: 40, fontSize: 22 },
                           ]}
                           accessibilityLabel="Current answer"
                         >
@@ -1093,6 +1155,7 @@ function App() {
                         showMinus={modeType === 'negative'}
                         showDecimal={modeType === 'decimals'}
                         buttonColor={activeTheme.buttonColor}
+                        compact
                       />
                     </View>
                   ) : (
@@ -1152,7 +1215,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start' as const,
     alignItems: 'center' as const,
-    paddingVertical: 8,
+    paddingVertical: 4,
   },
   topBar: {
     flexDirection: 'row' as const,
@@ -1243,6 +1306,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center' as const,
     gap: 8,
   },
+  battlefieldMobile: {
+    paddingVertical: 4,
+    gap: 4,
+  },
   heroContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -1255,7 +1322,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-evenly',
   },
+  enemiesContainerMobile: {
+    gap: 2,
+    justifyContent: 'center',
+  },
   characterImage: { width: 120, height: 120, resizeMode: 'contain' as any },
+  characterImageMobile: { width: 60, height: 60, resizeMode: 'contain' as any },
   heartsContainer: {
     flexDirection: 'row' as const,
     justifyContent: 'center' as const,
@@ -1263,7 +1335,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   heart: {
-    fontSize: 28,
+    fontSize: 22,
   },
   heartFull: {
     opacity: 1,
@@ -1298,7 +1370,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 16,
+    paddingBottom: 8,
     flexWrap: 'wrap',
   },
   mathText: {
@@ -1589,9 +1661,16 @@ const styles = StyleSheet.create({
   },
   enemyCount: { paddingVertical: 4 },
   enemyCountText: {
-    fontSize: 20,
+    fontSize: 16,
     fontFamily: '"Quicksand", sans-serif',
     fontWeight: 'bold',
+    color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+    width: '100%',
+    textAlign: 'center' as any,
+    paddingBottom: 2,
   },
   msgTextErrorHC: {
     color: '#FFD93D',
