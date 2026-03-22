@@ -5,6 +5,8 @@
   "license": "MIT",
   "homepage": "https://jesserweigel.github.io/battlemath",
   "dependencies": {
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
     "canvas-confetti": "^1.9.4",
     "react": "^18.2.0",
     "react-art": "^18.2.0",
@@ -24,7 +26,10 @@
     "e2e": "cypress open",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "cap:sync": "yarn build && npx cap sync",
+    "cap:android": "npx cap open android",
+    "cap:ios": "npx cap open ios"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx,js,jsx,json,css}": [
@@ -32,6 +37,7 @@
     ]
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.2.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
