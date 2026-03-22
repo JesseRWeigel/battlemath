@@ -22,3 +22,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Capacitor native build artifacts
+android/app/build/
+android/.gradle/
+android/local.properties
