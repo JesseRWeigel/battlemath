@@ -67,6 +67,30 @@ Each question starts a 30-second countdown timer. Faster correct answers earn mo
 
 Wrong answers earn 0 points. Your total score accumulates across all questions, and your best score for the session is tracked. The timer changes color as time runs low (green to yellow to red) to keep things exciting!
 
+## Mobile App (Capacitor)
+
+BattleMath can be built as a native Android or iOS app using Capacitor.
+
+### Android
+
+```bash
+yarn build
+npx cap sync
+npx cap open android  # Opens Android Studio
+```
+
+Then build and run from Android Studio.
+
+### iOS (requires macOS + Xcode)
+
+```bash
+yarn add @capacitor/ios
+npx cap add ios
+yarn build
+npx cap sync
+npx cap open ios  # Opens Xcode
+```
+
 ### Roadmap
 
 - [x] Simple UI with Addition, Subtraction, Multiplication, Division questions
