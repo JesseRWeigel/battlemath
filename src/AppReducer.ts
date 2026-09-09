@@ -14,29 +14,29 @@ export function randomNumberGenerator(
 }
 
 export const TYPES = {
-  SET_ANSWER: 0,
-  ADD_ENEMY: 1,
-  REMOVE_ENEMY: 2,
-  CHECK_ANSWER: 3,
-  NEW_PROBLEM: 4,
-  SET_MODE: 5,
-  SET_DIFFICULTY: 6,
-  RESTART: 7,
-  SET_MODE_TYPES: 8,
-  RESTORE_STATE: 9,
-  SET_SOUND_ENABLED: 10,
-  SET_HIGH_CONTRAST: 11,
-  START_TIMER: 12,
-  SET_ADAPTIVE: 13,
-  DISMISS_TUTORIAL: 14,
-  SHOW_TUTORIAL: 15,
-  SET_ANSWER_MODE: 16,
-  SELECT_LEVEL: 17,
-  COMPLETE_LEVEL: 18,
-  BACK_TO_LEVELS: 19,
-  PLAY_FREE: 20,
-  SET_LOCALE: 21,
-  START_DAILY_CHALLENGE: 21,
+  SET_ANSWER: 'SET_ANSWER',
+  ADD_ENEMY: 'ADD_ENEMY',
+  REMOVE_ENEMY: 'REMOVE_ENEMY',
+  CHECK_ANSWER: 'CHECK_ANSWER',
+  NEW_PROBLEM: 'NEW_PROBLEM',
+  SET_MODE: 'SET_MODE',
+  SET_DIFFICULTY: 'SET_DIFFICULTY',
+  RESTART: 'RESTART',
+  SET_MODE_TYPES: 'SET_MODE_TYPES',
+  RESTORE_STATE: 'RESTORE_STATE',
+  SET_SOUND_ENABLED: 'SET_SOUND_ENABLED',
+  SET_HIGH_CONTRAST: 'SET_HIGH_CONTRAST',
+  START_TIMER: 'START_TIMER',
+  SET_ADAPTIVE: 'SET_ADAPTIVE',
+  DISMISS_TUTORIAL: 'DISMISS_TUTORIAL',
+  SHOW_TUTORIAL: 'SHOW_TUTORIAL',
+  SET_ANSWER_MODE: 'SET_ANSWER_MODE',
+  SELECT_LEVEL: 'SELECT_LEVEL',
+  COMPLETE_LEVEL: 'COMPLETE_LEVEL',
+  BACK_TO_LEVELS: 'BACK_TO_LEVELS',
+  PLAY_FREE: 'PLAY_FREE',
+  SET_LOCALE: 'SET_LOCALE',
+  START_DAILY_CHALLENGE: 'START_DAILY_CHALLENGE',
 } as const;
 
 const OPERATORS = {
@@ -58,10 +58,16 @@ const MODE_TYPES = {
   negative: 'negative',
 } as const;
 
-export type ActionType = {
-  type: (typeof TYPES)[keyof typeof TYPES];
-  payload?: unknown;
-};
+export type ActionType =
+  | { type: typeof TYPES.SET_LOCALE; payload: Locale }
+  | { type: typeof TYPES.START_DAILY_CHALLENGE; payload: DailyProblem[] }
+  | {
+      type: Exclude<
+        (typeof TYPES)[keyof typeof TYPES],
+        typeof TYPES.SET_LOCALE | typeof TYPES.START_DAILY_CHALLENGE
+      >;
+      payload?: unknown;
+    };
 
 export type AppState = {
   answer: string;
@@ -849,7 +855,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
     }
 
     case TYPES.START_DAILY_CHALLENGE: {
-      const problems = action.payload as DailyProblem[];
+      const problems = action.payload;
       const first = problems[0];
       const op = first.operator as (typeof OPERATORS)[keyof typeof OPERATORS];
       const dcMode = first.mode as keyof typeof OPERATORS;
@@ -909,12 +915,12 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
     case TYPES.SET_LOCALE: {
       return {
         ...state,
-        locale: action.payload as Locale,
+        locale: action.payload,
       };
     }
 
     default:
-      throw new Error(`Invalid action ${action.type}`);
+      throw new Error(`Invalid action ${(action as ActionType).type}`);
   }
 
   return state;

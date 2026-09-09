@@ -725,9 +725,11 @@ function App() {
                     { label: 'FR', value: 'fr' },
                   ]}
                   selectedValue={locale}
-                  onSelect={(v) =>
-                    dispatch({ type: TYPES.SET_LOCALE, payload: v })
-                  }
+                  onSelect={(v) => {
+                    if (v === 'en' || v === 'es' || v === 'fr') {
+                      dispatch({ type: TYPES.SET_LOCALE, payload: v });
+                    }
+                  }}
                   accessibilityLabel="Select language"
                   testID="language-selector"
                 />
