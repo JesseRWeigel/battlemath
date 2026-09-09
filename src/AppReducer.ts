@@ -251,10 +251,11 @@ export function computeAnswer(
       result = val1 * val2;
       break;
     case '/':
+      if (val2 === 0) throw new Error('Division by zero is not supported');
       result = val1 / val2;
       break;
     default:
-      result = val1 + val2;
+      throw new Error(`Unsupported operator: ${operator}`);
   }
   return Number.parseFloat(result.toFixed(2));
 }
@@ -427,11 +428,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         else answer = parseFloat(state?.answer ?? '');
       }
 
-      // eslint-disable-next-line no-eval
-      let expected = eval(`${state.val1} ${state.operator} ${state.val2}`);
-      expected = Number.parseFloat(expected.toFixed(2));
-
-      console.log(expected);
+      const expected = computeAnswer(state.val1, state.operator, state.val2);
 
       const isCorrect = answer === expected;
 

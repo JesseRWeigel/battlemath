@@ -7,6 +7,7 @@ import {
   calculateStars,
   getAdaptiveDifficulty,
   getStreakMilestone,
+  computeAnswer,
   generateChoices,
   AppState,
   ActionType,
@@ -17,6 +18,42 @@ import { LEVELS } from './levels';
 const makeState = (overrides: Partial<AppState> = {}): AppState => ({
   ...initialState,
   ...overrides,
+});
+
+describe('computeAnswer', () => {
+  it.each([
+    [7, '+', 3, 10],
+    [7, '-', 3, 4],
+    [7, '*', 3, 21],
+    [7, '/', 2, 3.5],
+  ])('calculates %s %s %s', (val1, operator, val2, expected) => {
+    expect(computeAnswer(val1, operator, val2)).toBe(expected);
+  });
+
+  it.each([
+    [-7, '+', 3, -4],
+    [-7, '-', -3, -4],
+    [-7, '*', -3, 21],
+    [-7, '/', 2, -3.5],
+  ])(
+    'calculates negative operands: %s %s %s',
+    (val1, operator, val2, expected) => {
+      expect(computeAnswer(val1, operator, val2)).toBe(expected);
+    },
+  );
+
+  it('rounds decimal results to two places', () => {
+    expect(computeAnswer(2, '/', 3)).toBe(0.67);
+    expect(computeAnswer(1.234, '+', 2.345)).toBe(3.58);
+  });
+
+  it('rejects division by zero', () => {
+    expect(() => computeAnswer(5, '/', 0)).toThrow(/division by zero/i);
+  });
+
+  it('rejects an unsupported operator', () => {
+    expect(() => computeAnswer(5, '^', 2)).toThrow(/unsupported operator/i);
+  });
 });
 
 describe('randomNumberGenerator', () => {
@@ -382,6 +419,29 @@ describe('reducer', () => {
   });
 
   describe('CHECK_ANSWER', () => {
+    it('routes answer evaluation through the deterministic helper without eval', () => {
+      const evalSpy = vi.spyOn(globalThis, 'eval').mockReturnValue(999);
+      let result: AppState;
+      try {
+        result = reducer(
+          makeState({
+            val1: 2,
+            val2: 3,
+            operator: '+',
+            mode: 'addition',
+            answer: '5',
+            numOfEnemies: 3,
+          }),
+          { type: TYPES.CHECK_ANSWER },
+        );
+        expect(evalSpy).not.toHaveBeenCalled();
+      } finally {
+        evalSpy.mockRestore();
+      }
+
+      expect(result!.numOfEnemies).toBe(2);
+    });
+
     it('removes an enemy when the answer is correct (addition)', () => {
       const state = makeState({
         val1: 3,
@@ -1307,6 +1367,57 @@ describe('PLAY_FREE', () => {
 });
 
 describe('answer mode', () => {
+  it('fails fast instead of generating choices for division by zero', () => {
+    const state = makeState({
+      val1: 5,
+      val2: 0,
+      operator: '/',
+      mode: 'division',
+      answerMode: 'type',
+    });
+
+    expect(() =>
+      reducer(state, { type: TYPES.SET_ANSWER_MODE, payload: 'choose' }),
+    ).toThrow(/division by zero/i);
+  });
+
+  it('scores equivalent typed and multiple-choice answers identically', () => {
+    const correctAnswer = computeAnswer(2, '/', 3);
+    const exercise = {
+      val1: 2,
+      val2: 3,
+      operator: '/' as const,
+      mode: 'division' as const,
+      numOfEnemies: 3,
+      modeType: 'decimals' as const,
+    };
+
+    const typed = reducer(
+      makeState({
+        ...exercise,
+        answer: String(correctAnswer),
+        answerMode: 'type',
+      }),
+      { type: TYPES.CHECK_ANSWER },
+    );
+    const choiceState = reducer(
+      makeState({
+        ...exercise,
+        answer: '',
+        answerMode: 'choose',
+        choices: generateChoices(correctAnswer),
+      }),
+      { type: TYPES.SET_ANSWER, payload: String(correctAnswer) },
+    );
+    const chosen = reducer(choiceState, { type: TYPES.CHECK_ANSWER });
+
+    expect(choiceState.choices).toContain(correctAnswer);
+    expect(typed.recentResults[typed.recentResults.length - 1]).toBe(true);
+    expect(chosen.recentResults[chosen.recentResults.length - 1]).toBe(true);
+    expect(chosen.numOfEnemies).toBe(typed.numOfEnemies);
+    expect(chosen.score).toBe(typed.score);
+  });
+
   it('SET_ANSWER_MODE changes answerMode to choose', () => {
     const state = makeState({ answerMode: 'type' });
     const result = reducer(state, {
