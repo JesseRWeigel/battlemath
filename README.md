@@ -1,14 +1,15 @@
 # BattleMath
 
-A simple browser based game that helps children learn the four basic fundamentals of math
+BattleMath is a browser-based arithmetic practice game built with React and TypeScript. Players solve problems to battle enemies across four operations:
 
 - Subtraction
 - Addition
 - Multiplication
 - Division
 
-Children will be tested on their skills with added difficulties and decimals. 
-The game will consists of difficulties ranging from easy to hard
+The app includes adaptive difficulty, progressive hints, daily challenges, and progress saved in browser local storage. English, Spanish, and French language resources and PWA configuration are included.
+
+Players can choose difficulties ranging from easy to hard:
 
 | Difficulty | Description |
 | --- | --- |
@@ -28,29 +29,35 @@ These mode types combine with the difficulty and operator settings, giving child
 
 ### Built With
 
-- [React](https://reactjs.org/)
+- [React](https://react.dev/) and TypeScript
+- Vite and Vitest
 - [Cypress](https://www.cypress.io/)
 - [Yarn](https://yarnpkg.com/)
 
 ## Quick Start
 
-```sh
-git clone git@github.com:JesseRWeigel/battlemath.git
-```
+Use Node.js 22.12 or newer and Yarn Classic (1.x). The project uses a Yarn v1 lockfile and enforces Yarn for dependency installation.
 
 ```sh
+git clone https://github.com/JesseRWeigel/battlemath.git
 cd battlemath
-
-yarn install
-
-yarn start
+yarn install --frozen-lockfile
+yarn dev
 ```
 
-### Publish
+Open [http://localhost:3000/battlemath/](http://localhost:3000/battlemath/) (or the URL printed by Vite if the port is busy).
+
+### Test and build
+
+Run these checks from the repository root, matching the CI workflow:
 
 ```sh
-npm run build
+yarn format:check
+yarn build
+yarn test
 ```
+
+`yarn test` runs Vitest once; `yarn test:watch` starts watch mode. `yarn build` generates the production files in `build/`. To inspect that build locally, run `yarn preview` and open the URL printed by Vite. Building and previewing do not publish the app.
 
 ### Scoring System
 
