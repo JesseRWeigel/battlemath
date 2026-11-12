@@ -1,6 +1,12 @@
 import { Translations } from './types';
 
 export const en: Translations = {
+  untimedPractice: 'Untimed practice',
+  practiceDescription:
+    'No countdown. Correct answers earn the same credit at any speed. Practice records are separate. Choose before starting a round.',
+  practiceRecords: 'Showing practice records',
+  timedRecords: 'Showing timed records',
+
   // UI
   title: 'Battle Math',
   submit: 'Submit',

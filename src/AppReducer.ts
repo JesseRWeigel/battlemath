@@ -14,6 +14,7 @@ export function randomNumberGenerator(
 }
 
 export const TYPES = {
+  SET_PRACTICE: 'SET_PRACTICE',
   SET_ANSWER: 'SET_ANSWER',
   ADD_ENEMY: 'ADD_ENEMY',
   REMOVE_ENEMY: 'REMOVE_ENEMY',
@@ -70,6 +71,9 @@ export type ActionType =
     };
 
 export type AppState = {
+  practiceMode: boolean;
+  practiceBestScore: number;
+  practiceLevelProgress: Record<number, LevelProgress>;
   answer: string;
   numOfEnemies: number;
   previousNumOfEnemies: number;
@@ -119,17 +123,21 @@ export function calculateStars(
   correctAttempts: number,
   totalAttempts: number,
   totalAnswerTime: number,
+  practiceMode = false,
 ): number {
   if (totalAttempts === 0) return 0;
   const accuracy = correctAttempts / totalAttempts;
   const avgTime = totalAnswerTime / correctAttempts;
 
-  if (accuracy >= 0.9 && avgTime < 10000) return 3;
+  if (accuracy >= 0.9 && (practiceMode || avgTime < 10000)) return 3;
   if (accuracy >= 0.7) return 2;
   return 1;
 }
 
 export const initialState: AppState = {
+  practiceMode: false,
+  practiceBestScore: 0,
+  practiceLevelProgress: {},
   answer: '',
   numOfEnemies: 3,
   previousNumOfEnemies: 3,
@@ -352,6 +360,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
 
       return {
         ...initialState,
+        practiceMode: state.practiceMode,
+        practiceBestScore: state.practiceBestScore,
+        practiceLevelProgress: state.practiceLevelProgress,
         mode: state.mode,
         difficulty: state.difficulty,
         modeType: state.modeType,
@@ -461,7 +472,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
 
       if (isCorrect) {
         const elapsed = Date.now() - state.questionStartTime;
-        const basePoints = calculatePoints(elapsed);
+        const basePoints = state.practiceMode ? 10 : calculatePoints(elapsed);
         const attemptMultiplier =
           state.attempts === 0 ? 1 : state.attempts === 1 ? 0.5 : 0.25;
         const bossMultiplier = state.isBossLevel ? 3 : 1;
@@ -475,7 +486,13 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         const streakBonus = milestone ? milestone.bonus : 0;
 
         const newScore = state.score + pointsEarned + streakBonus;
-        const newBestScore = Math.max(state.bestScore, newScore);
+        const newBestScore = Math.max(
+          state.practiceMode ? state.practiceBestScore : state.bestScore,
+          newScore,
+        );
+        const scoreRecord = state.practiceMode
+          ? { practiceBestScore: newBestScore }
+          : { bestScore: newBestScore };
 
         const newCorrectAttempts = state.correctAttempts + 1;
         const newTotalAnswerTime = state.totalAnswerTime + elapsed;
@@ -502,13 +519,14 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
                 newCorrectAttempts,
                 newTotalAttempts,
                 newTotalAnswerTime,
+                state.practiceMode,
               )
             : state.starsEarned;
 
           return {
             ...stateWithProblem,
             score: newScore,
-            bestScore: newBestScore,
+            ...scoreRecord,
             lastPointsEarned: pointsEarned,
             questionStartTime: Date.now(),
             attempts: 0,
@@ -543,13 +561,14 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
               newCorrectAttempts,
               newTotalAttempts,
               newTotalAnswerTime,
+              state.practiceMode,
             )
           : state.starsEarned;
 
         return {
           ...stateWithProblem,
           score: newScore,
-          bestScore: newBestScore,
+          ...scoreRecord,
           lastPointsEarned: pointsEarned,
           questionStartTime: Date.now(),
           attempts: 0,
@@ -691,6 +710,12 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
       };
     }
 
+    case TYPES.SET_PRACTICE: {
+      // Switch only between rounds so scores never mix timing rules.
+      if (state.gameScreen !== 'levelSelect') return state;
+      return { ...state, practiceMode: action.payload === true };
+    }
+
     case TYPES.SET_SOUND_ENABLED: {
       return {
         ...state,
@@ -757,6 +782,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
       const isBoss = level.isBoss === true;
       return {
         ...initialState,
+        practiceMode: state.practiceMode,
+        practiceBestScore: state.practiceBestScore,
+        practiceLevelProgress: state.practiceLevelProgress,
         mode,
         difficulty,
         modeType: state.modeType,
@@ -788,7 +816,10 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         state.totalAttempts > 0
           ? state.correctAttempts / state.totalAttempts
           : 0;
-      const prevProgress = state.levelProgress[state.currentLevel.id];
+      const progress = state.practiceMode
+        ? state.practiceLevelProgress
+        : state.levelProgress;
+      const prevProgress = progress[state.currentLevel.id];
       const newStars = state.starsEarned;
       const newProgress: LevelProgress = {
         levelId: state.currentLevel.id,
@@ -801,12 +832,14 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         ),
       };
       const updatedProgress = {
-        ...state.levelProgress,
+        ...progress,
         [state.currentLevel.id]: newProgress,
       };
       return {
         ...state,
-        levelProgress: updatedProgress,
+        ...(state.practiceMode
+          ? { practiceLevelProgress: updatedProgress }
+          : { levelProgress: updatedProgress }),
         gameScreen: 'victory',
       };
     }
@@ -831,6 +864,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
           : [];
       return {
         ...initialState,
+        practiceMode: state.practiceMode,
+        practiceBestScore: state.practiceBestScore,
+        practiceLevelProgress: state.practiceLevelProgress,
         mode: state.mode,
         difficulty: state.difficulty,
         modeType: state.modeType,
@@ -863,6 +899,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
           : [];
       return {
         ...initialState,
+        practiceMode: state.practiceMode,
+        practiceBestScore: state.practiceBestScore,
+        practiceLevelProgress: state.practiceLevelProgress,
         mode: dcMode,
         difficulty: dcDifficulty,
         modeType: state.modeType,
@@ -897,6 +936,9 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         showTutorial: storedState.hasSeenTutorial ? false : true,
         hasSeenTutorial: storedState.hasSeenTutorial ?? false,
         levelProgress: storedState.levelProgress ?? {},
+        practiceMode: storedState.practiceMode === true,
+        practiceBestScore: storedState.practiceBestScore ?? 0,
+        practiceLevelProgress: storedState.practiceLevelProgress ?? {},
         gameScreen: 'levelSelect',
         currentLevel: null,
       };

@@ -9,6 +9,7 @@ import {
 } from '../utils/DailyChallenge';
 
 interface LevelSelectProps {
+  practiceMode?: boolean;
   progress: Record<number, LevelProgress>;
   onSelectLevel: (level: Level) => void;
   onFreePlay: () => void;
@@ -66,11 +67,17 @@ function StarDisplay({ count }: { count: number }) {
   );
 }
 
-function DailyChallengeCard({ onPlay }: { onPlay: () => void }) {
+function DailyChallengeCard({
+  onPlay,
+  practiceMode,
+}: {
+  onPlay: () => void;
+  practiceMode: boolean;
+}) {
   const todayKey = getTodayKey();
-  const history = getDailyHistory();
+  const history = getDailyHistory(practiceMode);
   const todayResult = history[todayKey];
-  const streak = getDailyStreak();
+  const streak = getDailyStreak(practiceMode);
   const completedToday = todayResult?.completed ?? false;
 
   const today = new Date();
@@ -112,6 +119,7 @@ function DailyChallengeCard({ onPlay }: { onPlay: () => void }) {
 }
 
 export default function LevelSelect({
+  practiceMode = false,
   progress,
   onSelectLevel,
   onFreePlay,
@@ -124,7 +132,10 @@ export default function LevelSelect({
     <View style={styles.container}>
       <Text style={styles.title}>{t ? t.selectLevel : 'Select a Level'}</Text>
 
-      <DailyChallengeCard onPlay={onDailyChallenge} />
+      <DailyChallengeCard
+        onPlay={onDailyChallenge}
+        practiceMode={practiceMode}
+      />
 
       {worlds.map((w) => (
         <View key={w.world} style={styles.worldSection}>

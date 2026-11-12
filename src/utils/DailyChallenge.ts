@@ -67,19 +67,29 @@ export interface DailyResult {
   completed: boolean;
 }
 
-export function getDailyHistory(): Record<string, DailyResult> {
-  const stored = localStorage.getItem('dailyChallengeHistory');
+export function getDailyHistory(
+  practiceMode = false,
+): Record<string, DailyResult> {
+  const stored = localStorage.getItem(
+    practiceMode ? 'dailyPracticeHistory' : 'dailyChallengeHistory',
+  );
   return stored ? JSON.parse(stored) : {};
 }
 
-export function saveDailyResult(result: DailyResult): void {
-  const history = getDailyHistory();
+export function saveDailyResult(
+  result: DailyResult,
+  practiceMode = false,
+): void {
+  const history = getDailyHistory(practiceMode);
   history[result.date] = result;
-  localStorage.setItem('dailyChallengeHistory', JSON.stringify(history));
+  localStorage.setItem(
+    practiceMode ? 'dailyPracticeHistory' : 'dailyChallengeHistory',
+    JSON.stringify(history),
+  );
 }
 
-export function getDailyStreak(): number {
-  const history = getDailyHistory();
+export function getDailyStreak(practiceMode = false): number {
+  const history = getDailyHistory(practiceMode);
   let streak = 0;
   const today = new Date();
   for (let i = 0; i < 365; i++) {

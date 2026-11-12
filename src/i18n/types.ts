@@ -1,6 +1,10 @@
 export type Locale = 'en' | 'es' | 'fr';
 
 export interface Translations {
+  untimedPractice: string;
+  practiceDescription: string;
+  practiceRecords: string;
+  timedRecords: string;
   // UI
   title: string;
   submit: string;
