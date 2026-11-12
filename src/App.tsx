@@ -164,6 +164,9 @@ function SegmentedButtonGroup({
 function App() {
   const [
     {
+      practiceMode,
+      practiceBestScore,
+      practiceLevelProgress,
       answer,
       numOfEnemies,
       val1,
@@ -293,14 +296,24 @@ function App() {
         totalAttempts > 0
           ? Math.round((correctAttempts / totalAttempts) * 100)
           : 0;
-      saveDailyResult({
-        date: getTodayKey(),
-        score,
-        accuracy,
-        completed: true,
-      });
+      saveDailyResult(
+        {
+          date: getTodayKey(),
+          score,
+          accuracy,
+          completed: true,
+        },
+        practiceMode,
+      );
     }
-  }, [won, isDailyChallenge, score, correctAttempts, totalAttempts]);
+  }, [
+    won,
+    isDailyChallenge,
+    score,
+    correctAttempts,
+    totalAttempts,
+    practiceMode,
+  ]);
 
   // Victory celebration confetti + fanfare
   useEffect(() => {
@@ -385,6 +398,7 @@ function App() {
       if (submitInputRef.current) submitInputRef.current.focus();
     }, 50);
   }, [dispatch]);
+  const [hasRestoredState, setHasRestoredState] = useState(false);
   const activeTheme = highContrast ? themes.highContrast : themes[mode];
   useEffect(() => {
     dispatch({ type: TYPES.NEW_PROBLEM });
@@ -410,8 +424,10 @@ function App() {
         }),
       );
     }
+    setHasRestoredState(true);
   }, []);
   useEffect(() => {
+    if (!hasRestoredState) return;
     localStorage.setItem(
       'state',
       JSON.stringify({
@@ -427,10 +443,15 @@ function App() {
         previousNumOfEnemies,
         hasSeenTutorial,
         levelProgress,
+        practiceMode,
+        practiceBestScore,
+        practiceLevelProgress,
+        bestScore,
         locale,
       }),
     );
   }, [
+    hasRestoredState,
     answer,
     numOfEnemies,
     won,
@@ -443,6 +464,10 @@ function App() {
     previousNumOfEnemies,
     hasSeenTutorial,
     levelProgress,
+    practiceMode,
+    practiceBestScore,
+    practiceLevelProgress,
+    bestScore,
     locale,
   ]);
   const submitMsgText = isErrorMessage
@@ -461,14 +486,14 @@ function App() {
     submitInputRef.current && submitInputRef.current.focus();
   }, [val1, val2]);
   useEffect(() => {
-    if (won) return;
+    if (won || practiceMode || gameScreen !== 'playing') return;
     dispatch({ type: TYPES.START_TIMER });
     setTimeLeft(isBossLevel ? 20 : 30);
     const interval = setInterval(() => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(interval);
-  }, [val1, val2, won, isBossLevel]);
+  }, [val1, val2, won, isBossLevel, practiceMode, gameScreen]);
   useEffect(() => {
     if (lastPointsEarned == null) return;
     setShowPoints(true);
@@ -598,6 +623,39 @@ function App() {
             </View>
           </View>
 
+          {gameScreen === 'levelSelect' && (
+            <View style={styles.cardPanel}>
+              <label
+                style={{
+                  color: '#fff',
+                  display: 'flex',
+                  gap: 12,
+                  minHeight: 44,
+                  alignItems: 'center',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={practiceMode}
+                  onChange={(event) =>
+                    dispatch({
+                      type: TYPES.SET_PRACTICE,
+                      payload: event.target.checked,
+                    })
+                  }
+                  aria-describedby="practice-description"
+                />
+                {t.untimedPractice}
+              </label>
+              <Text nativeID="practice-description" style={{ color: '#fff' }}>
+                {t.practiceDescription}
+              </Text>
+              <Text accessibilityLiveRegion="polite" style={{ color: '#fff' }}>
+                {practiceMode ? t.practiceRecords : t.timedRecords}
+              </Text>
+            </View>
+          )}
+
           {/* === SCORE BAR === */}
           {gameScreen !== 'levelSelect' && (
             <View
@@ -615,9 +673,14 @@ function App() {
               accessibilityLiveRegion="polite"
             >
               <Text
-                style={[styles.timerText, { color: timerColor }]}
+                style={[
+                  styles.timerText,
+                  { color: practiceMode ? '#fff' : timerColor },
+                ]}
                 testID="timer"
-              >{`\u23F1 ${timeLeft}s`}</Text>
+              >
+                {practiceMode ? t.untimedPractice : `\u23F1 ${timeLeft}s`}
+              </Text>
               <Text
                 style={[styles.scoreText, { color: '#fff' }]}
                 testID="score"
@@ -625,7 +688,7 @@ function App() {
               <Text
                 style={[styles.bestScoreText, { color: '#fff' }]}
                 testID="best-score"
-              >{`${t.best}: ${bestScore}`}</Text>
+              >{`${t.best}: ${practiceMode ? practiceBestScore : bestScore}`}</Text>
               {showPoints && lastPointsEarned != null && (
                 <Text
                   style={[
@@ -673,7 +736,8 @@ function App() {
           {/* === LEVEL SELECT SCREEN === */}
           {gameScreen === 'levelSelect' && (
             <LevelSelect
-              progress={levelProgress}
+              progress={practiceMode ? practiceLevelProgress : levelProgress}
+              practiceMode={practiceMode}
               onSelectLevel={handleSelectLevel}
               onFreePlay={handleFreePlay}
               onDailyChallenge={handleDailyChallenge}
@@ -985,7 +1049,7 @@ function App() {
                   <Text
                     style={styles.victoryBest}
                     accessibilityRole="text"
-                  >{`${t.bestScore}: ${bestScore}`}</Text>
+                  >{`${t.bestScore}: ${practiceMode ? practiceBestScore : bestScore}`}</Text>
                   {maxStreak >= 3 && (
                     <Text
                       style={styles.victoryBest}

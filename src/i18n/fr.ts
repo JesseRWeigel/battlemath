@@ -1,6 +1,12 @@
 import { Translations } from './types';
 
 export const fr: Translations = {
+  untimedPractice: 'Entraînement sans chrono',
+  practiceDescription:
+    'Sans compte à rebours. Les bonnes réponses valent autant quelle que soit la vitesse. Les records sont séparés. Choisissez avant de commencer.',
+  practiceRecords: 'Records d’entraînement',
+  timedRecords: 'Records chronométrés',
+
   // UI
   title: 'Bataille Math',
   submit: 'Valider',

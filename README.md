@@ -83,3 +83,13 @@ Wrong answers earn 0 points. Your total score accumulates across all questions, 
 - [x] Difficulty selection (Easy, Medium, Hard)
 - [x] Mode types (Whole Number, Decimals, Negatives)
 - [x] Point System
+
+### Untimed practice
+
+On the level-selection screen, enable **Untimed practice** before starting a round.
+There is no countdown, and correct answers earn 10 base points regardless of
+response time (existing retry and boss multipliers and streak bonuses still apply).
+Stars depend on accuracy rather than speed. Level progress, best scores and daily
+challenge history are saved separately from timed play in the same browser.
+Switch modes between rounds; existing saves remain timed and are not overwritten.
+The checkbox has a visible label and explanation and supports keyboard activation.
