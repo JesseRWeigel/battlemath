@@ -93,3 +93,16 @@ Stars depend on accuracy rather than speed. Level progress, best scores and dail
 challenge history are saved separately from timed play in the same browser.
 Switch modes between rounds; existing saves remain timed and are not overwritten.
 The checkbox has a visible label and explanation and supports keyboard activation.
+
+## Publishing
+
+GitHub Pages deploys automatically from `main` through `.github/workflows/pages.yml`.
+Every push to `main` installs locked dependencies, checks formatting, runs tests,
+builds the Vite app and deploys the `build` artifact. Failed checks block publishing.
+The workflow can also be run manually from Actions on `main`.
+
+Repository Settings > Pages > Source must be **GitHub Actions**. Do not switch
+Pages to serve raw files from `main`: this React/Vite app needs its build step.
+The former `gh-pages` branch is historical and no longer needs updates. Local
+`yarn build` remains available for validation; the old branch-publishing scripts
+have been removed to avoid accidentally using the obsolete deployment route.
