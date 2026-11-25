@@ -15,13 +15,12 @@ function seededRandom(seed: number): () => number {
   };
 }
 
-function dateSeed(): number {
-  const d = new Date();
+function dateSeed(d: Date): number {
   return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
 }
 
-export function generateDailyProblems(): DailyProblem[] {
-  const rand = seededRandom(dateSeed());
+export function generateDailyProblems(date = new Date()): DailyProblem[] {
+  const rand = seededRandom(dateSeed(date));
   const operations = ['addition', 'subtraction', 'multiplication', 'division'];
   const operators = ['+', '-', '*', '/'];
   const difficulties = ['easy', 'medium', 'hard'];
@@ -55,8 +54,7 @@ export function generateDailyProblems(): DailyProblem[] {
   return problems;
 }
 
-export function getTodayKey(): string {
-  const d = new Date();
+export function getTodayKey(d = new Date()): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 

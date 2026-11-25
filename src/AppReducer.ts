@@ -61,7 +61,10 @@ const MODE_TYPES = {
 
 export type ActionType =
   | { type: typeof TYPES.SET_LOCALE; payload: Locale }
-  | { type: typeof TYPES.START_DAILY_CHALLENGE; payload: DailyProblem[] }
+  | {
+      type: typeof TYPES.START_DAILY_CHALLENGE;
+      payload: { problems: DailyProblem[]; date: string };
+    }
   | {
       type: Exclude<
         (typeof TYPES)[keyof typeof TYPES],
@@ -111,6 +114,7 @@ export type AppState = {
   levelProgress: Record<number, LevelProgress>;
   gameScreen: 'levelSelect' | 'playing' | 'victory';
   isDailyChallenge: boolean;
+  dailyChallengeDate: string | null;
   dailyProblems: DailyProblem[];
   dailyProblemIndex: number;
   locale: Locale;
@@ -175,6 +179,7 @@ export const initialState: AppState = {
   levelProgress: {},
   gameScreen: 'levelSelect',
   isDailyChallenge: false,
+  dailyChallengeDate: null,
   dailyProblems: [],
   dailyProblemIndex: 0,
   locale: 'en' as Locale,
@@ -851,6 +856,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         gameScreen: 'levelSelect',
         won: false,
         isDailyChallenge: false,
+        dailyChallengeDate: null,
         dailyProblems: [],
         dailyProblemIndex: 0,
       };
@@ -888,7 +894,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
     }
 
     case TYPES.START_DAILY_CHALLENGE: {
-      const problems = action.payload;
+      const { problems, date } = action.payload;
       const first = problems[0];
       const op = first.operator as (typeof OPERATORS)[keyof typeof OPERATORS];
       const dcMode = first.mode as keyof typeof OPERATORS;
@@ -922,6 +928,7 @@ export const reducer: Reducer<AppState, ActionType> = (state, action) => {
         hasSeenTutorial: state.hasSeenTutorial,
         locale: state.locale,
         isDailyChallenge: true,
+        dailyChallengeDate: date,
         dailyProblems: problems,
         dailyProblemIndex: 0,
       };

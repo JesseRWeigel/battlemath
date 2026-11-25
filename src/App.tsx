@@ -202,6 +202,7 @@ function App() {
       gameScreen,
       locale,
       isDailyChallenge,
+      dailyChallengeDate,
       isBossLevel,
       bossHP,
       bossMaxHP,
@@ -291,14 +292,14 @@ function App() {
 
   // Save daily challenge result on victory
   useEffect(() => {
-    if (won && isDailyChallenge) {
+    if (won && isDailyChallenge && dailyChallengeDate) {
       const accuracy =
         totalAttempts > 0
           ? Math.round((correctAttempts / totalAttempts) * 100)
           : 0;
       saveDailyResult(
         {
-          date: getTodayKey(),
+          date: dailyChallengeDate,
           score,
           accuracy,
           completed: true,
@@ -309,6 +310,7 @@ function App() {
   }, [
     won,
     isDailyChallenge,
+    dailyChallengeDate,
     score,
     correctAttempts,
     totalAttempts,
@@ -386,8 +388,14 @@ function App() {
     dispatch({ type: TYPES.PLAY_FREE });
   }, [dispatch]);
   const handleDailyChallenge = useCallback(() => {
-    const problems = generateDailyProblems();
-    dispatch({ type: TYPES.START_DAILY_CHALLENGE, payload: problems });
+    const startedAt = new Date();
+    dispatch({
+      type: TYPES.START_DAILY_CHALLENGE,
+      payload: {
+        problems: generateDailyProblems(startedAt),
+        date: getTodayKey(startedAt),
+      },
+    });
   }, [dispatch]);
   const handleBackToLevels = useCallback(() => {
     dispatch({ type: TYPES.BACK_TO_LEVELS });

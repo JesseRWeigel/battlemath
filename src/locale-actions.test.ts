@@ -12,7 +12,10 @@ describe('locale and daily challenge action isolation', () => {
     const problems = generateDailyProblems();
     const started = reducer(
       { ...initialState, locale: 'es' },
-      { type: TYPES.START_DAILY_CHALLENGE, payload: problems },
+      {
+        type: TYPES.START_DAILY_CHALLENGE,
+        payload: { problems, date: '2026-11-24' },
+      },
     );
     expect(started.locale).toBe('es');
     expect(started.dailyProblems).toEqual(problems);
