@@ -110,15 +110,18 @@ it('preserves practice settings and records across all new-round actions', () =>
     { type: TYPES.SELECT_LEVEL, payload: LEVELS[0] },
     {
       type: TYPES.START_DAILY_CHALLENGE,
-      payload: [
-        {
-          val1: 2,
-          val2: 3,
-          operator: '+',
-          mode: 'addition',
-          difficulty: 'easy',
-        },
-      ],
+      payload: {
+        date: '2026-11-24',
+        problems: [
+          {
+            val1: 2,
+            val2: 3,
+            operator: '+',
+            mode: 'addition',
+            difficulty: 'easy',
+          },
+        ],
+      },
     },
   ] as ActionType[]) {
     const next = reducer(saved, action);

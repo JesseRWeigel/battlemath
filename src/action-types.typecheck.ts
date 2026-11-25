@@ -3,7 +3,7 @@
 import { TYPES, type ActionType } from './AppReducer';
 
 const locale: ActionType = { type: TYPES.SET_LOCALE, payload: 'fr' };
-// @ts-expect-error A locale string cannot be a challenge problem array.
+// @ts-expect-error A locale string cannot be a challenge start payload.
 const invalidChallenge: ActionType = {
   type: TYPES.START_DAILY_CHALLENGE,
   payload: 'fr',

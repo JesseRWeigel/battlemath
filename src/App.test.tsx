@@ -1,6 +1,10 @@
 import { StrictMode } from 'react';
 import App from './App';
 import { getTranslations } from './i18n';
+import { computeAnswer } from './AppReducer';
+import { generateDailyProblems, getDailyHistory } from './utils/DailyChallenge';
+
+vi.mock('canvas-confetti', () => ({ default: vi.fn() }));
 
 beforeEach(() => localStorage.clear());
 
@@ -64,4 +68,33 @@ it('offers a labeled keyboard-operable practice checkbox and persists it', async
     screen.getByRole('checkbox', { name: 'Untimed practice' }),
   ).toBeChecked();
   expect(JSON.parse(localStorage.getItem('state')!).bestScore).toBe(42);
+});
+
+it('records a challenge against the date it started across midnight', () => {
+  vi.useFakeTimers({ toFake: ['Date'] });
+  try {
+    vi.setSystemTime(new Date(2026, 10, 24, 23, 59, 59));
+    localStorage.setItem('state', JSON.stringify({ hasSeenTutorial: true }));
+    const problems = generateDailyProblems();
+    render(<App />);
+    fireEvent.click(screen.getByTestId('daily-challenge-button'));
+
+    vi.setSystemTime(new Date(2026, 10, 25, 0, 0, 1));
+    for (const { val1, operator, val2 } of problems) {
+      fireEvent.change(screen.getByLabelText('Enter your answer'), {
+        target: {
+          value: String(
+            computeAnswer(val1, operator as '+' | '-' | '*' | '/', val2),
+          ),
+        },
+      });
+      fireEvent.click(screen.getByTestId('submit'));
+    }
+
+    expect(getDailyHistory()).toEqual({
+      '2026-11-24': expect.objectContaining({ completed: true, accuracy: 100 }),
+    });
+  } finally {
+    vi.useRealTimers();
+  }
 });
