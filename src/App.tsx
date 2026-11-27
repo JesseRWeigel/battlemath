@@ -41,6 +41,7 @@ import {
   getTodayKey,
   saveDailyResult,
 } from './utils/DailyChallenge';
+import { readStoredRecord, writeStoredRecord } from './utils/StoredRecord';
 
 // Character sprite imports
 import heroIdle from './assets/images/characters/hero_idle.png';
@@ -406,60 +407,42 @@ function App() {
       if (submitInputRef.current) submitInputRef.current.focus();
     }, 50);
   }, [dispatch]);
-  const [hasRestoredState, setHasRestoredState] = useState(false);
+  const [canPersistState, setCanPersistState] = useState(false);
   const activeTheme = highContrast ? themes.highContrast : themes[mode];
   useEffect(() => {
     dispatch({ type: TYPES.NEW_PROBLEM });
-    const storedData = localStorage.getItem('state');
-    if (storedData) {
-      dispatch({ type: TYPES.RESTORE_STATE, payload: JSON.parse(storedData) });
+    const saved = readStoredRecord<Partial<typeof initialState>>('state');
+    if (saved.status === 'ok') {
+      dispatch({ type: TYPES.RESTORE_STATE, payload: saved.value });
     } else {
       dispatch({ type: TYPES.SHOW_TUTORIAL });
-      localStorage.setItem(
-        'state',
-        JSON.stringify({
-          answer,
-          numOfEnemies,
-          val1,
-          val2,
-          won,
-          operator,
-          mode,
-          difficulty,
-          modeType,
-          previousNumOfEnemies,
-          hasSeenTutorial: false,
-        }),
-      );
     }
-    setHasRestoredState(true);
+    // Do not replace a saved record we could not read with defaults.
+    setCanPersistState(saved.status !== 'unavailable');
   }, []);
   useEffect(() => {
-    if (!hasRestoredState) return;
-    localStorage.setItem(
-      'state',
-      JSON.stringify({
-        answer,
-        numOfEnemies,
-        val1,
-        val2,
-        won,
-        operator,
-        mode,
-        difficulty,
-        modeType,
-        previousNumOfEnemies,
-        hasSeenTutorial,
-        levelProgress,
-        practiceMode,
-        practiceBestScore,
-        practiceLevelProgress,
-        bestScore,
-        locale,
-      }),
-    );
+    if (!canPersistState) return;
+    writeStoredRecord('state', {
+      answer,
+      numOfEnemies,
+      val1,
+      val2,
+      won,
+      operator,
+      mode,
+      difficulty,
+      modeType,
+      previousNumOfEnemies,
+      hasSeenTutorial,
+      levelProgress,
+      practiceMode,
+      practiceBestScore,
+      practiceLevelProgress,
+      bestScore,
+      locale,
+    });
   }, [
-    hasRestoredState,
+    canPersistState,
     answer,
     numOfEnemies,
     won,
