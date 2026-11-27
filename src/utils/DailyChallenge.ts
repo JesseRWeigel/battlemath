@@ -1,3 +1,5 @@
+import { readStoredRecord, writeStoredRecord } from './StoredRecord';
+
 export interface DailyProblem {
   val1: number;
   val2: number;
@@ -65,25 +67,28 @@ export interface DailyResult {
   completed: boolean;
 }
 
+function historyKey(practiceMode: boolean): string {
+  return practiceMode ? 'dailyPracticeHistory' : 'dailyChallengeHistory';
+}
+
 export function getDailyHistory(
   practiceMode = false,
 ): Record<string, DailyResult> {
-  const stored = localStorage.getItem(
-    practiceMode ? 'dailyPracticeHistory' : 'dailyChallengeHistory',
+  const saved = readStoredRecord<Record<string, DailyResult>>(
+    historyKey(practiceMode),
   );
-  return stored ? JSON.parse(stored) : {};
+  return saved.status === 'ok' ? saved.value : {};
 }
 
 export function saveDailyResult(
   result: DailyResult,
   practiceMode = false,
 ): void {
-  const history = getDailyHistory(practiceMode);
-  history[result.date] = result;
-  localStorage.setItem(
-    practiceMode ? 'dailyPracticeHistory' : 'dailyChallengeHistory',
-    JSON.stringify(history),
-  );
+  const key = historyKey(practiceMode);
+  const saved = readStoredRecord<Record<string, DailyResult>>(key);
+  if (saved.status === 'unavailable') return;
+  const history = saved.status === 'ok' ? saved.value : {};
+  writeStoredRecord(key, { ...history, [result.date]: result });
 }
 
 export function getDailyStreak(practiceMode = false): number {

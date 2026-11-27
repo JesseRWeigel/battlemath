@@ -98,3 +98,71 @@ it('records a challenge against the date it started across midnight', () => {
     vi.useRealTimers();
   }
 });
+
+it('opens without overwriting unreadable saved game state', () => {
+  localStorage.setItem('state', '{"truncated":');
+
+  render(<App />);
+
+  expect(screen.getByText(/Battle Math/)).toBeInTheDocument();
+  expect(localStorage.getItem('state')).toBe('{"truncated":');
+});
+
+it('opens and starts a daily challenge when browser storage is blocked', () => {
+  const getter = vi
+    .spyOn(window, 'localStorage', 'get')
+    .mockImplementation(() => {
+      throw new DOMException('Storage is blocked', 'SecurityError');
+    });
+  try {
+    render(<App />);
+    fireEvent.click(screen.getByTestId('daily-challenge-button'));
+    expect(screen.getByLabelText('Enter your answer')).toBeInTheDocument();
+  } finally {
+    getter.mockRestore();
+  }
+});
+
+it('finishes a daily challenge without replacing malformed history', () => {
+  localStorage.setItem('state', JSON.stringify({ hasSeenTutorial: true }));
+  localStorage.setItem('dailyChallengeHistory', 'null');
+  const problems = generateDailyProblems();
+  render(<App />);
+  fireEvent.click(screen.getByTestId('daily-challenge-button'));
+  for (const { val1, operator, val2 } of problems) {
+    fireEvent.change(screen.getByLabelText('Enter your answer'), {
+      target: {
+        value: String(
+          computeAnswer(val1, operator as '+' | '-' | '*' | '/', val2),
+        ),
+      },
+    });
+    fireEvent.click(screen.getByTestId('submit'));
+  }
+  expect(screen.getByText(/100%/)).toBeInTheDocument();
+  expect(localStorage.getItem('dailyChallengeHistory')).toBe('null');
+});
+
+it('keeps the selected locale for the session when saving fails', () => {
+  localStorage.setItem(
+    'state',
+    JSON.stringify({ hasSeenTutorial: true, locale: 'en' }),
+  );
+  const setItem = vi
+    .spyOn(Storage.prototype, 'setItem')
+    .mockImplementation(() => {
+      throw new DOMException('Storage is full', 'QuotaExceededError');
+    });
+  try {
+    render(<App />);
+    fireEvent.click(screen.getByTestId('daily-challenge-button'));
+    fireEvent.click(screen.getByLabelText('Show settings'));
+    fireEvent.click(screen.getByText('ES'));
+    expect(screen.getByRole('heading')).toHaveTextContent(
+      getTranslations('es').title,
+    );
+    expect(JSON.parse(localStorage.getItem('state')!).locale).toBe('en');
+  } finally {
+    setItem.mockRestore();
+  }
+});
